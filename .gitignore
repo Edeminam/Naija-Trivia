@@ -1,0 +1,17 @@
+node_modules/
+dist/
+.next/
+.expo/
+.turbo/
+web-build/
+*.log
+.env
+.env.local
+.DS_Store
+apps/server/.data/
+coverage/
+playwright-report/
+test-results/
+ios/
+android/
+*.tsbuildinfo

@@ -1,0 +1,41 @@
+{
+  "name": "@ntc/server",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch --clear-screen=false src/index.ts",
+    "start": "node dist/index.js",
+    "build": "tsup",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@colyseus/core": "^0.18.18",
+    "@colyseus/schema": "^5.0.36",
+    "@colyseus/ws-transport": "^0.18.4",
+    "@electric-sql/pglite": "^0.5.8",
+    "@ntc/content": "workspace:*",
+    "@ntc/shared": "workspace:*",
+    "@resvg/resvg-js": "^2.6.2",
+    "colyseus": "^0.18.9",
+    "cors": "^2.8.6",
+    "dotenv": "^18.0.5",
+    "express": "^5.2.1",
+    "ioredis": "^6.0.0",
+    "jose": "^6.2.12",
+    "postgres": "^3.4.9",
+    "satori": "^0.35.0",
+    "zod": "^4.1.0"
+  },
+  "devDependencies": {
+    "@colyseus/sdk": "^0.18.5",
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.6",
+    "@types/node": "^26.6.4",
+    "tsup": "^8.5.1",
+    "tsx": "^4.20.0",
+    "typescript": "~5.9.3",
+    "vitest": "^3.2.4"
+  }
+}
