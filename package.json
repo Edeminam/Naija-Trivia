@@ -2,7 +2,9 @@
   "name": "naija-trivia-clash",
   "private": true,
   "packageManager": "pnpm@9.15.9",
-  "engines": { "node": ">=20" },
+  "engines": {
+    "node": ">=20"
+  },
   "scripts": {
     "dev": "turbo run dev --parallel",
     "build": "turbo run build",
@@ -12,6 +14,7 @@
     "seed:generate": "pnpm --filter @ntc/content generate"
   },
   "devDependencies": {
+    "@playwright/test": "^1.63.0",
     "turbo": "^2.11.7",
     "typescript": "~5.9.3"
   }
