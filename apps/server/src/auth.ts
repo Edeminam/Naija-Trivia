@@ -79,4 +79,6 @@ export async function createDevUser(sql: Sql, opts: { guest: boolean; username?:
 /** Profiles are created by trigger, but make sure one exists (e.g. trigger missing on a fresh project). */
 export async function ensureProfile(sql: Sql, user: AuthUser) {
   await sql.query("insert into profiles (id, is_guest) values ($1, $2) on conflict (id) do nothing", [user.userId, user.isAnonymous]);
+  // A guest who linked a phone / Google / Apple identity keeps the same id — promote them.
+  if (!user.isAnonymous) await sql.query("update profiles set is_guest = false where id = $1 and is_guest", [user.userId]);
 }

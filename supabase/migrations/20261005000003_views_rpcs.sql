@@ -23,7 +23,7 @@ language sql stable security definer set search_path = public as $$
     order by p.state_code, p.points desc, p.updated_at asc
   )
   select t.code, t.name, t.region, t.points, t.players,
-         rank() over (order by t.points desc, t.players desc, t.name asc) as rank,
+         rank() over (order by t.points desc, t.players desc) as rank,
          tops.user_id, tops.username, tops.avatar_id, tops.points
   from totals t
   left join tops on tops.state_code = t.code

@@ -1,6 +1,5 @@
 import { View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import type { BottomTabBarProps } from "@react-navigation/bottom-tabs";
 import Animated, { useAnimatedStyle, withSpring } from "react-native-reanimated";
 import { Home, Shield, Map, ShoppingBag, User, type LucideIcon } from "lucide-react-native";
 import { PressableScale } from "./Pressable";
@@ -41,7 +40,12 @@ function Tab({ active, label, icon, onPress }: { active: boolean; label: string;
   );
 }
 
-/** Custom tab bar: frosted surface, active pill, 48pt targets. */
+interface BottomTabBarProps {
+  state: { index: number; routes: { key: string; name: string }[] };
+  navigation: { emit: (e: { type: "tabPress"; target: string; canPreventDefault: true }) => { defaultPrevented: boolean }; navigate: (name: string) => void };
+}
+
+/** Custom tab bar: solid surface, active pill, 48pt targets. */
 export function TabBar({ state, navigation }: BottomTabBarProps) {
   const insets = useSafeAreaInsets();
   return (

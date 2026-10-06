@@ -51,6 +51,16 @@ player.post(
   }),
 );
 
+/** Dev-mode equivalent of linking an identity to an anonymous Supabase user: same id, no longer a guest. */
+player.post(
+  "/auth/dev/upgrade",
+  authed(async ({ user, sql }) => {
+    if (!env.allowDevAuth) throw new HttpError(404, "Not available");
+    await sql.query("update profiles set is_guest = false where id = $1", [user.userId]);
+    return { token: await issueDevToken(user.userId, false), userId: user.userId };
+  }),
+);
+
 player.get("/config", open(async () => ({ devAuth: env.allowDevAuth, supabase: !!env.supabaseUrl, appUrl: env.appUrl, serverTime: Date.now() })));
 
 // ── Me ─────────────────────────────────────────────────────────────────────

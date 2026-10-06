@@ -20,3 +20,10 @@ onlineManager.setEventListener((setOnline) => NetInfo.addEventListener((s) => se
 if (Platform.OS !== "web") {
   AppState.addEventListener("change", (s) => focusManager.setFocused(s === "active"));
 }
+
+import { createAsyncStoragePersister } from "@tanstack/query-async-storage-persister";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+
+/** Persist query cache so Home/Daily render instantly (and offline) on cold start. */
+export const persister = createAsyncStoragePersister({ storage: AsyncStorage, key: "ntc.query-cache", throttleTime: 2000 });
+export const PERSISTED_KEYS = new Set(["me", "home", "daily", "leagues", "state-wars", "profile-stats", "shop"]);

@@ -8,9 +8,10 @@ import { useFonts } from "expo-font";
 import { Inter_400Regular, Inter_500Medium, Inter_600SemiBold, Inter_700Bold } from "@expo-google-fonts/inter";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaProvider } from "react-native-safe-area-context";
-import { QueryClientProvider } from "@tanstack/react-query";
+import { PersistQueryClientProvider } from "@tanstack/react-query-persist-client";
 import { ThemeProvider, useTheme } from "../theme/ThemeProvider";
-import { queryClient } from "../lib/queryClient";
+import { queryClient, persister, PERSISTED_KEYS } from "../lib/queryClient";
+import "../lib/outbox";
 import { ToastHost } from "../ui";
 import { useSession } from "../stores/session";
 import { usePrefs } from "../stores/prefs";
@@ -62,11 +63,14 @@ export default function RootLayout() {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <SafeAreaProvider>
-        <QueryClientProvider client={queryClient}>
+        <PersistQueryClientProvider
+          client={queryClient}
+          persistOptions={{ persister, maxAge: 24 * 60 * 60_000, buster: "v1", dehydrateOptions: { shouldDehydrateQuery: (q) => q.state.status === "success" && PERSISTED_KEYS.has(String(q.queryKey[0])) } }}
+        >
           <ThemeProvider>
             <Shell />
           </ThemeProvider>
-        </QueryClientProvider>
+        </PersistQueryClientProvider>
       </SafeAreaProvider>
     </GestureHandlerRootView>
   );
