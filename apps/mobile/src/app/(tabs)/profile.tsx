@@ -107,7 +107,7 @@ export default function Profile() {
           <SectionTitle title="Stats by category" />
           <Card className="p-4 gap-4">
             {s.categories.every((c) => c.answered === 0) ? (
-              <EmptyState icon={Swords} title="No answers yet" body="Play a few clashes and your strongest categories will show here." actionLabel="Play now" onAction={() => router.push("/match/search")} className="py-4" />
+              <EmptyState icon={Swords} title="No answers yet" body="Play a few clashes and your strongest categories will show here." actionLabel="Play now" onAction={() => router.push("/match/play")} className="py-4" />
             ) : (
               s.categories.map((c) => {
                 const def = categoryBySlug(c.slug)!;

@@ -22,3 +22,4 @@ export * from "./Screen";
 export * from "./AdirePattern";
 export * from "./Input";
 export * from "./ListRow";
+export * from "./Confetti";

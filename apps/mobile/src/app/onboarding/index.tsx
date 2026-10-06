@@ -97,7 +97,7 @@ export default function Intro() {
     setLoading(true);
     try {
       await playAsGuest();
-      router.replace({ pathname: "/match/search", params: { mode: "guest" } });
+      router.replace({ pathname: "/match/play", params: { mode: "guest" } });
     } catch (e: any) {
       toast.error("Couldn't start", e.message);
     } finally {

@@ -3,6 +3,7 @@ import Svg, { Circle, Ellipse, Path, Rect, G, Defs, LinearGradient as SvgGradien
 import { AVATARS, COSMETICS, LEAGUES, type AvatarDef, type LeagueId } from "@ntc/shared";
 import { Txt } from "./Text";
 import { useTheme } from "../theme/ThemeProvider";
+import { useSvgId } from "../lib/useSvgId";
 
 function shade(hex: string, amt: number) {
   const n = parseInt(hex.slice(1), 16);
@@ -92,7 +93,8 @@ export function Avatar({
   const frame = frameId ? COSMETICS.find((x) => x.id === frameId && x.kind === "frame") : undefined;
   const ringW = Math.max(2, Math.round(size / 18));
   const inner = ring || frame ? size - ringW * 2 - 4 : size;
-  const gid = `f-${frame?.id ?? "x"}`;
+  const gid = useSvgId("frame");
+  const bgId = useSvgId("avbg");
   return (
     <View style={{ width: size, height: size }} accessibilityRole="image" accessibilityLabel={label ?? `${a.name} avatar`}>
       {ring || frame ? (
@@ -111,12 +113,12 @@ export function Avatar({
       <View style={{ position: "absolute", left: (size - inner) / 2, top: (size - inner) / 2 }}>
         <Svg width={inner} height={inner} viewBox="0 0 100 100">
           <Defs>
-            <SvgGradient id={`bg-${a.id}`} x1="0" y1="0" x2="0" y2="1">
+            <SvgGradient id={bgId} x1="0" y1="0" x2="0" y2="1">
               <Stop offset="0" stopColor={shade(a.bg, 25)} />
               <Stop offset="1" stopColor={shade(a.bg, -25)} />
             </SvgGradient>
           </Defs>
-          <Circle cx={50} cy={50} r={50} fill={`url(#bg-${a.id})`} />
+          <Circle cx={50} cy={50} r={50} fill={`url(#${bgId})`} />
           <G clipPath={undefined}>
             <Path d="M14 100 C16 78 32 70 50 70 C68 70 84 78 86 100 Z" fill={shade(a.bg, -70)} />
             <Path d="M40 70 L50 80 L60 70" fill="none" stroke={a.accent} strokeWidth={3} strokeLinejoin="round" />

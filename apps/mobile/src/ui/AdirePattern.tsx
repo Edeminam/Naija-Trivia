@@ -1,14 +1,16 @@
 import Svg, { Defs, Pattern, Rect, Circle, Path, G } from "react-native-svg";
 import { StyleSheet } from "react-native";
 import { useTheme } from "../theme/ThemeProvider";
+import { useSvgId } from "../lib/useSvgId";
 
 /**
  * Adire-inspired line pattern (after the Yoruba 'Olokun' resist-dye motif): concentric rings,
  * spiral strokes and stitched lines on a 36pt grid. Rendered at 4% opacity, only on hero cards
  * and result screens — never behind body copy.
  */
-export function AdirePattern({ opacity = 0.04, id = "adire" }: { opacity?: number; id?: string }) {
+export function AdirePattern({ opacity = 0.04, id: prefix = "adire" }: { opacity?: number; id?: string }) {
   const { name } = useTheme();
+  const id = useSvgId(prefix);
   const stroke = name === "dark" ? "#FFFFFF" : "#0E1411";
   return (
     <Svg style={StyleSheet.absoluteFill} pointerEvents="none" aria-hidden>

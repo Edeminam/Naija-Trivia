@@ -110,7 +110,7 @@ export default function Home() {
               size="lg"
               full
               disabled={!online || (p.isGuest && p.guestMatchUsed)}
-              onPress={() => router.push({ pathname: "/match/search", params: { mode: p.isGuest ? "guest" : "ranked" } })}
+              onPress={() => router.push({ pathname: "/match/play", params: { mode: p.isGuest ? "guest" : "ranked" } })}
               accessibilityHint="Finds an opponent in seconds"
               testID="play-clash"
             />

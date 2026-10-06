@@ -2,6 +2,7 @@ import { View } from "react-native";
 import Svg, { Path, Defs, LinearGradient, Stop, Circle } from "react-native-svg";
 import { LEAGUES, type LeagueId } from "@ntc/shared";
 import { Txt } from "./Text";
+import { useSvgId } from "../lib/useSvgId";
 
 const TIER: Record<LeagueId, number> = { jjc: 1, learner: 2, sharp: 3, odogwu: 4, oga: 5, agba: 6 };
 
@@ -9,7 +10,7 @@ const TIER: Record<LeagueId, number> = { jjc: 1, learner: 2, sharp: 3, odogwu: 4
 export function LeagueBadge({ league, size = 56, showName }: { league: LeagueId; size?: number; showName?: boolean }) {
   const def = LEAGUES.find((l) => l.id === league) ?? LEAGUES[0]!;
   const tier = TIER[league];
-  const gid = `lg-${league}`;
+  const gid = useSvgId(`lg-${league}`);
   return (
     <View className="items-center gap-1.5" accessibilityRole="image" accessibilityLabel={`${def.name} league`}>
       <Svg width={size} height={size * 1.12} viewBox="0 0 100 112">
