@@ -70,7 +70,12 @@ function PremiumCard({ data, onBuy }: { data: ShopData; onBuy: (p: Pending) => v
       <View className="flex-row items-center gap-3">
         <View className="h-12 w-12 items-center justify-center rounded-2xl bg-accent"><Icon as={Crown} size={24} tone="ink" /></View>
         <View className="flex-1">
-          <Txt variant="overline" tone="accent">Naija Trivia Premium</Txt>
+          <View className="flex-row items-center gap-2">
+            <Txt variant="overline" tone="accent">Naija Trivia Premium</Txt>
+            <View className={data.premium.active ? "rounded-chip bg-primary px-2 py-0.5" : "rounded-chip bg-raised border border-line px-2 py-0.5"}>
+              <Txt variant="overline" tone={data.premium.active ? "white" : "muted"} style={{ fontSize: 10 }}>{data.premium.active ? "Active" : "Not active"}</Txt>
+            </View>
+          </View>
           <Txt variant="h2">{data.premium.active ? "You're Premium 👑" : "Play like an Oga"}</Txt>
         </View>
       </View>

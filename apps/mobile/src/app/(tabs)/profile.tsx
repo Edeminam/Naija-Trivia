@@ -1,6 +1,6 @@
 import { View } from "react-native";
 import { router } from "expo-router";
-import { Settings, Medal, History, Swords, MapPin, Bot, Users } from "lucide-react-native";
+import { Settings, Crown, Medal, History, Swords, MapPin, Bot, Users } from "lucide-react-native";
 import { categoryBySlug, stateByCode, leagueForRating, leagueProgress, LEAGUES, type MatchHistoryItem } from "@ntc/shared";
 import { Screen, SectionTitle, Txt, Card, Avatar, LeagueBadge, ProgressBar, IconButton, EmptyState, ErrorState, SkeletonCard, Skeleton, Icon, Chip, AdirePattern } from "../../ui";
 import { useMe } from "../../features/me";
@@ -72,7 +72,7 @@ export default function Profile() {
           <View className="flex-row gap-2 flex-wrap justify-center">
             <Chip label={leagueForRating(p.rating).name} tone="primary" />
             <Chip label={p.title} />
-            {p.isPremium ? <Chip label="Premium" tone="accent" /> : null}
+            {!p.isGuest ? <Chip label={p.isPremium ? "Premium" : "Free plan"} icon={p.isPremium ? Crown : undefined} tone={p.isPremium ? "accent" : "default"} onPress={() => router.push("/shop")} /> : null}
           </View>
           {(() => {
             const cur = leagueForRating(p.rating);

@@ -5,6 +5,7 @@ import { Swords, Users, Trophy, ChevronRight, WifiOff, UserPlus } from "lucide-r
 import { LAGOS_OFFSET_MS, leagueForRating, leagueProgress, LEAGUES } from "@ntc/shared";
 import { Screen, SectionTitle, Txt, Button, Card, Avatar, CoinCounter, Chip, LeagueBadge, ProgressBar, SkeletonCard, Skeleton, ErrorState, Icon, PressableScale } from "../../ui";
 import { useMe } from "../../features/me";
+import { PlanPill } from "../../features/PlanPill";
 import { useHome } from "../../features/home/api";
 import { DailyNaijaCard, MissionsCard, ChestCard } from "../../features/home/components";
 import { useOnline } from "../../lib/useNetwork";
@@ -64,6 +65,7 @@ export default function Home() {
           <View className="flex-row items-center gap-2 mt-1">
             <Txt variant="label" tone="primary">{league.name}</Txt>
             {next ? <View className="w-16"><ProgressBar value={leagueProgress(p.rating)} height={4} label={`${Math.round(leagueProgress(p.rating) * 100)}% of the way to ${next.name}`} /></View> : null}
+            {!p.isGuest ? <PlanPill premium={p.isPremium} /> : null}
           </View>
         </View>
         <CoinCounter value={p.coins} />

@@ -2,12 +2,13 @@ import { useState } from "react";
 import { Platform, View } from "react-native";
 import { router } from "expo-router";
 import { useQueryClient } from "@tanstack/react-query";
-import { Volume2, Vibrate, Bell, Wifi, Sparkles, MessageCircle, LogOut, Trash2, MapPin, UserCircle2, ShieldCheck } from "lucide-react-native";
+import { Volume2, Vibrate, Bell, Wifi, Sparkles, MessageCircle, LogOut, Trash2, MapPin, UserCircle2, ShieldCheck, Crown } from "lucide-react-native";
 import { stateByCode, type MeResponse } from "@ntc/shared";
 import { Screen, SectionTitle, Card, ListRow, Segmented, Txt, Modal, BottomSheet, Button, toast } from "../ui";
 import { usePrefs } from "../stores/prefs";
 import { useMe } from "../features/me";
 import { signOut } from "../features/auth";
+import { premiumUntilLabel } from "../features/PlanPill";
 import { enableNotifications, disableNotifications } from "../features/notifications";
 import { StatePicker } from "../features/profile/StatePicker";
 import { AvatarPicker } from "../features/profile/AvatarPicker";
@@ -77,6 +78,13 @@ export default function SettingsScreen() {
             <ListRow first icon={UserCircle2} title="Avatar" onPress={() => { setDraft(p.avatarId); setSheet("avatar"); }} />
             <ListRow icon={MapPin} title="Home state" value={stateByCode(p.stateCode)?.name} onPress={() => { setDraft(p.stateCode); setSheet("state"); }} />
             <ListRow icon={MessageCircle} title="Username" value={p.username} />
+            <ListRow
+              icon={Crown}
+              title="Plan"
+              value={p.isPremium ? "Premium" : "Free"}
+              subtitle={p.isPremium ? `Active until ${premiumUntilLabel(p.premiumUntil)}` : "Go Premium for no ads, unlimited challenges and more"}
+              onPress={() => router.push("/shop")}
+            />
           </Card>
         </>
       ) : null}
