@@ -1,5 +1,5 @@
 import { View } from "react-native";
-import Svg, { Circle, Ellipse, Path, Rect, G, Defs, LinearGradient as SvgGradient, Stop } from "react-native-svg";
+import Svg, { Circle, Ellipse, Path, Rect, G, Defs, ClipPath, LinearGradient as SvgGradient, Stop } from "react-native-svg";
 import { AVATARS, COSMETICS, LEAGUES, type AvatarDef, type LeagueId } from "@ntc/shared";
 import { Txt } from "./Text";
 import { useTheme } from "../theme/ThemeProvider";
@@ -95,6 +95,7 @@ export function Avatar({
   const inner = ring || frame ? size - ringW * 2 - 4 : size;
   const gid = useSvgId("frame");
   const bgId = useSvgId("avbg");
+  const clipId = useSvgId("avclip");
   return (
     <View style={{ width: size, height: size }} accessibilityRole="image" accessibilityLabel={label ?? `${a.name} avatar`}>
       {ring || frame ? (
@@ -110,16 +111,20 @@ export function Avatar({
           <Circle cx={size / 2} cy={size / 2} r={size / 2 - ringW / 2} stroke={frame ? `url(#${gid})` : ring} strokeWidth={ringW} fill="none" />
         </Svg>
       ) : null}
-      <View style={{ position: "absolute", left: (size - inner) / 2, top: (size - inner) / 2 }}>
+      <View style={{ position: "absolute", left: (size - inner) / 2, top: (size - inner) / 2, width: inner, height: inner, borderRadius: inner / 2, overflow: "hidden" }}>
         <Svg width={inner} height={inner} viewBox="0 0 100 100">
           <Defs>
             <SvgGradient id={bgId} x1="0" y1="0" x2="0" y2="1">
               <Stop offset="0" stopColor={shade(a.bg, 25)} />
               <Stop offset="1" stopColor={shade(a.bg, -25)} />
             </SvgGradient>
+            <ClipPath id={clipId}>
+              <Circle cx={50} cy={50} r={50} />
+            </ClipPath>
           </Defs>
           <Circle cx={50} cy={50} r={50} fill={`url(#${bgId})`} />
-          <G clipPath={undefined}>
+          {/* Everything (shoulders, headwear) is clipped to the circle so nothing spills past the frame. */}
+          <G clipPath={`url(#${clipId})`}>
             <Path d="M14 100 C16 78 32 70 50 70 C68 70 84 78 86 100 Z" fill={shade(a.bg, -70)} />
             <Path d="M40 70 L50 80 L60 70" fill="none" stroke={a.accent} strokeWidth={3} strokeLinejoin="round" />
             <Rect x={43} y={58} width={14} height={14} rx={5} fill={shade(a.skin, -18)} />

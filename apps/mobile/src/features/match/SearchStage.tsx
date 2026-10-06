@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { AnimatedBox } from "../../lib/animated";
 import { View } from "react-native";
 import Animated, { useSharedValue, withRepeat, withTiming, useAnimatedStyle, Easing, withDelay } from "react-native-reanimated";
 import { Txt } from "../../ui";
@@ -13,7 +14,7 @@ function Ring({ delay }: { delay: number }) {
     v.value = withDelay(delay, withRepeat(withTiming(1, { duration: 2200, easing: Easing.out(Easing.quad) }), -1, false));
   }, [delay, v]);
   const st = useAnimatedStyle(() => ({ transform: [{ scale: 0.4 + v.value * 1.6 }], opacity: 0.55 * (1 - v.value) }));
-  return <Animated.View style={[{ position: "absolute", height: 176, width: 176, borderRadius: 88, borderWidth: 2, borderColor: c.primary }, st]} />;
+  return <AnimatedBox style={[{ position: "absolute", height: 176, width: 176, borderRadius: 88, borderWidth: 2, borderColor: c.primary }, st]} />;
 }
 
 /** Radar pulse behind the arena while we look for an opponent. */

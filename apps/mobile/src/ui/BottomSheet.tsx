@@ -1,4 +1,5 @@
 import { useEffect, type ReactNode } from "react";
+import { AnimatedBox } from "../lib/animated";
 import { Modal as RNModal, Pressable, View, KeyboardAvoidingView, Platform } from "react-native";
 import Animated, { useAnimatedStyle, useSharedValue, withTiming, runOnJS } from "react-native-reanimated";
 import { Gesture, GestureDetector, GestureHandlerRootView } from "react-native-gesture-handler";
@@ -46,11 +47,11 @@ export function BottomSheet({ open, onClose, title, subtitle, children }: { open
   return (
     <RNModal visible={open} transparent animationType="none" onRequestClose={close} statusBarTranslucent>
       <GestureHandlerRootView style={[{ flex: 1 }, tv]}>
-        <Animated.View style={[{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0, zIndex: 0, backgroundColor: c.overlay }, backdrop]}>
+        <AnimatedBox style={[{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0, zIndex: 0, backgroundColor: c.overlay }, backdrop]}>
           <Pressable style={{ flex: 1 }} onPress={close} accessibilityRole="button" accessibilityLabel="Close sheet" />
-        </Animated.View>
+        </AnimatedBox>
         <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : undefined} style={{ flex: 1, justifyContent: "flex-end", zIndex: 1 }} pointerEvents="box-none">
-          <Animated.View style={[{ width: "100%", maxWidth: 560, alignSelf: "center" }, sheet]} accessibilityViewIsModal>
+          <AnimatedBox style={[{ width: "100%", maxWidth: 560, alignSelf: "center" }, sheet]} accessibilityViewIsModal>
           <View style={{ paddingBottom: insets.bottom + 16, backgroundColor: c.surface, borderColor: c.line }} className="rounded-t-[28px] border-t px-5 pt-2">
             <GestureDetector gesture={pan}>
               <View className="items-center py-2" accessibilityLabel="Drag down to close">
@@ -71,7 +72,7 @@ export function BottomSheet({ open, onClose, title, subtitle, children }: { open
             ) : null}
             {children}
           </View>
-          </Animated.View>
+          </AnimatedBox>
         </KeyboardAvoidingView>
       </GestureHandlerRootView>
     </RNModal>

@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { AnimatedBox } from "../lib/animated";
 import { View, StyleSheet, type DimensionValue } from "react-native";
 import Animated, { useAnimatedStyle, useSharedValue, withRepeat, withTiming, Easing } from "react-native-reanimated";
 import { useReducedMotion } from "../lib/motion";
@@ -16,7 +17,7 @@ export function Skeleton({ w = "100%", h = 16, r = 10, className }: { w?: Dimens
   const style = useAnimatedStyle(() => ({ opacity: o.value }));
   return (
     <View aria-hidden className={className} style={{ width: w, height: h, borderRadius: r, overflow: "hidden" }}>
-      <Animated.View style={[StyleSheet.absoluteFill, { backgroundColor: c.raised }, style]} />
+      <AnimatedBox style={[StyleSheet.absoluteFill, { backgroundColor: c.raised }, style]} />
     </View>
   );
 }

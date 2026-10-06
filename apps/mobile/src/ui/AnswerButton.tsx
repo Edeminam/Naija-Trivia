@@ -1,4 +1,5 @@
 import { View } from "react-native";
+import { AnimatedBox } from "../lib/animated";
 import Animated, { FadeIn, useAnimatedStyle, withSequence, withTiming, useSharedValue } from "react-native-reanimated";
 import { useEffect } from "react";
 import { Check, X } from "lucide-react-native";
@@ -65,7 +66,7 @@ export function AnswerButton({
   }
   const custom = themeColors && state === "idle" ? { backgroundColor: themeColors[0], borderColor: themeColors[1] } : null;
   return (
-    <Animated.View style={shakeStyle}>
+    <AnimatedBox style={shakeStyle}>
       <PressableScale
         accessibilityRole="button"
         accessibilityLabel={label}
@@ -93,6 +94,6 @@ export function AnswerButton({
           </Animated.View>
         ) : null}
       </PressableScale>
-    </Animated.View>
+    </AnimatedBox>
   );
 }

@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { AnimatedBox } from "../../lib/animated";
 import { View } from "react-native";
 import Animated, { useSharedValue, withSpring, withTiming, withRepeat, withDelay, useAnimatedStyle, Easing, FadeInRight, ZoomIn, FadeOut, FadeInDown } from "react-native-reanimated";
 import { stateByCode, LEAGUES } from "@ntc/shared";
@@ -15,7 +16,7 @@ function Dot({ on }: { on: boolean }) {
     s.value = on ? withSpring(1, { damping: 12, stiffness: 320 }) : withTiming(0, { duration: 120 });
   }, [on, s]);
   const st = useAnimatedStyle(() => ({ transform: [{ scale: s.value }], opacity: s.value }));
-  return <Animated.View style={[{ height: 10, width: 10, borderRadius: 5, backgroundColor: c.primary }, st]} />;
+  return <AnimatedBox style={[{ height: 10, width: 10, borderRadius: 5, backgroundColor: c.primary }, st]} />;
 }
 
 function Ring({ delay }: { delay: number }) {
@@ -25,7 +26,7 @@ function Ring({ delay }: { delay: number }) {
     v.value = withDelay(delay, withRepeat(withTiming(1, { duration: 2200, easing: Easing.out(Easing.quad) }), -1, false));
   }, [delay, v]);
   const st = useAnimatedStyle(() => ({ transform: [{ scale: 0.6 + v.value * 1.5 }], opacity: 0.5 * (1 - v.value) }));
-  return <Animated.View pointerEvents="none" style={[{ position: "absolute", height: 120, width: 120, borderRadius: 60, borderWidth: 2, borderColor: c.primary }, st]} />;
+  return <AnimatedBox pointerEvents="none" style={[{ position: "absolute", height: 120, width: 120, borderRadius: 60, borderWidth: 2, borderColor: c.primary }, st]} />;
 }
 
 function PlayerCard({ p, searching, right }: { p: PlayerView | null; searching?: boolean; right?: boolean }) {

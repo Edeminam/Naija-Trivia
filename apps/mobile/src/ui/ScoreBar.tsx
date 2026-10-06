@@ -1,4 +1,5 @@
 import { View } from "react-native";
+import { AnimatedBox } from "../lib/animated";
 import Animated, { useAnimatedStyle, withSpring, withTiming, useSharedValue } from "react-native-reanimated";
 import { useEffect } from "react";
 import type { LeagueId } from "@ntc/shared";
@@ -25,7 +26,7 @@ function AnsweredDot({ on }: { on: boolean }) {
     s.value = on ? withSpring(1, { damping: 12, stiffness: 300 }) : withTiming(0, { duration: 120 });
   }, [on, s]);
   const st = useAnimatedStyle(() => ({ transform: [{ scale: s.value }], opacity: s.value }));
-  return <Animated.View style={[{ height: 10, width: 10, borderRadius: 5, backgroundColor: c.primary }, st]} accessibilityLabel={on ? "Answered" : undefined} />;
+  return <AnimatedBox style={[{ height: 10, width: 10, borderRadius: 5, backgroundColor: c.primary }, st]} accessibilityLabel={on ? "Answered" : undefined} />;
 }
 
 function Side({ p, align }: { p: ScorePlayer; align: "left" | "right" }) {

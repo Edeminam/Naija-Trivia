@@ -1,4 +1,5 @@
 import { View } from "react-native";
+import { AnimatedBox } from "../../lib/animated";
 import Animated, { FadeIn, ZoomIn, FadeInUp, useSharedValue, useAnimatedStyle, withSequence, withTiming, withDelay } from "react-native-reanimated";
 import { useEffect } from "react";
 import { Flame } from "lucide-react-native";
@@ -28,7 +29,7 @@ export function DoubleWahalaIntro() {
       <View className="absolute inset-0 rounded-card overflow-hidden bg-accent-soft">
         <AdirePattern id="wahala" opacity={0.06} />
       </View>
-      <Animated.View style={shake}>
+      <AnimatedBox style={shake}>
         <View className="items-center gap-3">
         <Animated.View entering={reduce ? undefined : ZoomIn.springify().damping(9).stiffness(180)} className="h-20 w-20 items-center justify-center rounded-3xl bg-accent">
           <Icon as={Flame} size={40} tone="ink" />
@@ -38,7 +39,7 @@ export function DoubleWahalaIntro() {
         </Animated.View>
         <Txt variant="title" tone="muted">Final question · points x2</Txt>
         </View>
-      </Animated.View>
+      </AnimatedBox>
     </Animated.View>
   );
 }

@@ -1,4 +1,5 @@
 import { View } from "react-native";
+import { AnimatedBox } from "../lib/animated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Animated, { useAnimatedStyle, withSpring } from "react-native-reanimated";
 import { Home, Shield, Map, ShoppingBag, User, type LucideIcon } from "lucide-react-native";
@@ -32,7 +33,7 @@ function Tab({ active, label, icon, onPress }: { active: boolean; label: string;
       className="flex-1 items-center justify-center gap-1 min-h-touch py-1.5"
     >
       <View className="items-center justify-center h-8 w-14">
-        <Animated.View style={[{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0, borderRadius: 999, backgroundColor: c.primarySoft }, pill]} />
+        <AnimatedBox style={[{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0, borderRadius: 999, backgroundColor: c.primarySoft }, pill]} />
         <Icon as={icon} size={22} tone={active ? "primary" : "faint"} />
       </View>
       <Txt variant="caption" className={cn("text-xs font-body-sb", active ? "text-primary-text" : "text-ink-faint")} numberOfLines={1}>

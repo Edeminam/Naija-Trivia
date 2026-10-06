@@ -1,4 +1,5 @@
 import { useEffect, useMemo } from "react";
+import { AnimatedBox } from "../lib/animated";
 import { View, useWindowDimensions } from "react-native";
 import Animated, { useSharedValue, withTiming, withDelay, useAnimatedStyle, Easing } from "react-native-reanimated";
 import { useReducedMotion } from "../lib/motion";
@@ -14,7 +15,7 @@ function Piece({ x, delay, color, size, drift, spin, h }: { x: number; delay: nu
     opacity: t.value < 0.85 ? 1 : (1 - t.value) / 0.15,
     transform: [{ translateY: -40 + t.value * (h + 80) }, { translateX: Math.sin(t.value * 6) * drift }, { rotate: `${t.value * spin}deg` }],
   }));
-  return <Animated.View style={[{ position: "absolute", left: x, top: 0, width: size, height: size * 0.45, borderRadius: 2, backgroundColor: color }, st]} />;
+  return <AnimatedBox style={[{ position: "absolute", left: x, top: 0, width: size, height: size * 0.45, borderRadius: 2, backgroundColor: color }, st]} />;
 }
 
 /** Celebration burst — only for wins and promotions, and never under Reduce Motion. */
