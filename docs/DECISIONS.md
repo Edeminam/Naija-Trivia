@@ -88,3 +88,7 @@ Decisions made where the brief left room, or where a constraint forced a choice.
     `@supabase/auth-js` instead of the full supabase-js (data never goes client → Supabase).
 31. **Anti-cheat ban**: admins can mark a flagged account *banned*; banned accounts can't join the ranked
     queue (they keep their profile). Appeals are a manual process.
+32. **League over level in the UI.** A player's league crest (JJC → Agba, from their rating) sits on the
+    bottom-right of their avatar (40 px and up; smaller avatars keep the league-coloured ring), and the
+    home/profile headers show the league name and progress to the next league instead of "Lv n". XP and
+    levels still exist in the data but are no longer shown on those screens.

@@ -4,6 +4,7 @@ import { AVATARS, COSMETICS, LEAGUES, type AvatarDef, type LeagueId } from "@ntc
 import { Txt } from "./Text";
 import { useTheme } from "../theme/ThemeProvider";
 import { useSvgId } from "../lib/useSvgId";
+import { LeagueBadge } from "./LeagueBadge";
 
 function shade(hex: string, amt: number) {
   const n = parseInt(hex.slice(1), 16);
@@ -71,7 +72,11 @@ function Hair({ a }: { a: AvatarDef }) {
   }
 }
 
-/** Illustrated preset avatar (SVG) with optional league ring, cosmetic frame and state badge. */
+/**
+ * Illustrated preset avatar (SVG) with optional league ring, cosmetic frame, state badge and league crest.
+ * With a league, the crest sits on the bottom-right (avatars from 40px; smaller ones only get the ring).
+ * The state badge moves to the bottom-left when a crest is shown.
+ */
 export function Avatar({
   id,
   size = 48,
@@ -79,6 +84,7 @@ export function Avatar({
   frameId,
   stateCode,
   label,
+  badge = true,
 }: {
   id: string;
   size?: number;
@@ -86,6 +92,8 @@ export function Avatar({
   frameId?: string | null;
   stateCode?: string | null;
   label?: string;
+  /** Show the league crest on the bottom-right (default true when `league` is set). */
+  badge?: boolean;
 }) {
   const { c } = useTheme();
   const a = AVATARS.find((x) => x.id === id) ?? AVATARS[0]!;
@@ -96,6 +104,7 @@ export function Avatar({
   const gid = useSvgId("frame");
   const bgId = useSvgId("avbg");
   const clipId = useSvgId("avclip");
+  const crest = league && badge && size >= 40 ? Math.round(size * 0.4) : 0;
   return (
     <View style={{ width: size, height: size }} accessibilityRole="image" accessibilityLabel={label ?? `${a.name} avatar`}>
       {ring || frame ? (
@@ -142,12 +151,17 @@ export function Avatar({
       {stateCode ? (
         <View
           className="absolute rounded-chip bg-surface border border-line px-1.5"
-          style={{ right: -4, bottom: -2, borderColor: c.line, minWidth: 22, alignItems: "center" }}
+          style={{ ...(crest ? { left: -4 } : { right: -4 }), bottom: -2, borderColor: c.line, minWidth: 22, alignItems: "center" }}
           accessibilityLabel={`State ${stateCode}`}
         >
           <Txt variant="overline" style={{ fontSize: Math.max(9, size / 6), lineHeight: Math.max(13, size / 4.2) }}>
             {stateCode}
           </Txt>
+        </View>
+      ) : null}
+      {crest ? (
+        <View pointerEvents="none" style={{ position: "absolute", right: -crest * 0.12, bottom: -crest * 0.12 }}>
+          <LeagueBadge league={league!} size={crest} />
         </View>
       ) : null}
     </View>

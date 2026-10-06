@@ -3,7 +3,7 @@ import { AnimatedBox } from "../../lib/animated";
 import { View } from "react-native";
 import Animated, { useSharedValue, withSpring, withTiming, withRepeat, withDelay, useAnimatedStyle, Easing, FadeInRight, ZoomIn, FadeOut, FadeInDown } from "react-native-reanimated";
 import { stateByCode, LEAGUES } from "@ntc/shared";
-import { Avatar, Txt, AnimatedNumber, LeagueBadge } from "../../ui";
+import { Avatar, Txt, AnimatedNumber } from "../../ui";
 import { cn } from "../../lib/cn";
 import { useReducedMotion } from "../../lib/motion";
 import type { PlayerView } from "./store";
@@ -57,7 +57,6 @@ function PlayerCard({ p, searching, right }: { p: PlayerView | null; searching?:
             <Txt variant="h3" numberOfLines={1} className="max-w-[150px]">{p.username}</Txt>
             <Txt variant="caption" tone="muted">{stateByCode(p.stateCode)?.name ?? "Naija"} · {p.rating}</Txt>
             <View className="flex-row items-center gap-1.5 mt-1">
-              <LeagueBadge league={p.league} size={22} />
               <Txt variant="caption" tone="faint">{LEAGUES.find((l) => l.id === p.league)?.name}</Txt>
             </View>
           </Animated.View>

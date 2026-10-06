@@ -2,7 +2,7 @@ import { View } from "react-native";
 import { router } from "expo-router";
 import Animated, { FadeInDown } from "react-native-reanimated";
 import { Swords, Users, Trophy, ChevronRight, WifiOff, UserPlus } from "lucide-react-native";
-import { LAGOS_OFFSET_MS, leagueForRating, leagueProgress, levelFromXp, LEAGUES } from "@ntc/shared";
+import { LAGOS_OFFSET_MS, leagueForRating, leagueProgress, LEAGUES } from "@ntc/shared";
 import { Screen, SectionTitle, Txt, Button, Card, Avatar, CoinCounter, Chip, LeagueBadge, ProgressBar, SkeletonCard, Skeleton, ErrorState, Icon, PressableScale } from "../../ui";
 import { useMe } from "../../features/me";
 import { useHome } from "../../features/home/api";
@@ -48,7 +48,6 @@ export default function Home() {
       </Screen>
     );
   }
-  const lvl = levelFromXp(p.xp);
   const league = leagueForRating(p.rating);
   const next = LEAGUES[LEAGUES.indexOf(league) + 1];
 
@@ -57,14 +56,14 @@ export default function Home() {
       {/* Header */}
       <View className="flex-row items-center gap-3 mb-5">
         <PressableScale onPress={() => router.push("/profile")} accessibilityLabel="Your profile" accessibilityRole="button">
-          <Avatar id={p.avatarId} size={52} league={p.league} frameId={p.frameId} />
+          <Avatar id={p.avatarId} size={52} league={league.id} frameId={p.frameId} />
         </PressableScale>
         <View className="flex-1">
           <Txt variant="caption" tone="muted">{greeting()},</Txt>
           <Txt variant="h3" numberOfLines={1}>{p.isGuest ? "Guest player" : p.username}</Txt>
           <View className="flex-row items-center gap-2 mt-1">
-            <Txt variant="label" tone="primary">Lv {lvl.level}</Txt>
-            <View className="w-16"><ProgressBar value={lvl.progress} height={4} label={`Level progress ${Math.round(lvl.progress * 100)}%`} /></View>
+            <Txt variant="label" tone="primary">{league.name}</Txt>
+            {next ? <View className="w-16"><ProgressBar value={leagueProgress(p.rating)} height={4} label={`${Math.round(leagueProgress(p.rating) * 100)}% of the way to ${next.name}`} /></View> : null}
           </View>
         </View>
         <CoinCounter value={p.coins} />

@@ -1,7 +1,7 @@
 import { View } from "react-native";
 import { router } from "expo-router";
 import { Settings, Medal, History, Swords, MapPin, Bot, Users } from "lucide-react-native";
-import { categoryBySlug, stateByCode, levelFromXp, LEAGUES, type MatchHistoryItem } from "@ntc/shared";
+import { categoryBySlug, stateByCode, leagueForRating, leagueProgress, LEAGUES, type MatchHistoryItem } from "@ntc/shared";
 import { Screen, SectionTitle, Txt, Card, Avatar, LeagueBadge, ProgressBar, IconButton, EmptyState, ErrorState, SkeletonCard, Skeleton, Icon, Chip, AdirePattern } from "../../ui";
 import { useMe } from "../../features/me";
 import { useProfileStats } from "../../features/profile/api";
@@ -61,7 +61,7 @@ export default function Profile() {
       ) : (
         <Card className="p-5 items-center gap-3 overflow-hidden">
           <AdirePattern id="profile-pattern" />
-          <Avatar id={p.avatarId} size={96} league={p.league} frameId={p.frameId} />
+          <Avatar id={p.avatarId} size={96} league={leagueForRating(p.rating).id} frameId={p.frameId} />
           <View className="items-center gap-1">
             <Txt variant="h1">{p.isGuest ? "Guest player" : p.username}</Txt>
             <View className="flex-row items-center gap-1.5">
@@ -70,17 +70,23 @@ export default function Profile() {
             </View>
           </View>
           <View className="flex-row gap-2 flex-wrap justify-center">
-            <Chip label={`Level ${levelFromXp(p.xp).level}`} tone="primary" />
+            <Chip label={leagueForRating(p.rating).name} tone="primary" />
             <Chip label={p.title} />
             {p.isPremium ? <Chip label="Premium" tone="accent" /> : null}
           </View>
-          <View className="w-full gap-1.5 mt-2">
-            <View className="flex-row justify-between">
-              <Txt variant="caption" tone="muted">XP to level {levelFromXp(p.xp).level + 1}</Txt>
-              <Txt variant="caption" tone="muted" tabular>{levelFromXp(p.xp).into}/{levelFromXp(p.xp).needed}</Txt>
-            </View>
-            <ProgressBar value={levelFromXp(p.xp).progress} />
-          </View>
+          {(() => {
+            const cur = leagueForRating(p.rating);
+            const next = LEAGUES[LEAGUES.indexOf(cur) + 1];
+            return (
+              <View className="w-full gap-1.5 mt-2">
+                <View className="flex-row justify-between">
+                  <Txt variant="caption" tone="muted">{next ? `Next league: ${next.name}` : "Top league"}</Txt>
+                  {next ? <Txt variant="caption" tone="muted" tabular>{next.min - p.rating} rating to go</Txt> : null}
+                </View>
+                <ProgressBar value={next ? leagueProgress(p.rating) : 1} label="League progress" />
+              </View>
+            );
+          })()}
         </Card>
       )}
 
