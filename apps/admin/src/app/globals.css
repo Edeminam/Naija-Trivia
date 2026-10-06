@@ -1,0 +1,143 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-inter);
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, monospace;
+  --font-heading: var(--font-satoshi);
+  --color-gold: var(--gold);
+  --color-gold-soft: var(--gold-soft);
+  --color-green-text: var(--green-text);
+  --color-green-soft: var(--green-soft);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.2);
+  --radius-4xl: calc(var(--radius) * 2.6);
+}
+
+:root {
+  /* Naija Trivia Clash brand tokens — light */
+  --background: #F7F8F6;
+  --foreground: #0E1411;
+  --card: #FFFFFF;
+  --card-foreground: #0E1411;
+  --popover: #FFFFFF;
+  --popover-foreground: #0E1411;
+  --primary: #0FA958;
+  --primary-foreground: #03140B;
+  --secondary: #EEF1EE;
+  --secondary-foreground: #0E1411;
+  --muted: #EEF1EE;
+  --muted-foreground: #55605A;
+  --accent: #EEF1EE;
+  --accent-foreground: #0E1411;
+  --destructive: #E5484D;
+  --border: rgba(14, 20, 17, 0.09);
+  --input: rgba(14, 20, 17, 0.14);
+  --ring: #0FA958;
+  --chart-1: #0FA958;
+  --chart-2: #E8B44A;
+  --chart-3: #4FB3FF;
+  --chart-4: #C77DFF;
+  --chart-5: #FF7A59;
+  --radius: 0.875rem;
+  --gold: #8A6110;
+  --gold-soft: rgba(232, 180, 74, 0.18);
+  --green-text: #0A7A40;
+  --green-soft: rgba(15, 169, 88, 0.12);
+  --sidebar: #FFFFFF;
+  --sidebar-foreground: #0E1411;
+  --sidebar-primary: #0FA958;
+  --sidebar-primary-foreground: #03140B;
+  --sidebar-accent: rgba(15, 169, 88, 0.12);
+  --sidebar-accent-foreground: #0A7A40;
+  --sidebar-border: rgba(14, 20, 17, 0.08);
+  --sidebar-ring: #0FA958;
+}
+
+.dark {
+  /* dark */
+  --background: #0B0F0D;
+  --foreground: #F4F6F5;
+  --card: #141A17;
+  --card-foreground: #F4F6F5;
+  --popover: #1C2420;
+  --popover-foreground: #F4F6F5;
+  --primary: #0FA958;
+  --primary-foreground: #03140B;
+  --secondary: #1C2420;
+  --secondary-foreground: #F4F6F5;
+  --muted: #1C2420;
+  --muted-foreground: #A3ADA8;
+  --accent: #1C2420;
+  --accent-foreground: #F4F6F5;
+  --destructive: #E5484D;
+  --border: rgba(255, 255, 255, 0.08);
+  --input: rgba(255, 255, 255, 0.12);
+  --ring: #0FA958;
+  --gold: #F0C76E;
+  --gold-soft: rgba(232, 180, 74, 0.14);
+  --green-text: #2FCB78;
+  --green-soft: rgba(15, 169, 88, 0.14);
+  --sidebar: #0F1411;
+  --sidebar-foreground: #F4F6F5;
+  --sidebar-primary: #0FA958;
+  --sidebar-primary-foreground: #03140B;
+  --sidebar-accent: rgba(15, 169, 88, 0.14);
+  --sidebar-accent-foreground: #2FCB78;
+  --sidebar-border: rgba(255, 255, 255, 0.07);
+  --sidebar-ring: #0FA958;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+  html {
+    @apply font-sans;
+  }
+}
+@layer base {
+  h1, h2, h3 { font-family: var(--font-satoshi); letter-spacing: -0.01em; }
+  .tabular { font-variant-numeric: tabular-nums; }
+}

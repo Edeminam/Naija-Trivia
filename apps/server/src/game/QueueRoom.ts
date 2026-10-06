@@ -39,6 +39,12 @@ export class QueueRoom extends Room {
       client.leave();
       return;
     }
+    const banned = await sql.one("select 1 from anticheat_flags where user_id = $1 and status = 'banned' limit 1", [auth.userId]);
+    if (banned) {
+      client.send("queueError", { reason: "banned", message: "Ranked play is suspended on this account pending a fair-play review." });
+      client.leave();
+      return;
+    }
     // Same account searching on two devices: newest wins.
     const prev = this.byUser.get(auth.userId);
     if (prev && prev !== client) prev.leave();
