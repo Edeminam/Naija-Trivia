@@ -3,7 +3,7 @@ import { Modal as RNModal, View, Pressable } from "react-native";
 import Animated, { FadeIn, ZoomIn } from "react-native-reanimated";
 import { Txt } from "./Text";
 import { Button } from "./Button";
-import { useTheme } from "../theme/ThemeProvider";
+import { useTheme, useThemeVars } from "../theme/ThemeProvider";
 import { useReducedMotion } from "../lib/motion";
 
 /** Centered confirmation dialog. */
@@ -31,12 +31,13 @@ export function Modal({
   loading?: boolean;
 }) {
   const { c } = useTheme();
+  const tv = useThemeVars();
   const reduce = useReducedMotion();
   return (
     <RNModal visible={open} transparent animationType="none" onRequestClose={onClose} statusBarTranslucent>
-      <Animated.View entering={reduce ? undefined : FadeIn.duration(150)} style={{ flex: 1, backgroundColor: c.overlay, justifyContent: "center", padding: 24 }}>
-        <Pressable style={{ position: "absolute", inset: 0 } as any} onPress={onClose} accessibilityLabel="Close dialog" />
-        <Animated.View entering={reduce ? undefined : ZoomIn.springify().damping(18)} className="w-full max-w-[420px] self-center rounded-card border border-line bg-surface p-6 gap-3" accessibilityViewIsModal>
+      <Animated.View entering={reduce ? undefined : FadeIn.duration(150)} style={[{ flex: 1, backgroundColor: c.overlay, justifyContent: "center", padding: 24 }, tv]}>
+        <Pressable style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0, zIndex: 0 }} onPress={onClose} accessibilityLabel="Close dialog" />
+        <Animated.View entering={reduce ? undefined : ZoomIn.springify().damping(18)} className="w-full max-w-[420px] self-center rounded-card border border-line bg-surface p-6 gap-3" style={{ zIndex: 1 }} accessibilityViewIsModal>
           <Txt variant="h2" accessibilityRole="header">
             {title}
           </Txt>

@@ -6,13 +6,14 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Txt } from "./Text";
 import { motion } from "../theme/tokens";
 import { useReducedMotion } from "../lib/motion";
-import { useTheme } from "../theme/ThemeProvider";
+import { useTheme, useThemeVars } from "../theme/ThemeProvider";
 
 /** Drag-to-dismiss bottom sheet over a dimmed backdrop. */
 export function BottomSheet({ open, onClose, title, subtitle, children }: { open: boolean; onClose: () => void; title?: string; subtitle?: string; children: ReactNode }) {
   const insets = useSafeAreaInsets();
   const reduce = useReducedMotion();
   const { c } = useTheme();
+  const tv = useThemeVars();
   const y = useSharedValue(600);
   const fade = useSharedValue(0);
 
@@ -44,11 +45,11 @@ export function BottomSheet({ open, onClose, title, subtitle, children }: { open
 
   return (
     <RNModal visible={open} transparent animationType="none" onRequestClose={close} statusBarTranslucent>
-      <GestureHandlerRootView style={{ flex: 1 }}>
-        <Animated.View style={[{ position: "absolute", inset: 0, backgroundColor: c.overlay } as any, backdrop]}>
+      <GestureHandlerRootView style={[{ flex: 1 }, tv]}>
+        <Animated.View style={[{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0, zIndex: 0, backgroundColor: c.overlay }, backdrop]}>
           <Pressable style={{ flex: 1 }} onPress={close} accessibilityRole="button" accessibilityLabel="Close sheet" />
         </Animated.View>
-        <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : undefined} style={{ flex: 1, justifyContent: "flex-end" }} pointerEvents="box-none">
+        <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : undefined} style={{ flex: 1, justifyContent: "flex-end", zIndex: 1 }} pointerEvents="box-none">
           <Animated.View style={[sheet, { paddingBottom: insets.bottom + 16, backgroundColor: c.surface, borderColor: c.line }]} className="rounded-t-[28px] border-t px-5 pt-2 w-full max-w-[560px] self-center" accessibilityViewIsModal>
             <GestureDetector gesture={pan}>
               <View className="items-center py-2" accessibilityLabel="Drag down to close">

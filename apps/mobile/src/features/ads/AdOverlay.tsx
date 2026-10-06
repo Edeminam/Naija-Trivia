@@ -27,7 +27,7 @@ export function AdOverlayHost() {
     useAdOverlay.setState({ open: null });
   };
   return (
-    <Animated.View entering={FadeIn.duration(180)} exiting={FadeOut.duration(150)} style={{ position: "absolute", inset: 0, backgroundColor: c.bg, zIndex: 100 } as any} accessibilityViewIsModal>
+    <Animated.View entering={FadeIn.duration(180)} exiting={FadeOut.duration(150)} style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0, backgroundColor: c.bg, zIndex: 100 }} accessibilityViewIsModal>
       <AdirePattern opacity={0.05} id="ad-pattern" />
       <View className="flex-1 items-center justify-center px-8 gap-5">
         <View className="h-20 w-20 items-center justify-center rounded-3xl bg-accent-soft">

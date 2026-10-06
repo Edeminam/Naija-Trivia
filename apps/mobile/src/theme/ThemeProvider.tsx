@@ -49,3 +49,8 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
 }
 
 export const useTheme = () => useContext(Ctx);
+
+/** CSS variables for the active theme — re-apply inside portals (RN Modal renders outside the tree on web). */
+export function useThemeVars() {
+  return themeVars[useContext(Ctx).name];
+}
