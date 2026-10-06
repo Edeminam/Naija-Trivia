@@ -1,4 +1,4 @@
-import { readFileSync, readdirSync, mkdirSync } from "node:fs";
+import { readFileSync, readdirSync, mkdirSync, existsSync } from "node:fs";
 import { resolve, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 import { env } from "../env";
@@ -21,7 +21,8 @@ export function pgArray(values: readonly (string | number)[]): string {
 }
 
 const here = dirname(fileURLToPath(import.meta.url));
-const repoRoot = resolve(here, "../../../..");
+// Repo root holds /supabase; resolve from src/db (dev) or dist/ (bundled).
+const repoRoot = [resolve(here, "../../../.."), resolve(here, "../../.."), process.cwd(), resolve(process.cwd(), "../..")].find((d) => existsSync(resolve(d, "supabase/migrations")))!;
 
 function wrap(
   kind: Sql["kind"],

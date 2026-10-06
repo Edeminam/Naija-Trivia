@@ -16,3 +16,4 @@ ios/
 android/
 *.tsbuildinfo
 .shot.mjs
+dist-web/

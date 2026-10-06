@@ -1,11 +1,10 @@
 import { View } from "react-native";
-import * as Lucide from "lucide-react-native";
+import { POWER_UP_ICONS as ICONS } from "../icons";
 import { POWER_UPS, type PowerUpKind } from "@ntc/shared";
 import { BottomSheet, Txt, PressableScale, Icon, CoinIcon } from "../../ui";
 import { useMe } from "../me";
 import { cn } from "../../lib/cn";
 
-const ICONS: Record<PowerUpKind, Lucide.LucideIcon> = { fifty: Lucide.Split, extra_time: Lucide.Timer, crowd: Lucide.Users, shield: Lucide.Shield };
 
 /** One power-up per match: inventory first, then the free daily one, then coins. */
 export function PowerUpSheet({ open, onClose, onPick }: { open: boolean; onClose: () => void; onPick: (k: PowerUpKind) => void }) {

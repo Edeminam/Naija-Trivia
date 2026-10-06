@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { View } from "react-native";
-import * as Lucide from "lucide-react-native";
+import { POWER_UP_ICONS as PU_ICON } from "../../features/icons";
 import { Crown, Check, PlayCircle, ShieldCheck, Sparkles, Gift, Infinity as InfinityIcon, Ban, Ticket } from "lucide-react-native";
-import { type ProductId, type PowerUpKind } from "@ntc/shared";
+import { type ProductId } from "@ntc/shared";
 import { Screen, SectionTitle, Txt, Card, Button, CoinCounter, CoinIcon, Avatar, Icon, BottomSheet, Segmented, Chip, Skeleton, SkeletonCard, ErrorState, toast } from "../../ui";
 import { useShop, useBuyItem, useEquip, useShopRefresh, type ShopData } from "../../features/shop/api";
 import { purchases } from "../../features/shop/PurchaseService";
@@ -11,7 +11,6 @@ import { useMe } from "../../features/me";
 import { haptic } from "../../lib/haptics";
 import { cn } from "../../lib/cn";
 
-const PU_ICON: Record<PowerUpKind, Lucide.LucideIcon> = { fifty: Lucide.Split, extra_time: Lucide.Timer, crowd: Lucide.Users, shield: Lucide.Shield };
 
 type Pending = { productId: ProductId; title: string; detail: string } | null;
 

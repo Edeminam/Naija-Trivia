@@ -1,4 +1,4 @@
-import { readFileSync } from "node:fs";
+import { readFileSync, existsSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { dirname, resolve } from "node:path";
 import { Router } from "express";
@@ -10,7 +10,9 @@ import { env } from "../env";
 import { errors } from "../services/errors";
 
 const here = dirname(fileURLToPath(import.meta.url));
-const font = (f: string) => readFileSync(resolve(here, "../../assets/fonts", f));
+// Works from src/share (dev) and from the bundled dist/ (prod).
+const FONT_DIR = [resolve(here, "../../assets/fonts"), resolve(here, "../assets/fonts"), resolve(process.cwd(), "assets/fonts")].find((d) => existsSync(d))!;
+const font = (f: string) => readFileSync(resolve(FONT_DIR, f));
 const FONTS = [
   { name: "Satoshi", data: font("Satoshi-Black.ttf"), weight: 900 as const, style: "normal" as const },
   { name: "Satoshi", data: font("Satoshi-Bold.ttf"), weight: 700 as const, style: "normal" as const },

@@ -1,19 +1,17 @@
 import { useEffect, useState } from "react";
 import { View } from "react-native";
 import Animated, { FadeIn, ZoomIn } from "react-native-reanimated";
-import * as Lucide from "lucide-react-native";
 import { X } from "lucide-react-native";
 import { categoryBySlug } from "@ntc/shared";
 import { Txt, PressableScale, Icon, ProgressBar, Chip } from "../../ui";
 import { cn } from "../../lib/cn";
 import { useMatch, match } from "./store";
 import { useReducedMotion } from "../../lib/motion";
-
-const toPascal = (s: string) => s.replace(/(^|-)(\w)/g, (_, __, c: string) => c.toUpperCase());
+import { CATEGORY_ICONS, FALLBACK_ICON } from "../icons";
 
 export function CategoryIcon({ slug, size = 22, color }: { slug: string; size?: number; color?: string }) {
   const def = categoryBySlug(slug);
-  const Cmp = ((Lucide as any)[toPascal(def?.icon ?? "help-circle")] ?? Lucide.HelpCircle) as Lucide.LucideIcon;
+  const Cmp = CATEGORY_ICONS[slug as keyof typeof CATEGORY_ICONS] ?? FALLBACK_ICON;
   return <Icon as={Cmp} size={size} color={color ?? def?.tint} />;
 }
 

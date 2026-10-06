@@ -1,0 +1,27 @@
+# Fly.io config for the game server.  fly launch --no-deploy --copy-config && fly deploy
+app = "naija-trivia-clash"
+primary_region = "lhr"   # closest Fly region to Lagos with full features; jnb is an alternative
+
+[build]
+  dockerfile = "apps/server/Dockerfile"
+
+[env]
+  PORT = "2567"
+  NODE_ENV = "production"
+
+[http_service]
+  internal_port = 2567
+  force_https = true
+  auto_stop_machines = "off"     # keep rooms alive; matches are in-memory
+  min_machines_running = 1
+  [http_service.concurrency]
+    type = "connections"
+    soft_limit = 2000
+    hard_limit = 4000
+
+[[http_service.checks]]
+  interval = "15s"
+  timeout = "3s"
+  grace_period = "20s"
+  method = "GET"
+  path = "/health"

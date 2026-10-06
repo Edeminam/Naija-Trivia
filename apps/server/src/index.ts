@@ -62,7 +62,7 @@ export async function startServer(port = env.port, opts: { jobs?: boolean } = {}
   return { server, sql };
 }
 
-const isEntry = process.argv[1] && /index\.(ts|js|mjs)$/.test(process.argv[1]);
+const isEntry = !!process.argv[1] && /index\.(ts|js|mjs)$/.test(process.argv[1]);
 if (isEntry) {
   startServer().catch((e) => {
     console.error(e);
