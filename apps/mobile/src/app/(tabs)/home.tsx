@@ -64,7 +64,6 @@ export default function Home() {
           <Txt variant="h3" numberOfLines={1}>{p.isGuest ? "Guest player" : p.username}</Txt>
           <View className="flex-row items-center gap-2 mt-1">
             <Txt variant="label" tone="primary">{league.name}</Txt>
-            {next ? <View className="w-16"><ProgressBar value={leagueProgress(p.rating)} height={4} label={`${Math.round(leagueProgress(p.rating) * 100)}% of the way to ${next.name}`} /></View> : null}
             {!p.isGuest ? <PlanPill premium={p.isPremium} /> : null}
           </View>
         </View>
