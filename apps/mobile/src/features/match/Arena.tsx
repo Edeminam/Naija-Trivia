@@ -6,23 +6,26 @@ import { Avatar, Txt, AnimatedNumber, LeagueBadge } from "../../ui";
 import { cn } from "../../lib/cn";
 import { useReducedMotion } from "../../lib/motion";
 import type { PlayerView } from "./store";
+import { useTheme } from "../../theme/ThemeProvider";
 
 function Dot({ on }: { on: boolean }) {
+  const { c } = useTheme();
   const s = useSharedValue(on ? 1 : 0);
   useEffect(() => {
     s.value = on ? withSpring(1, { damping: 12, stiffness: 320 }) : withTiming(0, { duration: 120 });
   }, [on, s]);
   const st = useAnimatedStyle(() => ({ transform: [{ scale: s.value }], opacity: s.value }));
-  return <Animated.View className="h-2.5 w-2.5 rounded-full bg-primary" style={st} />;
+  return <Animated.View style={[{ height: 10, width: 10, borderRadius: 5, backgroundColor: c.primary }, st]} />;
 }
 
 function Ring({ delay }: { delay: number }) {
+  const { c } = useTheme();
   const v = useSharedValue(0);
   useEffect(() => {
     v.value = withDelay(delay, withRepeat(withTiming(1, { duration: 2200, easing: Easing.out(Easing.quad) }), -1, false));
   }, [delay, v]);
   const st = useAnimatedStyle(() => ({ transform: [{ scale: 0.6 + v.value * 1.5 }], opacity: 0.5 * (1 - v.value) }));
-  return <Animated.View pointerEvents="none" className="absolute h-[120px] w-[120px] rounded-full border-2 border-primary" style={st} />;
+  return <Animated.View pointerEvents="none" style={[{ position: "absolute", height: 120, width: 120, borderRadius: 60, borderWidth: 2, borderColor: c.primary }, st]} />;
 }
 
 function PlayerCard({ p, searching, right }: { p: PlayerView | null; searching?: boolean; right?: boolean }) {

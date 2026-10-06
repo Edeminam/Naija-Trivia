@@ -4,14 +4,16 @@ import Animated, { useSharedValue, withRepeat, withTiming, useAnimatedStyle, Eas
 import { Txt } from "../../ui";
 import { useReducedMotion } from "../../lib/motion";
 import { useMatch } from "./store";
+import { useTheme } from "../../theme/ThemeProvider";
 
 function Ring({ delay }: { delay: number }) {
+  const { c } = useTheme();
   const v = useSharedValue(0);
   useEffect(() => {
     v.value = withDelay(delay, withRepeat(withTiming(1, { duration: 2200, easing: Easing.out(Easing.quad) }), -1, false));
   }, [delay, v]);
   const st = useAnimatedStyle(() => ({ transform: [{ scale: 0.4 + v.value * 1.6 }], opacity: 0.55 * (1 - v.value) }));
-  return <Animated.View className="absolute h-44 w-44 rounded-full border-2 border-primary" style={st} />;
+  return <Animated.View style={[{ position: "absolute", height: 176, width: 176, borderRadius: 88, borderWidth: 2, borderColor: c.primary }, st]} />;
 }
 
 /** Radar pulse behind the arena while we look for an opponent. */

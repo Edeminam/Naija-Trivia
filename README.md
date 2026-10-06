@@ -44,6 +44,18 @@ with weekly State Wars points and Daily Naija scores (dev auth only).
 
 **Reset local data:** stop the server and delete `apps/server/.data`.
 
+### Running on the Android emulator
+Needs Android Studio (SDK + an emulator) and **JDK 17** (React Native's Gradle plugin requires it):
+```bash
+export JAVA_HOME=/path/to/jdk-17        # e.g. Temurin 17; Android Studio's bundled JBR is 21
+export ANDROID_HOME=$HOME/Library/Android/sdk
+pnpm dev                                # server + Metro + admin
+cd apps/mobile && npx expo run:android --no-bundler   # first build ~10 min
+```
+The emulator reaches your machine at `10.0.2.2`; the app derives the server address from the bundle URL
+automatically. If Gradle hangs downloading a JDK, add
+`org.gradle.java.installations.paths=/path/to/jdk-17` to `~/.gradle/gradle.properties`.
+
 ### Running on a phone
 Native modules (Reanimated 4, SVG, haptics, notifications, Apple sign-in) need a development build:
 `cd apps/mobile && npx expo run:ios` / `npx expo run:android`, or `eas build --profile development`.

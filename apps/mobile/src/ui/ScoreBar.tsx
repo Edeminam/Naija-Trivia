@@ -6,6 +6,7 @@ import { Avatar } from "./Avatar";
 import { Txt } from "./Text";
 import { AnimatedNumber } from "./AnimatedNumber";
 import { cn } from "../lib/cn";
+import { useTheme } from "../theme/ThemeProvider";
 
 export interface ScorePlayer {
   username: string;
@@ -18,12 +19,13 @@ export interface ScorePlayer {
 }
 
 function AnsweredDot({ on }: { on: boolean }) {
+  const { c } = useTheme();
   const s = useSharedValue(on ? 1 : 0);
   useEffect(() => {
     s.value = on ? withSpring(1, { damping: 12, stiffness: 300 }) : withTiming(0, { duration: 120 });
   }, [on, s]);
   const st = useAnimatedStyle(() => ({ transform: [{ scale: s.value }], opacity: s.value }));
-  return <Animated.View className="h-2.5 w-2.5 rounded-full bg-primary" style={st} accessibilityLabel={on ? "Answered" : undefined} />;
+  return <Animated.View style={[{ height: 10, width: 10, borderRadius: 5, backgroundColor: c.primary }, st]} accessibilityLabel={on ? "Answered" : undefined} />;
 }
 
 function Side({ p, align }: { p: ScorePlayer; align: "left" | "right" }) {

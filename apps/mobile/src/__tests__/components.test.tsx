@@ -1,4 +1,7 @@
 import { render, screen, fireEvent, act } from "@testing-library/react-native";
+
+/** Activate a control the way TalkBack/VoiceOver do (PressableScale routes this to onPress). */
+const activate = (el: any) => fireEvent(el, "accessibilityAction", { nativeEvent: { actionName: "activate" } });
 import { AnswerButton } from "../ui/AnswerButton";
 import { Button } from "../ui/Button";
 import { CircularTimer } from "../ui/CircularTimer";
@@ -9,7 +12,7 @@ describe("AnswerButton", () => {
     const onPress = jest.fn();
     await render(<AnswerButton letter="A" text="2Baba" state="idle" onPress={onPress} />);
     const btn = screen.getByRole("button", { name: "Option A: 2Baba" });
-    await fireEvent.press(btn);
+    await activate(btn);
     expect(onPress).toHaveBeenCalledTimes(1);
   });
 
@@ -17,7 +20,7 @@ describe("AnswerButton", () => {
     const onPress = jest.fn();
     const { rerender } = await render(<AnswerButton letter="B" text="D'banj" state="wrong" mine onPress={onPress} />);
     const wrong = screen.getByLabelText("Option B: D'banj, wrong, your pick");
-    await fireEvent.press(wrong);
+    await activate(wrong);
     expect(onPress).not.toHaveBeenCalled();
     await rerender(<AnswerButton letter="A" text="2Baba" state="correct" />);
     expect(screen.getByLabelText("Option A: 2Baba, correct answer")).toBeTruthy();
@@ -34,10 +37,10 @@ describe("Button", () => {
   it("fires onPress and blocks presses while loading", async () => {
     const onPress = jest.fn();
     const { rerender } = await render(<Button label="Play Clash" onPress={onPress} />);
-    await fireEvent.press(screen.getByRole("button", { name: "Play Clash" }));
+    await activate(screen.getByRole("button", { name: "Play Clash" }));
     expect(onPress).toHaveBeenCalledTimes(1);
     await rerender(<Button label="Play Clash" onPress={onPress} loading />);
-    await fireEvent.press(screen.getByRole("button", { name: "Play Clash" }));
+    await activate(screen.getByRole("button", { name: "Play Clash" }));
     expect(onPress).toHaveBeenCalledTimes(1);
   });
 });

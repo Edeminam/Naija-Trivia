@@ -28,7 +28,8 @@ export function DoubleWahalaIntro() {
       <View className="absolute inset-0 rounded-card overflow-hidden bg-accent-soft">
         <AdirePattern id="wahala" opacity={0.06} />
       </View>
-      <Animated.View style={shake} className="items-center gap-3">
+      <Animated.View style={shake}>
+        <View className="items-center gap-3">
         <Animated.View entering={reduce ? undefined : ZoomIn.springify().damping(9).stiffness(180)} className="h-20 w-20 items-center justify-center rounded-3xl bg-accent">
           <Icon as={Flame} size={40} tone="ink" />
         </Animated.View>
@@ -36,6 +37,7 @@ export function DoubleWahalaIntro() {
           <Txt variant="display" tone="accent" style={{ fontSize: 44, lineHeight: 48 }} className="text-center">DOUBLE{"\n"}WAHALA</Txt>
         </Animated.View>
         <Txt variant="title" tone="muted">Final question · points x2</Txt>
+        </View>
       </Animated.View>
     </Animated.View>
   );

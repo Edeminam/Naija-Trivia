@@ -50,7 +50,8 @@ export function BottomSheet({ open, onClose, title, subtitle, children }: { open
           <Pressable style={{ flex: 1 }} onPress={close} accessibilityRole="button" accessibilityLabel="Close sheet" />
         </Animated.View>
         <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : undefined} style={{ flex: 1, justifyContent: "flex-end", zIndex: 1 }} pointerEvents="box-none">
-          <Animated.View style={[sheet, { paddingBottom: insets.bottom + 16, backgroundColor: c.surface, borderColor: c.line }]} className="rounded-t-[28px] border-t px-5 pt-2 w-full max-w-[560px] self-center" accessibilityViewIsModal>
+          <Animated.View style={[{ width: "100%", maxWidth: 560, alignSelf: "center" }, sheet]} accessibilityViewIsModal>
+          <View style={{ paddingBottom: insets.bottom + 16, backgroundColor: c.surface, borderColor: c.line }} className="rounded-t-[28px] border-t px-5 pt-2">
             <GestureDetector gesture={pan}>
               <View className="items-center py-2" accessibilityLabel="Drag down to close">
                 <View className="h-1.5 w-10 rounded-full bg-raised" />
@@ -69,6 +70,7 @@ export function BottomSheet({ open, onClose, title, subtitle, children }: { open
               </View>
             ) : null}
             {children}
+          </View>
           </Animated.View>
         </KeyboardAvoidingView>
       </GestureHandlerRootView>

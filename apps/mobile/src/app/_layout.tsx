@@ -30,7 +30,6 @@ function Shell() {
         <Stack.Screen name="index" options={{ animation: "none" }} />
         <Stack.Screen name="(tabs)" options={{ animation: "fade" }} />
         <Stack.Screen name="match" options={{ gestureEnabled: false, animation: "fade" }} />
-        <Stack.Screen name="report" options={{ presentation: "transparentModal", animation: "fade" }} />
       </Stack>
       <AdOverlayHost />
       <ToastHost />

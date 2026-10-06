@@ -1,18 +1,24 @@
 import { useEffect } from "react";
-import { View, type DimensionValue } from "react-native";
+import { View, StyleSheet, type DimensionValue } from "react-native";
 import Animated, { useAnimatedStyle, useSharedValue, withRepeat, withTiming, Easing } from "react-native-reanimated";
 import { useReducedMotion } from "../lib/motion";
 import { cn } from "../lib/cn";
+import { useTheme } from "../theme/ThemeProvider";
 
 /** Pulsing placeholder block. Compose into screen-shaped skeletons. */
 export function Skeleton({ w = "100%", h = 16, r = 10, className }: { w?: DimensionValue; h?: number; r?: number; className?: string }) {
   const reduce = useReducedMotion();
+  const { c } = useTheme();
   const o = useSharedValue(0.55);
   useEffect(() => {
     if (!reduce) o.value = withRepeat(withTiming(1, { duration: 850, easing: Easing.inOut(Easing.quad) }), -1, true);
   }, [reduce, o]);
   const style = useAnimatedStyle(() => ({ opacity: o.value }));
-  return <Animated.View aria-hidden className={cn("bg-raised", className)} style={[{ width: w, height: h, borderRadius: r }, style]} />;
+  return (
+    <View aria-hidden className={className} style={{ width: w, height: h, borderRadius: r, overflow: "hidden" }}>
+      <Animated.View style={[StyleSheet.absoluteFill, { backgroundColor: c.raised }, style]} />
+    </View>
+  );
 }
 
 export function SkeletonCard({ lines = 2, className }: { lines?: number; className?: string }) {
