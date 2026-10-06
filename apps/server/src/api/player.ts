@@ -26,7 +26,7 @@ import {
 import { authed, open, parse, HttpError } from "./http";
 import { env } from "../env";
 import { createDevUser, issueDevToken } from "../auth";
-import { getMe, usernameAvailable, getProfileRow, toPublic, isPremium } from "../repo/profiles";
+import { getMe, usernameAvailable, getProfileRow, toPublic, isPremium, getPublicProfiles as getPublicProfilesFor } from "../repo/profiles";
 import { listMissions, claimMission } from "../repo/missions";
 import { dailyStatus, getStreak, startDaily, dailyTable, completeDaily, ensureDailySet } from "../repo/daily";
 import { serveNext, submitAnswer } from "../repo/solo";
@@ -404,6 +404,32 @@ player.post(
       }
       return { ok: true, duplicate: false };
     });
+  }),
+);
+
+// Public summary of a finished match (share landing page).
+player.get(
+  "/matches/:id/public",
+  open(async ({ req, sql }) => {
+    const m = await sql.one(
+      `select m.id, m.type, m.is_bot, m.bot_name, m.bot_rating, m.winner, m.score_a, m.score_b, m.categories, m.created_at, m.player_a, m.player_b
+         from matches m where m.id = $1`,
+      [String(req.params.id)],
+    );
+    if (!m) throw new HttpError(404, "Match not found");
+    const profiles = await getPublicProfilesFor(sql, [m.player_a, m.player_b].filter(Boolean));
+    return {
+      id: m.id,
+      type: m.type,
+      isBot: m.is_bot,
+      a: profiles.get(m.player_a) ?? null,
+      b: m.is_bot ? { username: m.bot_name ?? "Practice opponent", avatarId: "musa", stateCode: "LA", rating: m.bot_rating ?? 1000 } : (profiles.get(m.player_b) ?? null),
+      scoreA: m.score_a,
+      scoreB: m.score_b,
+      winner: m.winner === m.player_a ? "a" : m.winner ? "b" : null,
+      categories: m.categories,
+      createdAt: new Date(m.created_at).toISOString(),
+    };
   }),
 );
 

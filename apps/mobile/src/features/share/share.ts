@@ -1,7 +1,7 @@
 import { Platform, Share } from "react-native";
 import * as Sharing from "expo-sharing";
 import { File, Paths } from "expo-file-system";
-import { SERVER_URL, APP_URL } from "../../lib/config";
+import { SERVER_URL } from "../../lib/config";
 import { analytics } from "../../services/analytics";
 
 /**
@@ -35,7 +35,7 @@ async function shareCard(imagePath: string, link: string, message: string) {
 
 export async function shareMatch(matchId: string, won: boolean) {
   analytics.track("share_match", { won });
-  await shareCard(`/share/match/${matchId}.png`, `${APP_URL}/s/${matchId}`, won ? "I just won a Naija Trivia Clash 🇳🇬🔥 Think you can beat me?" : "Just played Naija Trivia Clash 🇳🇬 Come test your Naija knowledge!");
+  await shareCard(`/share/match/${matchId}.png`, `${SERVER_URL}/l/s/${matchId}`, won ? "I just won a Naija Trivia Clash 🇳🇬🔥 Think you can beat me?" : "Just played Naija Trivia Clash 🇳🇬 Come test your Naija knowledge!");
 }
 
 export async function shareChallengeCard(code: string, link: string) {

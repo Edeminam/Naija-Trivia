@@ -17,7 +17,8 @@ function makeCode() {
 }
 
 export function challengeLinks(code: string, creatorName: string) {
-  const shareUrl = `${env.appUrl}/c/${code}`;
+  // Server link page carries OpenGraph tags (rich WhatsApp preview) and forwards to the app.
+  const shareUrl = `${env.publicUrl}/l/c/${code}`;
   const text = `I just played a Naija Trivia Clash challenge. You fit beat my score? 🇳🇬 Play the same 7 questions here: ${shareUrl}`;
   return { shareUrl, whatsappUrl: `https://wa.me/?text=${encodeURIComponent(text)}`, text, creatorName };
 }

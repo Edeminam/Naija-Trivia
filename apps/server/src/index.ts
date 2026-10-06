@@ -5,6 +5,8 @@ import { WebSocketTransport } from "@colyseus/ws-transport";
 import { env } from "./env";
 import { getDb } from "./db";
 import { player } from "./api/player";
+import { share } from "./share/cards";
+import { dev } from "./api/dev";
 import { errorHandler } from "./api/http";
 import { MatchRoom } from "./game/MatchRoom";
 import { QueueRoom, setQueueStore } from "./game/QueueRoom";
@@ -33,6 +35,8 @@ export async function startServer(port = env.port, opts: { jobs?: boolean } = {}
       app.use(express.json({ limit: "2mb" }));
       app.get("/health", (_req, res) => void res.json({ ok: true, db: sql.kind, time: Date.now() }));
       app.use("/api", player);
+      app.use("/api", dev);
+      app.use(share);
       app.use(errorHandler);
     },
   });
