@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Platform, View } from "react-native";
 import { router } from "expo-router";
 import { useQueryClient } from "@tanstack/react-query";
-import { Volume2, Vibrate, Bell, Wifi, Sparkles, MessageCircle, LogOut, Trash2, MapPin, UserCircle2, ShieldCheck, LayoutGrid } from "lucide-react-native";
+import { Volume2, Vibrate, Bell, Wifi, Sparkles, MessageCircle, LogOut, Trash2, MapPin, UserCircle2, ShieldCheck } from "lucide-react-native";
 import { stateByCode, type MeResponse } from "@ntc/shared";
 import { Screen, SectionTitle, Card, ListRow, Segmented, Txt, Modal, BottomSheet, Button, toast } from "../ui";
 import { usePrefs } from "../stores/prefs";
@@ -84,7 +84,6 @@ export default function SettingsScreen() {
       <SectionTitle title="More" />
       <Card className="px-4">
         <ListRow first icon={ShieldCheck} title="Fair play" subtitle="Server-checked timers and answers. Bots are always labelled." />
-        <ListRow icon={LayoutGrid} title="Design system" onPress={() => router.push("/dev/gallery")} />
         <ListRow icon={LogOut} title="Sign out" onPress={async () => { await signOut(); router.replace("/onboarding"); }} />
         <ListRow icon={Trash2} title="Delete account" destructive onPress={() => setConfirmDelete(true)} />
       </Card>

@@ -101,11 +101,11 @@ Client → server: `ban { categoryId }`, `answer { questionId, optionId }`, `pow
 
 `index` (splash) · `onboarding/{intro,auth,otp,username,avatar,state}` · `(tabs)/{home,leagues,state-wars,shop,profile}` ·
 `match/{search,ban,play,result}` · `challenge/{new,[code]}` · `daily/{index,play,result}` · `state/[code]` ·
-`settings` · `report` (sheet) · `dev/gallery`.
+`settings` · `report` (sheet).
 
 ## 7. Milestones
 
-1. Scaffold, shared rules + tests, migrations + seed, tokens + UI library + gallery.
+1. Scaffold, shared rules + tests, migrations + seed, tokens + UI library.
 2. Auth, onboarding, home, profile.
 3. Server rooms, matchmaking, bot, question/reveal/result.
 4. Friend Challenge, Daily Naija, streaks, missions, economy.
