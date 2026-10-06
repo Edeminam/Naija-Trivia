@@ -43,7 +43,8 @@ export function Button({ label, onPress, variant = "primary", size = "md", icon,
   const { c } = useTheme();
   const inactive = disabled || loading;
   const filled = (variant === "primary" || variant === "accent") && !disabled;
-  const tone = disabled ? "faint" : filled ? "ink" : variant === "destructive" ? "danger" : variant === "ghost" ? "primary" : "default";
+  // Green buttons carry white text; gold (accent) buttons keep dark ink for contrast.
+  const tone = disabled ? "faint" : filled ? (variant === "primary" ? "white" : "ink") : variant === "destructive" ? "danger" : variant === "ghost" ? "primary" : "default";
   return (
     <PressableScale
       testID={testID}
@@ -59,7 +60,7 @@ export function Button({ label, onPress, variant = "primary", size = "md", icon,
       className={cn("flex-row items-center justify-center rounded-btn min-h-touch", disabled ? "bg-raised border border-line" : base[variant], sizes[size], full && "self-stretch", className)}
     >
       {loading ? (
-        <ActivityIndicator color={tone === "ink" ? c.primaryInk : c.text} />
+        <ActivityIndicator color={tone === "white" ? "#FFFFFF" : tone === "ink" ? c.primaryInk : c.text} />
       ) : (
         <View className="flex-row items-center gap-2">
           {icon ? <Icon as={icon} size={size === "sm" ? 16 : 18} tone={tone} /> : null}

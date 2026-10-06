@@ -2,7 +2,7 @@ import { Text as RNText, type TextProps } from "react-native";
 import { cn } from "../lib/cn";
 
 type Variant = "display" | "h1" | "h2" | "h3" | "title" | "body" | "bodyStrong" | "caption" | "label" | "overline" | "number";
-type Tone = "default" | "muted" | "faint" | "primary" | "accent" | "danger" | "ink";
+type Tone = "default" | "muted" | "faint" | "primary" | "accent" | "danger" | "ink" | "white";
 
 const variants: Record<Variant, string> = {
   display: "font-display text-3xl",
@@ -26,6 +26,7 @@ const tones: Record<Tone, string> = {
   accent: "text-accent-text",
   danger: "text-danger-text",
   ink: "text-primary-ink",
+  white: "text-white",
 };
 
 export interface TxtProps extends TextProps {

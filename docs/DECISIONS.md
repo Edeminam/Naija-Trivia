@@ -80,8 +80,9 @@ Decisions made where the brief left room, or where a constraint forced a choice.
 28. **Notifications**: the 7 pm WAT reminder is scheduled locally on the device (works offline and
     without push setup) and also sent by the server when a push token exists; the server enforces the
     max-one-marketing-notification-per-day rule via `notification_log`.
-29. **Accessibility**: primary buttons use dark ink on Naija green (≥ 4.5:1 — white text on #0FA958 is
-    only ~3:1). Green used as *text* is a lighter/darker variant per theme. Correct/wrong answers always
+29. **Accessibility**: primary (green) buttons use white text, per the product owner's call (white on
+    #0FA958 is ~3:1, which passes WCAG AA for large/bold text — button labels are bold). Gold buttons keep
+    dark ink. Green used as *text* is a lighter/darker variant per theme. Correct/wrong answers always
     carry ✓/✕ icons and screen-reader labels.
 30. **Web bundle**: web builds use Expo's tree shaking (`build:web`), and the client ships
     `@supabase/auth-js` instead of the full supabase-js (data never goes client → Supabase).
