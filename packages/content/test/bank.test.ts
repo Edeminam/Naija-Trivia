@@ -1,11 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { questionInputSchema } from "@ntc/shared";
+import { questionInputSchema, CATEGORIES } from "@ntc/shared";
 import { BANKS, buildQuestions } from "../src";
 
 describe("seed question bank", () => {
-  it("has exactly 100 questions in each of the 6 seeded categories", () => {
-    expect(BANKS).toHaveLength(6);
-    for (const b of BANKS) expect(b.questions.length, b.category).toBe(100);
+  it("seeds every category with a deep enough bank", () => {
+    expect(BANKS.map((b) => b.category).sort()).toEqual(CATEGORIES.map((c) => c.slug).sort());
+    for (const b of BANKS) expect(b.questions.filter((q) => q.status === "live").length, b.category).toBeGreaterThanOrEqual(100);
   });
 
   it("every question passes the authoring schema", () => {

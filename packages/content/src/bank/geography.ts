@@ -1,4 +1,4 @@
-import { q, u, W, type CategoryBank } from "./helpers";
+import { q, W, type CategoryBank } from "./helpers";
 
 const S = W + "States_of_Nigeria";
 
@@ -99,7 +99,7 @@ export const geography: CategoryBank = {
     q(4, "Which Ogun town hosts the colourful Ojude Oba festival?", ["Ijebu-Ode", "Abeokuta", "Sagamu", "Ota"], "It is held after Eid al-Adha.", W + "Ojude_Oba_festival"),
     q(4, "The Durbar festival, with its horse-riding procession, is most associated with which city?", ["Kano", "Ibadan", "Enugu", "Calabar"], "Durbars are also held in Katsina, Zaria and Bida.", W + "Durbar_festival"),
     q(4, "Nigeria's time zone is…", ["West Africa Time (UTC+1)", "Greenwich Mean Time (UTC+0)", "Central Africa Time (UTC+2)", "East Africa Time (UTC+3)"], "Nigeria does not observe daylight saving time.", W + "West_Africa_Time"),
-    u(4, "Which state is the 'Home of Peace' according to its official slogan?", ["Borno", "Plateau", "Gombe", "Kwara"], "Borno's capital is Maiduguri.", W + "Borno_State"),
+    q(4, "Which state is the 'Home of Peace' according to its official slogan?", ["Borno", "Katsina", "Gombe", "Kwara"], "Borno's capital is Maiduguri.", W + "Borno_State"),
 
     // ── Difficulty 5 ──────────────────────────────────────────────────────
     q(5, "Jigawa State was carved out of which state in 1991?", ["Kano", "Katsina", "Bauchi", "Kaduna"], "Its capital, Dutse, was a new administrative town.", W + "Jigawa_State"),
@@ -113,6 +113,6 @@ export const geography: CategoryBank = {
     q(5, "The River Benue flows into Nigeria from which country?", ["Cameroon", "Chad", "Niger", "Central African Republic"], "It rises in the Adamawa Plateau of Cameroon.", W + "Benue_River"),
     q(5, "The Niger River enters Nigeria from which country?", ["Niger", "Benin", "Mali", "Chad"], "The river rises in the Guinea Highlands.", W + "Niger_River"),
     q(5, "Which state's slogan is 'Jewel in the Savannah'?", ["Gombe", "Bauchi", "Yobe", "Adamawa"], "Gombe was created from Bauchi State in 1996.", W + "Gombe_State"),
-    u(5, "Which state's slogan is 'Land of Equity'?", ["Kebbi", "Sokoto", "Zamfara", "Jigawa"], "Kebbi was created from Sokoto State in 1991.", W + "Kebbi_State"),
+    q(5, "Which state's slogan is 'Land of Equity'?", ["Kebbi", "Sokoto", "Zamfara", "Jigawa"], "Kebbi was created from Sokoto State in 1991.", W + "Kebbi_State"),
   ],
 };

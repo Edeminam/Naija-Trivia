@@ -1,4 +1,5 @@
 import { readFileSync, readdirSync, mkdirSync, existsSync } from "node:fs";
+import { createHash } from "node:crypto";
 import { resolve, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 import { env } from "../env";
@@ -104,7 +105,7 @@ do $$ begin create role service_role nologin bypassrls; exception when duplicate
 create table if not exists public._migrations (name text primary key, applied_at timestamptz not null default now());
 `;
 
-/** Local mode only: apply the shim, every migration once, then the seed if the bank is empty. */
+/** Local mode only: apply the shim, every migration once, then the seed whenever its contents change (it's idempotent). */
 export async function migrateLocal(sql: Sql, log = console.log) {
   await sql.exec(AUTH_SHIM);
   const dir = resolve(repoRoot, "supabase/migrations");
@@ -116,10 +117,12 @@ export async function migrateLocal(sql: Sql, log = console.log) {
     await sql.exec(readFileSync(resolve(dir, f), "utf8"));
     await sql.query("insert into _migrations (name) values ($1)", [f]);
   }
-  const seeded = await sql.one<{ n: number }>("select count(*)::int as n from questions");
-  if (!seeded || seeded.n === 0) {
+  const seed = readFileSync(resolve(repoRoot, "supabase/seed.sql"), "utf8");
+  const seedKey = `seed:${createHash("sha1").update(seed).digest("hex").slice(0, 12)}`;
+  if (!applied.has(seedKey)) {
     log("[db] loading supabase/seed.sql");
-    await sql.exec(readFileSync(resolve(repoRoot, "supabase/seed.sql"), "utf8"));
+    await sql.exec(seed);
+    await sql.query("insert into _migrations (name) values ($1) on conflict (name) do nothing", [seedKey]);
   }
 }
 

@@ -1,4 +1,4 @@
-import { q, u, W, type CategoryBank } from "./helpers";
+import { q, W, type CategoryBank } from "./helpers";
 
 export const football: CategoryBank = {
   category: "football",
@@ -38,7 +38,7 @@ export const football: CategoryBank = {
     q(2, "Who scored the winning goal in the 1996 Olympic final?", ["Emmanuel Amunike", "Nwankwo Kanu", "Daniel Amokachi", "Celestine Babayaro"], "Amunike's late goal sealed a 3–2 win over Argentina.", W + "Emmanuel_Amunike"),
     q(2, "Chioma Ajunwa won Nigeria's first Olympic gold medal in which event?", ["Long jump", "100 metres", "Triple jump", "400 metres"], "She won at Atlanta 1996 — Nigeria's first Olympic gold.", W + "Chioma_Ajunwa"),
     q(2, "In which city did Tobi Amusan set her 100m hurdles world record?", ["Eugene", "Tokyo", "Doha", "Budapest"], "She ran 12.12 seconds in the semi-final in July 2022.", W + "Tobi_Amusan"),
-    u(2, "Which Nigerian sprinter won Olympic silver in the long jump at Beijing 2008 (after reallocation)?", ["Blessing Okagbare", "Chioma Ajunwa", "Ese Brume", "Mary Onyali"], "Okagbare was originally awarded bronze.", W + "Blessing_Okagbare"),
+    q(2, "Which Nigerian sprinter won Olympic silver in the long jump at Beijing 2008 (after reallocation)?", ["Blessing Okagbare", "Chioma Ajunwa", "Ese Brume", "Mary Onyali"], "Okagbare was originally awarded bronze.", W + "Blessing_Okagbare"),
     q(2, "Ese Brume won a medal at the Tokyo 2020 Olympics in which event?", ["Long jump", "Triple jump", "Shot put", "100m hurdles"], "She won bronze.", W + "Ese_Brume"),
     q(2, "Blessing Oborududu won Nigeria's first Olympic medal in which sport?", ["Wrestling", "Weightlifting", "Taekwondo", "Judo"], "She took freestyle silver at Tokyo 2020.", W + "Blessing_Oborududu"),
     q(2, "Hakeem Olajuwon was named NBA MVP in which season?", ["1993–94", "1985–86", "1995–96", "1999–2000"], "He also won Finals MVP that season.", W + "Hakeem_Olajuwon"),
@@ -67,7 +67,7 @@ export const football: CategoryBank = {
     q(3, "What medal did Nigeria win in men's football at Rio 2016?", ["Bronze", "Gold", "Silver", "None"], "Nigeria beat Honduras 3–2 in the bronze medal match.", W + "Football_at_the_2016_Summer_Olympics_%E2%80%93_Men%27s_tournament"),
     q(3, "Who won the Golden Boot at the 2015 U-17 World Cup with a record 10 goals?", ["Victor Osimhen", "Kelechi Nwakali", "Samuel Chukwueze", "Taiwo Awoniyi"], "Nigeria won that tournament in Chile.", W + "2015_FIFA_U-17_World_Cup"),
     q(3, "Kelechi Iheanacho won the Golden Ball at which tournament?", ["2013 U-17 World Cup", "2015 U-20 World Cup", "2016 Olympics", "2013 AFCON"], "Nigeria won the 2013 edition in the UAE.", W + "2013_FIFA_U-17_World_Cup"),
-    u(3, "Asisat Oshoala has won African Women's Footballer of the Year a record how many times?", ["6", "4", "5", "3"], "Oshoala starred for FC Barcelona Femení.", W + "Asisat_Oshoala"),
+    q(3, "Asisat Oshoala has won African Women's Footballer of the Year a record how many times?", ["6", "4", "5", "3"], "Oshoala starred for FC Barcelona Femení.", W + "Asisat_Oshoala"),
     q(3, "Nigeria's Super Falcons have qualified for how many Women's World Cups?", ["Every edition since 1991", "Every edition since 1999", "Five", "Three"], "Nigeria is one of only a few teams to play at every Women's World Cup.", W + "Nigeria_women%27s_national_football_team"),
     q(3, "Hogan 'Kid' Bassey became Nigeria's first world boxing champion in which division?", ["Featherweight", "Lightweight", "Middleweight", "Heavyweight"], "He won the world title in 1957.", W + "Hogan_Bassey"),
     q(3, "Dick Tiger held world titles at middleweight and which other division?", ["Light heavyweight", "Heavyweight", "Welterweight", "Lightweight"], "Dick Tiger was born in Amaigbo, Imo State.", W + "Dick_Tiger"),
@@ -77,7 +77,7 @@ export const football: CategoryBank = {
     q(3, "Which Nigerian table tennis star reached the Olympic quarter-finals at Rio 2016?", ["Aruna Quadri", "Segun Toriola", "Bode Abiodun", "Funke Oshonaike"], "He was the first African to reach that stage in Olympic table tennis.", W + "Quadri_Aruna"),
     q(3, "Ahmed Musa became the first Nigerian to score in two different World Cups. Which team did he score twice against in 2018?", ["Iceland", "Croatia", "Argentina", "Bosnia"], "Nigeria won that match 2–0 in Volgograd.", W + "Ahmed_Musa"),
     q(3, "Nigeria beat which team in the final of the first U-16 World Championship in 1985?", ["West Germany", "Brazil", "Guinea", "Italy"], "Nigeria won the final 2–0 in Beijing.", W + "1985_FIFA_U-16_World_Championship"),
-    u(3, "Kokawa is a traditional form of which sport practised in northern Nigeria?", ["Wrestling", "Boxing", "Archery", "Horse racing"], "Kokawa contests are popular during harvest festivals.", W + "Dambe"),
+    q(3, "Kokawa is a traditional form of which sport practised in northern Nigeria?", ["Wrestling", "Boxing", "Archery", "Horse racing"], "Kokawa is the Hausa name for the West African folk wrestling style known as Laamb in Senegal.", W + "Lutte_Traditionnelle"),
 
     // ── Difficulty 4 ──────────────────────────────────────────────────────
     q(4, "Who coached Nigeria to the 1980 AFCON title?", ["Otto Glória", "Clemens Westerhof", "Tiko Jelisavčić", "Adegboye Onigbinde"], "The Brazilian coach had led Portugal to third place at the 1966 World Cup.", W + "Otto_Gl%C3%B3ria"),
@@ -89,18 +89,18 @@ export const football: CategoryBank = {
     q(4, "Moshood Abiola National Stadium is in which city?", ["Abuja", "Lagos", "Ibadan", "Uyo"], "It was renamed in 2019 from the National Stadium, Abuja.", W + "Moshood_Abiola_National_Stadium"),
     q(4, "Which stadium in Uyo has become the Super Eagles' main home ground?", ["Godswill Akpabio International Stadium", "Teslim Balogun Stadium", "Ahmadu Bello Stadium", "U.J. Esuene Stadium"], "It is nicknamed the 'Nest of Champions'.", W + "Godswill_Akpabio_International_Stadium"),
     q(4, "Nigeria's first-ever Olympic medal was won in which sport?", ["Boxing", "Athletics", "Football", "Weightlifting"], "Nojim Maiyegun won bronze at Tokyo 1964.", W + "Nigeria_at_the_Olympics"),
-    u(4, "Which Nigerian goalkeeper went 1,000+ minutes without conceding in Ligue 1 for Lille?", ["Vincent Enyeama", "Peter Rufai", "Carl Ikeme", "Austin Ejide"], "He was named African Goalkeeper of the Year in that era.", W + "Vincent_Enyeama"),
+    q(4, "Which Nigerian goalkeeper went 1,000+ minutes without conceding in Ligue 1 for Lille?", ["Vincent Enyeama", "Peter Rufai", "Carl Ikeme", "Austin Ejide"], "His 1,062-minute run in 2013–14 fell just 114 minutes short of the Ligue 1 record.", W + "Vincent_Enyeama"),
     q(4, "Taribo West played for both Inter Milan and which other Milan club?", ["AC Milan", "Atalanta", "Monza", "Como"], "He was known for his colourful braided hairstyles.", W + "Taribo_West"),
     q(4, "Daniel Amokachi starred for which English club in the mid-1990s?", ["Everton", "Leeds United", "Aston Villa", "Newcastle United"], "He scored twice in Everton's 1995 FA Cup semi-final.", W + "Daniel_Amokachi"),
     q(4, "Jay-Jay Okocha captained which English club?", ["Bolton Wanderers", "Portsmouth", "Hull City", "West Brom"], "He joined Bolton from Paris Saint-Germain in 2002.", W + "Jay-Jay_Okocha"),
     q(4, "Nigeria's women's basketball team won the AfroBasket title in 2017, 2019, 2021 and which year?", ["2023", "2015", "2013", "2011"], "D'Tigress dominated African women's basketball in that era.", W + "Nigeria_women%27s_national_basketball_team"),
-    u(4, "At Paris 2024, D'Tigress became the first African team to reach which stage of the Olympic basketball tournament?", ["Quarter-finals", "Semi-finals", "Final", "Group stage"], "They beat Australia and Canada in the group stage.", W + "Nigeria_women%27s_national_basketball_team"),
-    u(4, "Nigeria's men's 4x400m relay team was upgraded to gold for which Olympics?", ["Sydney 2000", "Atlanta 1996", "Athens 2004", "Beijing 2008"], "The US team was later disqualified over a doping case.", W + "Athletics_at_the_2000_Summer_Olympics_%E2%80%93_Men%27s_4_%C3%97_400_metres_relay"),
-    u(4, "Which Nigerian club won the African Cup Winners' Cup in 1976?", ["Shooting Stars", "Rangers International", "Enyimba", "Bendel Insurance"], "Shooting Stars are based in Ibadan.", W + "Shooting_Stars_S.C."),
+    q(4, "At Paris 2024, D'Tigress became the first African team to reach which stage of the Olympic basketball tournament?", ["Quarter-finals", "Semi-finals", "Final", "Group stage"], "They beat Australia and Canada in the group stage.", W + "Nigeria_women%27s_national_basketball_team"),
+    q(4, "Nigeria's men's 4x400m relay team was upgraded to gold for which Olympics?", ["Sydney 2000", "Atlanta 1996", "Athens 2004", "Beijing 2008"], "The US team was later disqualified over a doping case.", W + "Athletics_at_the_2000_Summer_Olympics_%E2%80%93_Men%27s_4_%C3%97_400_metres_relay"),
+    q(4, "Which Nigerian club won the African Cup Winners' Cup in 1976?", ["Shooting Stars", "Rangers International", "Enyimba", "Bendel Insurance"], "Shooting Stars are based in Ibadan.", W + "Shooting_Stars_S.C."),
     q(4, "Rangers International FC is based in which city?", ["Enugu", "Owerri", "Onitsha", "Aba"], "Rangers are nicknamed 'The Flying Antelopes'.", W + "Rangers_International_F.C."),
 
     // ── Difficulty 5 ──────────────────────────────────────────────────────
-    u(5, "Before 'Super Eagles', what was Nigeria's national team called?", ["Green Eagles", "Red Devils", "Lone Stars", "Desert Warriors"], "The team was called the Red Devils in its early years before becoming the Green Eagles.", W + "Nigeria_national_football_team"),
+    q(5, "Before independence, Nigeria's national team was nicknamed what, after its red-topped kits?", ["Red Devils", "Green Eagles", "Lone Stars", "Desert Warriors"], "After independence the team became the Green Eagles, then the Super Eagles from 1988.", W + "Nigeria_national_football_team"),
     q(5, "Stephen Keshi and which Egyptian are the only two men to win AFCON as player and coach?", ["Mahmoud El-Gohary", "Hassan Shehata", "Hossam Hassan", "Mohamed Aboutrika"], "Keshi won in 1994 as a player and 2013 as coach.", W + "Stephen_Keshi"),
     q(5, "In which country did Nigeria win the inaugural U-16 world title in 1985?", ["China", "Canada", "Scotland", "Japan"], "The tournament later became the U-17 World Cup.", W + "1985_FIFA_U-16_World_Championship"),
     q(5, "Which city hosted the 2nd All-Africa Games in 1973?", ["Lagos", "Abuja", "Ibadan", "Kaduna"], "The Games were held at the National Stadium, Surulere.", W + "1973_All-Africa_Games"),
@@ -111,6 +111,6 @@ export const football: CategoryBank = {
     q(5, "Which Malian-French coach was appointed Super Eagles head coach in January 2025?", ["Éric Chelle", "Hervé Renard", "Claude Le Roy", "Paul Put"], "He previously coached Mali.", W + "%C3%89ric_Chelle"),
     q(5, "Nigeria hosted which FIFA youth tournament in 2009?", ["U-17 World Cup", "U-20 World Cup", "Women's U-20 World Cup", "Club World Cup"], "Nigeria reached the final but lost to Switzerland.", W + "2009_FIFA_U-17_World_Cup"),
     q(5, "Nigeria hosted the FIFA World Youth Championship (U-20) in which year?", ["1999", "1995", "2003", "1989"], "Spain won the tournament, with matches in Lagos, Kaduna, Enugu and elsewhere.", W + "1999_FIFA_World_Youth_Championship"),
-    u(5, "Nigeria's first Africa Cup of Nations appearance was in which year?", ["1963", "1957", "1976", "1980"], "Nigeria were knocked out in the group stage in Ghana.", W + "Nigeria_national_football_team"),
+    q(5, "Nigeria's first Africa Cup of Nations appearance was in which year?", ["1963", "1957", "1976", "1980"], "Nigeria were knocked out in the group stage in Ghana.", W + "Nigeria_national_football_team"),
   ],
 };

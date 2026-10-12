@@ -10,6 +10,7 @@ import {
   leagueForRating,
   leagueProgress,
   seasonResetRating,
+  LEAGUES,
   ratingWindow,
   canPair,
   pairQueue,
@@ -129,10 +130,29 @@ describe("leagues", () => {
     expect(leagueProgress(2500)).toBe(1);
   });
   it("soft resets at season end", () => {
-    expect(seasonResetRating(1600)).toBe(1300);
-    expect(seasonResetRating(1000)).toBe(1000);
-    expect(seasonResetRating(800)).toBe(900);
+    // JJC is pulled halfway up to 1000; Learner goes back to 1000.
     expect(seasonResetRating(0)).toBe(500);
+    expect(seasonResetRating(800)).toBe(900);
+    expect(seasonResetRating(1000)).toBe(1000);
+    expect(seasonResetRating(1299)).toBe(1000);
+    // Sharp and above drop exactly one league, keeping their place in the band.
+    expect(seasonResetRating(1300)).toBe(1000);
+    expect(seasonResetRating(1600)).toBe(1300);
+    expect(seasonResetRating(2050)).toBe(1750);
+    expect(seasonResetRating(2200)).toBe(1900);
+    expect(seasonResetRating(2350)).toBe(2050);
+    expect(seasonResetRating(3400)).toBe(2199);
+  });
+
+  it("never drops a player more than one league, and never reorders players", () => {
+    let prev = -1;
+    for (let r = 0; r <= 3500; r++) {
+      const after = seasonResetRating(r);
+      expect(after).toBeGreaterThanOrEqual(prev);
+      prev = after;
+      const before = LEAGUES.indexOf(leagueForRating(r));
+      expect(LEAGUES.indexOf(leagueForRating(after))).toBeGreaterThanOrEqual(Math.max(0, before - 1));
+    }
   });
 });
 

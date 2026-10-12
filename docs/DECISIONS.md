@@ -92,3 +92,22 @@ Decisions made where the brief left room, or where a constraint forced a choice.
     bottom-right of their avatar (40 px and up; smaller avatars keep the league-coloured ring), and the
     home/profile headers show the league name and progress to the next league instead of "Lv n". XP and
     levels still exist in the data but are no longer shown on those screens.
+33. **Season rewards are actually paid.** At rollover every player with a ranked game gets their league's
+    coins *and* its cosmetic: Sharp, Odogwu and Oga frames, and the Agba Crown (a frame drawn with a crown).
+    These frames are not for sale; the shop shows "Finish a season in …" instead of a price.
+34. **Gentler season reset: nobody drops more than one league.** JJC is pulled halfway up to 1000,
+    Learner goes back to 1000, and Sharp and above move down exactly one league, keeping their place in
+    the band (Agba lands no higher than 2199, the top of Oga). The rule lives in `seasonResetRating`
+    (shared) with an equivalent SQL expression (`seasonResetSql`); a server test checks they agree for
+    every rating from 0 to 3600.
+35. **Season finishes are kept forever** in `season_results` (written before the reset) and shown as a
+    "Season finishes" row of league crests on the profile.
+36. **Question bank v2 (Oct 2026): ~1,720 questions across all 10 categories**, up from 600 in six. The
+    four dormant categories (Pidgin, Proverbs & Languages, Naija Life, Tech & Business) are now active.
+    The original 22 `in_review` questions were fact-checked: 17 promoted as-is, 5 corrected (an ambiguous
+    distractor, a disputed song credit, a wrong source) and promoted. About 90 new questions I was less
+    than certain of are seeded `in_review` for an editor to confirm in the admin CMS. Every source URL
+    resolves. The local server now re-runs the (idempotent) seed whenever `seed.sql` changes; the seed
+    can promote `in_review` → `live` and activate a category but never demotes or deactivates anything an
+    admin changed.
+

@@ -1,4 +1,4 @@
-import { q, u, W, type CategoryBank } from "./helpers";
+import { q, W, type CategoryBank } from "./helpers";
 
 export const nollywood: CategoryBank = {
   category: "nollywood",
@@ -95,7 +95,7 @@ export const nollywood: CategoryBank = {
     q(4, "Who won the very first season of Big Brother Nigeria in 2006?", ["Katung Aduwak", "Ebuka Obi-Uchendu", "Efe Ejeba", "Uti Nwachukwu"], "Katung later worked as a film director.", W + "Big_Brother_Nigeria_(season_1)"),
     q(4, "Who won Big Brother Naija season 6 'Shine Ya Eye' in 2021?", ["Whitemoney", "Liquorose", "Pere", "Cross"], "Whitemoney became known for cooking in the house.", W + "Big_Brother_Naija_(season_6)"),
     q(4, "Which 2017 Jadesola Osiberu romantic comedy is named after its lead character, a successful Lagosian?", ["Isoken", "Kemi", "Moremi", "Bisi"], "Dakore Egbuson-Akande played the title role.", W + "Isoken"),
-    u(4, "The 2018 EbonyLife comedy Chief Daddy is about a family fighting over what?", ["A billionaire's inheritance", "A chieftaincy title", "A lottery ticket", "A family house"], "Chief Daddy was produced by Mo Abudu's EbonyLife Films.", W + "Chief_Daddy"),
+    q(4, "The 2018 EbonyLife comedy Chief Daddy is about a family fighting over what?", ["A billionaire's inheritance", "A chieftaincy title", "A lottery ticket", "A family house"], "Chief Daddy was produced by Mo Abudu's EbonyLife Films.", W + "Chief_Daddy"),
     q(4, "Which Nollywood film follows three sisters who stumble on a stash of cash?", ["Sugar Rush", "Merry Men", "Isoken", "Breaded Life"], "Sugar Rush (2019) was directed by Kayode Kasum.", W + "Sugar_Rush_(2019_film)"),
     q(4, "Phone Swap (2012) is a comedy directed by?", ["Kunle Afolayan", "Obi Emelonye", "Tope Oshin", "Mildred Okwo"], "Two strangers accidentally swap phones at an airport.", W + "Phone_Swap"),
 
@@ -104,11 +104,11 @@ export const nollywood: CategoryBank = {
     q(5, "Which 1980s NTA soap opera was created by Lola Fani-Kayode?", ["Mirror in the Sun", "Ripples", "Checkmate", "Behind the Clouds"], "It is one of Nigeria's earliest TV soap operas.", W + "Mirror_in_the_Sun"),
     q(5, "Which Femi Adebayo film (2022) is also titled Ogundabede?", ["King of Thieves", "Jagun Jagun", "Agesinkole", "Ijakumo"], "The film is set in a Yoruba kingdom terrorised by a thief.", W + "King_of_Thieves_(2022_film)"),
     q(5, "Who directed Elesin Oba: The King's Horseman (2022)?", ["Biyi Bandele", "Tunde Kelani", "Kunle Afolayan", "Femi Odugbemi"], "It premiered at the Toronto International Film Festival.", W + "Biyi_Bandele"),
-    u(5, "In which newspaper was the word 'Nollywood' reportedly popularised in 2002?", ["The New York Times", "The Guardian (Lagos)", "The Washington Post", "BBC Focus on Africa"], "A 2002 article by Norimitsu Onishi helped popularise the term.", W + "Nollywood"),
-    u(5, "According to a 2009 UNESCO report, Nollywood ranked where in the world by number of films produced?", ["Second", "First", "Third", "Fifth"], "Only India's industry produced more films in that survey.", W + "Nollywood"),
+    q(5, "In which newspaper was the word 'Nollywood' reportedly popularised in 2002?", ["The New York Times", "The Guardian (Lagos)", "The Washington Post", "BBC Focus on Africa"], "A 2002 article by Norimitsu Onishi helped popularise the term.", W + "Nollywood"),
+    q(5, "According to a 2009 UNESCO report, Nollywood ranked where in the world by number of films produced?", ["Second", "First", "Third", "Fifth"], "Only India's industry produced more films in that survey.", W + "Nollywood"),
     q(5, "Which Wale Adenuga sitcom features the characters Ajasco and Pa James?", ["Papa Ajasco", "Super Story", "Ikebe Super", "This Life"], "It started as a comic strip before becoming a TV show.", W + "Papa_Ajasco"),
     q(5, "Who won Big Brother Naija season 7 'Level Up' in 2022?", ["Phyna", "Bella", "Daniella", "Bryann"], "Phyna is from Edo State.", W + "Big_Brother_Naija_(season_7)"),
-    u(5, "Who won Big Brother Naija All Stars in 2023?", ["Ilebaye", "Mercy Eke", "Cee-C", "Whitemoney"], "The All Stars edition brought back former housemates.", W + "Big_Brother_Naija_(season_8)"),
+    q(5, "Who won Big Brother Naija All Stars in 2023?", ["Ilebaye", "Mercy Eke", "Cee-C", "Whitemoney"], "The All Stars edition brought back former housemates.", W + "Big_Brother_Naija_(season_8)"),
     q(5, "Which 2023 Netflix series is set in a Lagos shanty town and stars Chidi Mokeme?", ["Shanty Town", "Far From Home", "Smoke and Mirrors", "Castle & Castle"], "Shanty Town premiered in January 2023.", W + "Shanty_Town_(TV_series)"),
     q(5, "Which 2022 Netflix series follows a poor teenager who gets a scholarship to an elite school?", ["Far From Home", "Blood Sisters", "Shanty Town", "Castle & Castle"], "Far From Home stars Mike Afolarin.", W + "Far_From_Home_(TV_series)"),
     q(5, "Which Wole Soyinka play was first staged in 1975 and is based on real events in Oyo in 1946?", ["Death and the King's Horseman", "The Lion and the Jewel", "Kongi's Harvest", "The Trials of Brother Jero"], "Soyinka won the Nobel Prize in Literature in 1986.", W + "Death_and_the_King%27s_Horseman"),

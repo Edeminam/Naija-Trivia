@@ -56,7 +56,7 @@ export default function Leagues() {
             <View className="h-11 w-11 items-center justify-center rounded-xl bg-accent-soft"><Icon as={CalendarClock} tone="accent" /></View>
             <View className="flex-1">
               <Txt variant="bodyStrong">Season ends in <Txt variant="bodyStrong" tabular>{text}</Txt></Txt>
-              <Txt variant="caption" tone="muted">Rewards pay out for your league at the end. Ratings then soft-reset halfway to 1000.</Txt>
+              <Txt variant="caption" tone="muted">Rewards pay out for your league at the end, and your finish is kept on your profile. Then everyone drops at most one league.</Txt>
             </View>
           </Card>
 

@@ -29,7 +29,7 @@ That starts three things:
 
 | | URL | Notes |
 |---|---|---|
-| Game server | http://localhost:2567 | Embedded Postgres (PGlite) in `apps/server/.data`; migrations + 600 questions load on first boot. In-memory matchmaking. |
+| Game server | http://localhost:2567 | Embedded Postgres (PGlite) in `apps/server/.data`; migrations apply on boot and the question seed reloads whenever it changes. In-memory matchmaking. |
 | Mobile app (Expo) | http://localhost:8081 | Press `w` for web, `i`/`a` for simulators, or scan the QR with a development build. |
 | Admin | http://localhost:3000 | Click **Sign in as local admin**. |
 
@@ -68,7 +68,7 @@ The app finds the server on the same machine automatically (`<metro host>:2567`)
 ```bash
 pnpm test                                # everything below
 pnpm --filter @ntc/shared test           # scoring, Elo, matchmaking widening, question selection, deadlines, leagues, time
-pnpm --filter @ntc/content test          # 600 questions: schema, counts, duplicates, difficulty spread
+pnpm --filter @ntc/content test          # question bank: schema, counts, duplicates, difficulty spread
 pnpm --filter @ntc/server test           # e2e: two clients play a full ranked match; bot fallback; late-answer rejection
 pnpm --filter @ntc/mobile test           # React Native Testing Library: AnswerButton, Button, CircularTimer, phone parsing
 pnpm --filter @ntc/admin test:e2e        # Playwright smoke: sign in → create → search → CSV import → approve

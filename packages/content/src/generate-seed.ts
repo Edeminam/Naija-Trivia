@@ -23,10 +23,10 @@ const lines: string[] = [
   STATES.map((s) => `  (${lit(s.code)}, ${lit(s.name)}, ${lit(s.region)})`).join(",\n") +
     "\non conflict (code) do update set name = excluded.name, region = excluded.region;",
   "",
-  "-- Categories (the four without seeded questions start inactive)",
+  "-- Categories (ones without seeded questions start inactive; seeding never deactivates one)",
   "insert into categories (id, slug, name, icon, tint, sort, active) values",
   CATEGORIES.map((c, i) => `  (${lit(catId(c.slug))}, ${lit(c.slug)}, ${lit(c.name)}, ${lit(c.icon)}, ${lit(c.tint)}, ${i}, ${seeded.has(c.slug)})`).join(",\n") +
-    "\non conflict (slug) do update set name = excluded.name, icon = excluded.icon, tint = excluded.tint, sort = excluded.sort;",
+    "\non conflict (slug) do update set name = excluded.name, icon = excluded.icon, tint = excluded.tint, sort = excluded.sort, active = categories.active or excluded.active;",
   "",
   "-- Avatars",
   "insert into avatars (id, name, skin, bg, accent, hair) values",
@@ -55,7 +55,8 @@ for (let i = 0; i < questions.length; i += 100) {
           `  (${lit(q.id)}, ${lit(catId(q.category))}, ${lit(q.text)}, ${lit(JSON.stringify(q.options))}::jsonb, ${q.correctIndex}, ${q.difficulty}, ${lit(q.fact)}, ${lit(q.sourceUrl)}, '${q.status}')`,
       )
       .join(",\n") +
-      "\non conflict (id) do update set text = excluded.text, options = excluded.options, correct_index = excluded.correct_index, difficulty = excluded.difficulty, fact = excluded.fact, source_url = excluded.source_url;",
+      "\non conflict (id) do update set text = excluded.text, options = excluded.options, correct_index = excluded.correct_index, difficulty = excluded.difficulty, fact = excluded.fact, source_url = excluded.source_url,\n" +
+      "  status = case when questions.status = 'in_review' and excluded.status = 'live' then 'live' else questions.status end;",
     "",
   );
 }

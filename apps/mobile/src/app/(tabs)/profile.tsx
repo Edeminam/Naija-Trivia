@@ -153,6 +153,30 @@ export default function Profile() {
             )}
           </Card>
 
+          <SectionTitle title="Season finishes" />
+          <Card className="p-4">
+            {/* Cached stats from before season history existed have no `seasons`. */}
+            {!s.seasons?.length ? (
+              <View className="flex-row items-center gap-3">
+                <LeagueBadge league="jjc" size={40} />
+                <Txt variant="caption" tone="muted" className="flex-1">When this season ends, the league you finish in is kept here for good (one ranked match is enough to count).</Txt>
+              </View>
+            ) : (
+              <View className="flex-row flex-wrap gap-3">
+                {s.seasons.map((r) => {
+                  const l = LEAGUES.find((x) => x.id === r.league) ?? LEAGUES[0]!;
+                  return (
+                    <View key={r.season} className="items-center gap-1 w-[30%]" accessibilityLabel={`Season ${r.season}: finished in ${l.name} at ${r.rating}`}>
+                      <LeagueBadge league={r.league} size={44} />
+                      <Txt variant="caption" className="text-center" numberOfLines={1}>{l.name}</Txt>
+                      <Txt variant="overline" tone="muted">Season {r.season}</Txt>
+                    </View>
+                  );
+                })}
+              </View>
+            )}
+          </Card>
+
           <SectionTitle title="Last 20 matches" />
           <Card className="px-4">
             {s.history.length === 0 ? (

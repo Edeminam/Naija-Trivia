@@ -127,15 +127,17 @@ export interface LeagueDef {
   color: string;
   reward: string;
   rewardCoins: number;
+  /** Cosmetic granted to everyone who finishes a season in this league */
+  rewardCosmetic?: string;
 }
 
 export const LEAGUES: readonly LeagueDef[] = [
   { id: "jjc", name: "JJC", min: 0, max: 1000, color: "#8C9A93", reward: "50 coins", rewardCoins: 50 },
   { id: "learner", name: "Learner", min: 1000, max: 1300, color: "#4FB3FF", reward: "150 coins", rewardCoins: 150 },
-  { id: "sharp", name: "Sharp", min: 1300, max: 1600, color: "#0FA958", reward: "300 coins + Sharp frame", rewardCoins: 300 },
-  { id: "odogwu", name: "Odogwu", min: 1600, max: 1900, color: "#C77DFF", reward: "500 coins + Odogwu frame", rewardCoins: 500 },
-  { id: "oga", name: "Oga at the Top", min: 1900, max: 2200, color: "#E8B44A", reward: "800 coins + Oga frame", rewardCoins: 800 },
-  { id: "agba", name: "Agba", min: 2200, max: null, color: "#FF5E5B", reward: "1,500 coins + Agba crown", rewardCoins: 1500 },
+  { id: "sharp", name: "Sharp", min: 1300, max: 1600, color: "#0FA958", reward: "300 coins + Sharp frame", rewardCoins: 300, rewardCosmetic: "frame_sharp" },
+  { id: "odogwu", name: "Odogwu", min: 1600, max: 1900, color: "#C77DFF", reward: "500 coins + Odogwu frame", rewardCoins: 500, rewardCosmetic: "frame_odogwu" },
+  { id: "oga", name: "Oga at the Top", min: 1900, max: 2200, color: "#E8B44A", reward: "800 coins + Oga frame", rewardCoins: 800, rewardCosmetic: "frame_oga" },
+  { id: "agba", name: "Agba", min: 2200, max: null, color: "#FF5E5B", reward: "1,500 coins + Agba crown", rewardCoins: 1500, rewardCosmetic: "frame_agba" },
 ] as const;
 
 // ── Power-ups ──────────────────────────────────────────────────────────────
@@ -214,6 +216,10 @@ export interface CosmeticDef {
   cost: number;
   colors: [string, string];
   premiumOnly?: boolean;
+  /** Not for sale: granted for finishing a season in this league */
+  leagueReward?: LeagueId;
+  /** Drawn with a crown on top of the avatar */
+  crown?: boolean;
 }
 
 export const COSMETICS: readonly CosmeticDef[] = [
@@ -221,6 +227,10 @@ export const COSMETICS: readonly CosmeticDef[] = [
   { id: "frame_eko", kind: "frame", name: "Eko Nights", cost: 600, colors: ["#4FB3FF", "#C77DFF"] },
   { id: "frame_greenwhite", kind: "frame", name: "Green-White", cost: 500, colors: ["#0FA958", "#F4F6F5"] },
   { id: "frame_premium", kind: "frame", name: "Premium Gold", cost: 0, colors: ["#E8B44A", "#FFF1C9"], premiumOnly: true },
+  { id: "frame_sharp", kind: "frame", name: "Sharp", cost: 0, colors: ["#0FA958", "#7CF0B5"], leagueReward: "sharp" },
+  { id: "frame_odogwu", kind: "frame", name: "Odogwu", cost: 0, colors: ["#C77DFF", "#F0D4FF"], leagueReward: "odogwu" },
+  { id: "frame_oga", kind: "frame", name: "Oga at the Top", cost: 0, colors: ["#E8B44A", "#FF9F43"], leagueReward: "oga" },
+  { id: "frame_agba", kind: "frame", name: "Agba Crown", cost: 0, colors: ["#FF5E5B", "#FFD166"], leagueReward: "agba", crown: true },
   { id: "btn_midnight", kind: "button_theme", name: "Midnight", cost: 300, colors: ["#1C2420", "#2A3530"] },
   { id: "btn_jollof", kind: "button_theme", name: "Jollof", cost: 450, colors: ["#3A1D12", "#5A2A16"] },
   { id: "btn_indigo", kind: "button_theme", name: "Adire Indigo", cost: 450, colors: ["#141B3A", "#1E2A5A"] },

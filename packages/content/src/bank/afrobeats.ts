@@ -1,4 +1,4 @@
-import { q, u, W, type CategoryBank } from "./helpers";
+import { q, W, type CategoryBank } from "./helpers";
 
 export const afrobeats: CategoryBank = {
   category: "afrobeats",
@@ -85,7 +85,7 @@ export const afrobeats: CategoryBank = {
     q(4, "Who won the first Grammy for Best African Music Performance in 2024?", ["Tyla", "Burna Boy", "Davido", "Ayra Starr"], "Tyla, from South Africa, won with 'Water'.", W + "Grammy_Award_for_Best_African_Music_Performance"),
     q(4, "Burna Boy's 2018 hit 'Ye' appeared on which album?", ["Outside", "African Giant", "L.I.F.E", "Redemption"], "Many listeners confused it with Kanye West's album 'Ye' released the same year.", W + "Ye_(Burna_Boy_song)"),
     q(4, "Davido's debut album, released in 2012, is titled?", ["Omo Baba Olowo", "A Good Time", "Son of Mercy", "The Baddest"], "The title means 'son of a rich man' in Yoruba.", W + "Omo_Baba_Olowo"),
-    q(4, "Wande Coal's debut album (2009) is titled?", ["Mushin 2 Mo'Hits", "Wanted", "Realms", "Black Diamond"], "It is often ranked among the best Nigerian albums of its decade.", W + "Mushin_2_Mo%27Hits"),
+    q(4, "Wande Coal's debut album (2009) is titled?", ["Mushin 2 Mo'Hits", "Wanted", "Realms", "Black Diamond"], "It is often ranked among the best Nigerian albums of its decade.", W + "Wande_Coal"),
     q(4, "9ice's 2008 album featuring 'Gongo Aso' is called?", ["Gongo Aso", "Tradition", "Certificate", "Bashorun Gaa"], "Gongo Aso won multiple Headies awards.", W + "9ice"),
     q(4, "Which highlife musician recorded 'Baby Jowo'?", ["Victor Olaiya", "Bobby Benson", "Rex Lawson", "E.T. Mensah"], "Olaiya was known as 'the Evil Genius of Highlife'.", W + "Victor_Olaiya"),
     q(4, "Christy Essien-Igbokwe was known by which title?", ["Lady of Songs", "Mama Africa", "Queen of Highlife", "Golden Voice"], "Her hits include 'Seun Rere'.", W + "Christy_Essien-Igbokwe"),
@@ -95,8 +95,8 @@ export const afrobeats: CategoryBank = {
     q(4, "The ogene is an Igbo instrument made of…", ["Metal (it is a gong/bell)", "Clay", "Gourd and beads", "Animal skin"], "It is struck with a stick to keep the beat.", W + "Ogene"),
     q(4, "Which Kcee song popularised the 'Ojapiano' sound in 2023?", ["Ojapiano", "Limpopo", "Pullover", "Erima"], "It blends amapiano with the Igbo oja flute.", W + "Kcee"),
     q(4, "The 'Zanku' (Legwork) dance was popularised by which artist?", ["Zlatan", "Naira Marley", "Poco Lee", "Olamide"], "Zanku took over parties and social media in 2018–2019.", W + "Zlatan_(musician)"),
-    u(4, "In 2018 Tiwa Savage became the first woman to win which award?", ["MTV EMA Best African Act", "BET Best International Act", "Grammy Best World Music", "Headies Next Rated"], "She won it at the MTV Europe Music Awards in Bilbao.", W + "Tiwa_Savage"),
-    u(4, "Iyanya rose to fame after winning which TV talent show in 2008?", ["MTN Project Fame West Africa", "Nigerian Idol", "The Voice Nigeria", "Star Quest"], "His later hit 'Kukere' made him a household name.", W + "Iyanya"),
+    q(4, "In 2018 Tiwa Savage became the first woman to win which award?", ["MTV EMA Best African Act", "BET Best International Act", "Grammy Best World Music", "Headies Next Rated"], "She won it at the MTV Europe Music Awards in Bilbao.", W + "Tiwa_Savage"),
+    q(4, "Iyanya rose to fame after winning which TV talent show in 2008?", ["MTN Project Fame West Africa", "Nigerian Idol", "The Voice Nigeria", "Star Quest"], "His later hit 'Kukere' made him a household name.", W + "Iyanya"),
     q(4, "Davido's hit 'If' (2017) was produced by which artist?", ["Tekno", "Kiddominant", "Shizzi", "Sarz"], "Tekno is also a singer known for 'Pana'.", W + "If_(Davido_song)"),
 
     // ── Difficulty 5 ──────────────────────────────────────────────────────
@@ -105,12 +105,12 @@ export const afrobeats: CategoryBank = {
     q(5, "'Sawale' is a classic by which Kalabari highlife star?", ["Cardinal Rex Lawson", "Celestine Ukwu", "Oliver De Coque", "Prince Nico Mbarga"], "Rex Lawson was one of the biggest highlife stars of the 1960s.", W + "Rex_Lawson"),
     q(5, "Prince Nico Mbarga's 1976 highlife hit, one of Africa's best-selling singles, is?", ["Sweet Mother", "Joromi", "Osondi Owendi", "Ijele"], "Mbarga was of Nigerian-Cameroonian parentage.", W + "Sweet_Mother"),
     q(5, "King Sunny Adé's 1983 album 'Synchro System' earned what?", ["A Grammy nomination", "A Brit Award", "A Mercury Prize", "An Oscar nomination"], "He was among the first Africans nominated for a Grammy.", W + "King_Sunny_Ad%C3%A9"),
-    u(5, "Which apala legend is famed for songs like 'Pansa Pansa'?", ["Haruna Ishola", "Ayinla Omowura", "Yusuf Olatunji", "Dauda Epo-Akara"], "Haruna Ishola was one of apala's biggest stars.", W + "Haruna_Ishola"),
+    q(4, "Which Ibadan-born musician is widely called the father of apala music?", ["Haruna Ishola", "Ayinla Omowura", "Yusuf Olatunji", "Dauda Epo-Akara"], "He gave the genre the name apala in the 1940s.", W + "Haruna_Ishola"),
     q(5, "Mr Eazi coined which term for his blend of Ghanaian and Nigerian sounds?", ["Banku music", "Afro-fusion", "Afro-swing", "Afro-soul"], "Mr Eazi also founded the emPawa Africa talent programme.", W + "Mr_Eazi"),
     q(5, "Burna Boy describes his own musical style as?", ["Afro-fusion", "Afro-swing", "Banku", "Afro-rave"], "He blends Afrobeats, dancehall, reggae and hip hop.", W + "Burna_Boy"),
     q(5, "Rema calls his signature sound?", ["Afro-rave", "Afro-fusion", "Afro-life", "Afro-trap"], "His debut album is Rave & Roses.", W + "Rema_(musician)"),
     q(5, "Which Nigerian singer's 2010 debut 'Victim of Truth' includes 'Heartbeat'?", ["Nneka", "Asa", "Omawumi", "Waje"], "Nneka was born in Warri to a Nigerian father and German mother.", W + "Nneka_(singer)"),
-    u(5, "The spelling 'Afrobeats' (with an s) was popularised around 2011 by which UK DJ?", ["DJ Abrantee", "DJ Edu", "DJ Spinall", "Tim Westwood"], "The plural name covers a broader pop sound than Fela's Afrobeat.", W + "Afrobeats"),
+    q(5, "The spelling 'Afrobeats' (with an s) was popularised around 2011 by which UK DJ?", ["DJ Abrantee", "DJ Edu", "DJ Spinall", "Tim Westwood"], "The plural name covers a broader pop sound than Fela's Afrobeat.", W + "Afrobeats"),
     q(5, "Celestine Ukwu, celebrated for philosophical lyrics, played which genre?", ["Highlife", "Jùjú", "Fuji", "Apala"], "Celestine Ukwu was a leading Igbo highlife musician of the 1960s and 70s.", W + "Celestine_Ukwu"),
   ],
 };

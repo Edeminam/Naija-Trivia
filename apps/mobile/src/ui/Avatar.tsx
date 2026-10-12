@@ -148,6 +148,14 @@ export function Avatar({
           </G>
         </Svg>
       </View>
+      {frame?.crown && size >= 32 ? (
+        <View pointerEvents="none" style={{ position: "absolute", left: size * 0.3, top: -size * 0.2, width: size * 0.4, height: size * 0.28 }}>
+          <Svg width="100%" height="100%" viewBox="0 0 100 70">
+            <Path d="M8 62 L4 16 L30 36 L50 4 L70 36 L96 16 L92 62 Z" fill={frame.colors[1]} stroke={frame.colors[0]} strokeWidth={6} strokeLinejoin="round" />
+            <Circle cx={50} cy={44} r={7} fill={frame.colors[0]} />
+          </Svg>
+        </View>
+      ) : null}
       {stateCode ? (
         <View
           className="absolute rounded-chip bg-surface border border-line px-1.5"

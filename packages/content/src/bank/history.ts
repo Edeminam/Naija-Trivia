@@ -1,4 +1,4 @@
-import { q, u, W, type CategoryBank } from "./helpers";
+import { q, W, type CategoryBank } from "./helpers";
 
 export const history: CategoryBank = {
   category: "history",
@@ -28,7 +28,7 @@ export const history: CategoryBank = {
     // ── Difficulty 2 ──────────────────────────────────────────────────────
     q(2, "In which year did Nigeria become a republic?", ["1963", "1960", "1966", "1979"], "Nigeria became a republic on 1 October 1963.", W + "First_Nigerian_Republic"),
     q(2, "In which year were the Northern and Southern Protectorates amalgamated?", ["1914", "1900", "1960", "1861"], "The amalgamation took effect on 1 January 1914.", W + "Amalgamation_of_Northern_and_Southern_Nigeria"),
-    q(2, "Who wrote the Nigerian National Pledge?", ["Felicia Adebola Adeyoyin", "Lillian Jean Williams", "Benedict Odiase", "Taiwo Akinkunmi"], "She wrote it in 1976.", W + "Nigerian_National_Pledge"),
+    q(2, "Who wrote the Nigerian National Pledge?", ["Felicia Adebola Adeyoyin", "Lillian Jean Williams", "Benedict Odiase", "Taiwo Akinkunmi"], "She wrote it in 1976.", W + "Nigeria"),
     q(2, "Who wrote the lyrics of 'Nigeria, We Hail Thee'?", ["Lillian Jean Williams", "Frances Berda", "Felicia Adeyoyin", "Benedict Odiase"], "Frances Berda composed the music.", W + "Nigeria,_We_Hail_Thee"),
     q(2, "Which anthem was used from 1978 to 2024?", ["Arise, O Compatriots", "Nigeria, We Hail Thee", "God Bless Nigeria", "Land of Unity"], "Its music was composed by the Nigeria Police Band under Benedict Odiase.", W + "Arise,_O_Compatriots"),
     q(2, "Who was the first Premier of the Northern Region?", ["Ahmadu Bello", "Abubakar Tafawa Balewa", "Aminu Kano", "Muhammadu Ribadu"], "He held the title Sardauna of Sokoto.", W + "Ahmadu_Bello"),
@@ -97,7 +97,7 @@ export const history: CategoryBank = {
     q(4, "Samuel Ajayi Crowther was the first African to become what?", ["An Anglican bishop", "A medical doctor", "A colonial governor", "A university professor"], "He was consecrated bishop in 1864.", W + "Samuel_Ajayi_Crowther"),
     q(4, "Kainji Dam, completed in 1968, is on which river?", ["Niger", "Benue", "Kaduna", "Sokoto"], "It was one of Nigeria's first large hydroelectric projects.", W + "Kainji_Dam"),
     q(4, "Margaret Ekpo is remembered as a pioneer of what?", ["Women's political participation", "Nigerian highlife", "Female aviation", "Nollywood film"], "Calabar's airport is named after her.", W + "Margaret_Ekpo"),
-    u(4, "Nigeria's 2006 national census counted roughly how many people?", ["140 million", "88 million", "200 million", "115 million"], "No full national census has been held since 2006.", W + "Demographics_of_Nigeria"),
+    q(4, "Nigeria's 2006 national census counted roughly how many people?", ["140 million", "88 million", "200 million", "115 million"], "No full national census has been held since 2006.", W + "Demographics_of_Nigeria"),
 
     // ── Difficulty 5 ──────────────────────────────────────────────────────
     q(5, "When did Lugard's Protectorate of Northern Nigeria begin?", ["1900", "1885", "1914", "1861"], "Lugard was its first High Commissioner.", W + "Northern_Nigeria_Protectorate"),

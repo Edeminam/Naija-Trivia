@@ -77,6 +77,7 @@ export async function buyItem(sql: Sql, userId: string, raw: unknown) {
     const c = COSMETICS.find((x) => x.id === body.itemId);
     if (!c) throw new HttpError(404, "Unknown item");
     if (c.premiumOnly) throw new HttpError(403, "This frame is included with Premium.", "premium_only");
+    if (c.leagueReward) throw new HttpError(403, "This frame is earned by finishing a season in its league.", "league_reward");
     const has = await tx.one("select 1 from inventory where user_id = $1 and item_id = $2 and quantity > 0", [userId, c.id]);
     if (has) throw new HttpError(409, "You already own this.");
     const paid = await tx.one("update profiles set coins = coins - $2 where id = $1 and coins >= $2 returning coins", [userId, c.cost]);

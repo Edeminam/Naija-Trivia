@@ -2,7 +2,7 @@ import { useState } from "react";
 import { View } from "react-native";
 import { POWER_UP_ICONS as PU_ICON } from "../../features/icons";
 import { Crown, Check, PlayCircle, ShieldCheck, Sparkles, Gift, Infinity as InfinityIcon, Ban, Ticket } from "lucide-react-native";
-import { type ProductId } from "@ntc/shared";
+import { LEAGUES, type ProductId } from "@ntc/shared";
 import { Screen, SectionTitle, Txt, Card, Button, CoinCounter, CoinIcon, Avatar, Icon, BottomSheet, Segmented, Chip, Skeleton, SkeletonCard, ErrorState, toast } from "../../ui";
 import { useShop, useBuyItem, useEquip, useShopRefresh, type ShopData } from "../../features/shop/api";
 import { purchases } from "../../features/shop/PurchaseService";
@@ -208,6 +208,8 @@ export default function Shop() {
                       <Button label={equipped ? "Equipped" : "Equip"} icon={equipped ? Check : undefined} size="sm" variant={equipped ? "ghost" : "secondary"} full disabled={equipped} onPress={() => equip.mutate({ frameId: c.id }, { onSuccess: () => toast.success("Frame equipped") })} />
                     ) : c.premiumOnly ? (
                       <Chip label="Premium" icon={Crown} tone="accent" />
+                    ) : c.leagueReward ? (
+                      <Txt variant="caption" tone="muted" className="text-center">Finish a season in {LEAGUES.find((l) => l.id === c.leagueReward)?.name}</Txt>
                     ) : (
                       <Button label={`${c.cost}`} size="sm" variant="secondary" full disabled={coins < c.cost} onPress={() => buyItem("cosmetic", c.id, c.name)} />
                     )}

@@ -1,4 +1,4 @@
-import { q, u, W, type CategoryBank } from "./helpers";
+import { q, W, type CategoryBank } from "./helpers";
 
 const NC = W + "Nigerian_cuisine";
 
@@ -74,7 +74,7 @@ export const food: CategoryBank = {
     q(3, "Scent leaf is called 'efirin' in Yoruba. What is its common English plant name?", ["African basil", "Mint", "Bay leaf", "Coriander"], "In Igbo it's nchanwu; in Hausa, daidoya.", W + "Ocimum_gratissimum"),
     q(3, "Uziza seeds and leaves are a type of…", ["Pepper", "Ginger", "Garlic", "Onion"], "Uziza adds peppery heat to soups like ofe nsala.", W + "Piper_guineense"),
     q(3, "Ehuru is better known in English as…", ["Calabash nutmeg", "Black pepper", "Cinnamon", "Cloves"], "It's toasted and ground for pepper soup.", W + "Monodora_myristica"),
-    u(3, "Which state is Nigeria's leading cocoa producer?", ["Ondo", "Oyo", "Cross River", "Ekiti"], "Cocoa was a key cash crop of the old Western Region.", W + "Ondo_State"),
+    q(3, "Which state is Nigeria's leading cocoa producer?", ["Ondo", "Oyo", "Cross River", "Ekiti"], "Cocoa was a key cash crop of the old Western Region.", W + "Ondo_State"),
     q(3, "Kano was famous in the 1960s for pyramids made of what?", ["Groundnut sacks", "Cotton bales", "Cocoa bags", "Rice sacks"], "The groundnut pyramids were a symbol of northern agriculture.", W + "Groundnut_pyramids"),
     q(3, "Stockfish, used in many Nigerian soups, is mostly imported from which country?", ["Norway", "Japan", "Portugal", "Morocco"], "Stockfish is cod that is air-dried in the cold.", W + "Stockfish"),
     q(3, "Ofada rice is named after a town in which state?", ["Ogun", "Lagos", "Oyo", "Ondo"], "It's a local, unpolished rice with a strong aroma.", W + "Ofada_rice"),
@@ -99,7 +99,7 @@ export const food: CategoryBank = {
     q(4, "Garden egg is a type of…", ["Eggplant", "Egg", "Tomato", "Potato"], "Garden eggs are often eaten raw with peanut butter.", W + "Solanum_aethiopicum"),
     q(4, "Ijebu garri is known for being…", ["White, fine and sour", "Yellow and sweet", "Coarse and red", "Smoked and brown"], "Yellow garri gets its colour from palm oil.", W + "Garri"),
     q(4, "The Igbo New Yam festival is called…", ["Iri Ji", "Ofala", "Igue", "Eyo"], "It marks the end of the farming season.", W + "New_Yam_Festival_of_the_Igbo"),
-    u(4, "Which Edo dish is called 'black soup' (omoebe)?", ["A dark herbal leaf soup", "Burnt-pot jollof", "Smoked fish stew", "Charcoal-roasted yam"], "It gets its dark colour from blended bitter leaf, scent leaf and uziza.", NC),
+    q(4, "Which Edo dish is called 'black soup' (omoebe)?", ["A dark herbal leaf soup", "Burnt-pot jollof", "Smoked fish stew", "Charcoal-roasted yam"], "It gets its dark colour from blended bitter leaf, scent leaf and uziza.", NC),
 
     // ── Difficulty 5 ──────────────────────────────────────────────────────
     q(5, "Afang leaves come from which climbing plant?", ["Gnetum africanum", "Telfairia occidentalis", "Talinum triangulare", "Vernonia amygdalina"], "Afang is widely harvested from forests in the south.", W + "Gnetum_africanum"),

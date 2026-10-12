@@ -287,6 +287,8 @@ export interface ProfileStatsResponse {
   categories: CategoryStat[];
   badges: { slug: CategorySlug; tier: "bronze" | "silver" | "gold" }[];
   history: MatchHistoryItem[];
+  /** Finished seasons, newest first */
+  seasons: { season: number; league: LeagueId; rating: number }[];
 }
 
 // ── Shop ───────────────────────────────────────────────────────────────────

@@ -6,9 +6,15 @@ import { football } from "./bank/football";
 import { history } from "./bank/history";
 import { geography } from "./bank/geography";
 import { food } from "./bank/food";
+import { pidgin } from "./bank/pidgin";
+import { proverbs } from "./bank/proverbs";
+import { naijaLife } from "./bank/naija-life";
+import { techBusiness } from "./bank/tech-business";
+import { MORE } from "./bank/more";
 
 export type { CategoryBank, Seed };
-export const BANKS: CategoryBank[] = [nollywood, afrobeats, football, history, geography, food];
+/** The original 100-question banks plus later additions (bank/more), merged per category. */
+export const BANKS: CategoryBank[] = [nollywood, afrobeats, football, history, geography, food, pidgin, proverbs, naijaLife, techBusiness].map((b) => ({ ...b, questions: [...b.questions, ...(MORE[b.category] ?? [])] }));
 
 /** Stable UUID derived from a string (sha1-based, v5-style layout). */
 export function stableUuid(input: string): string {

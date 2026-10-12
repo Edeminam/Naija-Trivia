@@ -32,7 +32,7 @@ import { dailyStatus, getStreak, startDaily, dailyTable, completeDaily, ensureDa
 import { serveNext, submitAnswer } from "../repo/solo";
 import { createChallenge, challengeSummary, startChallenge, challengeTable, completeChallenge, getChallengeRow } from "../repo/challenges";
 import { stateWars, stateTopPlayers, dailyBoard } from "../repo/leaderboards";
-import { currentSeason } from "../repo/seasons";
+import { currentSeason, seasonHistory } from "../repo/seasons";
 import { purchaseProduct, buyItem, equipItem, shopCatalog } from "../repo/shop";
 import { notifyChallengeResult } from "../services/notifications";
 import { analytics } from "../services/analytics";
@@ -337,6 +337,7 @@ player.get(
       categories,
       badges: categories.map((c) => ({ slug: c.slug, tier: badgeTier(c) })).filter((b): b is { slug: CategorySlug; tier: "bronze" | "silver" | "gold" } => !!b.tier),
       history,
+      seasons: await seasonHistory(sql, id),
     };
     return res;
   }),
