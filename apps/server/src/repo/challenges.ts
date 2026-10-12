@@ -8,8 +8,8 @@ import { env } from "../env";
 import type { SoloTable } from "./solo";
 import { checkAchievements } from "./achievements";
 
-/** Free players get 3 open challenges per day; Premium is unlimited. */
-export const FREE_CHALLENGES_PER_DAY = 3;
+/** Free players can send 2 challenges per 24 hours (direct ones included); Premium is unlimited. */
+export const FREE_CHALLENGES_PER_DAY = 2;
 const ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
 
 function makeCode() {

@@ -223,3 +223,14 @@ describe("Premium perks", () => {
     expect(await getStreak(sql, prem, "2026-03-09")).toMatchObject({ freezesLeft: 2 });
   });
 });
+
+describe("free challenge limit", () => {
+  it("lets free players send 2 challenges a day, Premium unlimited", async () => {
+    const free = await player("lim_free");
+    await createChallenge(sql, free);
+    await createChallenge(sql, free);
+    await expect(createChallenge(sql, free)).rejects.toThrow(/2 challenges a day/);
+    await sql.query("update profiles set premium_until = now() + interval '30 days' where id = $1", [free]);
+    await expect(createChallenge(sql, free)).resolves.toBeTruthy();
+  });
+});
