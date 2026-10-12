@@ -14,7 +14,7 @@ import type { Sql, Row } from "../db";
 
 export const PROFILE_COLUMNS = `id, username, avatar_id, state_code, level, xp, coins, rating, league, ranked_games, wins, losses, draws,
   premium_until, is_guest, is_admin, guest_match_used, frame_id, button_theme_id, settings, push_token,
-  free_powerup_date::text as free_powerup_date, chest_date::text as chest_date, matches_since_ad, created_at`;
+  free_powerup_date::text as free_powerup_date, chest_date::text as chest_date, first_win_date::text as first_win_date, matches_since_ad, created_at`;
 
 export function toPublic(r: Row): PublicProfile {
   return {

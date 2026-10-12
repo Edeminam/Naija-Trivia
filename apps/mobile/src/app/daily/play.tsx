@@ -34,7 +34,8 @@ export default function DailyPlay() {
           title="Daily"
           onFinished={(last) => {
             const rw = last?.rewards;
-            if (rw) toast.success(`+${rw.coins} coins · ${rw.streak.current}-day streak 🔥`, rw.streak.usedFreeze ? "Your weekly freeze saved the streak." : "See you tomorrow!");
+            if (rw?.milestone) toast.success(`${rw.milestone.days}-day streak! +${rw.coins} coins 🔥`, `Includes a +${rw.milestone.coins} streak bonus. Keep it going!`);
+            else if (rw) toast.success(`+${rw.coins} coins · ${rw.streak.current}-day streak 🔥`, rw.streak.usedFreeze ? (rw.streak.freezesUsed > 1 ? `${rw.streak.freezesUsed} freezes saved the streak.` : "A freeze saved the streak.") : "See you tomorrow!");
             void qc.invalidateQueries();
             if (usePrefs.getState().notifications) void scheduleDailyReminders(true).catch(() => {});
             router.replace({ pathname: "/daily", params: { done: "1" } });

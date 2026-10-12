@@ -10,6 +10,7 @@ import { useSession } from "../../../stores/session";
 import { useMe } from "../../../features/me";
 import { playAsGuest } from "../../../features/auth";
 import { useCountdown } from "../../../lib/useCountdown";
+import { FriendButton } from "../../../features/friends/FriendButton";
 import { cn } from "../../../lib/cn";
 import type { ApiError } from "../../../lib/api";
 
@@ -75,6 +76,7 @@ export default function ChallengeLanding() {
                   {stateByCode(c.createdBy.stateCode)?.name} · {c.createdBy.rating} rating
                 </Txt>
               </View>
+              {token && !isCreator && !me.data?.profile.isGuest ? <FriendButton id={c.createdBy.id} name={c.createdBy.username} /> : null}
               <View className="flex-row flex-wrap justify-center gap-2">
                 {c.categories.map((s) => <Chip key={s} label={categoryBySlug(s)?.name ?? s} tone="primary" />)}
               </View>

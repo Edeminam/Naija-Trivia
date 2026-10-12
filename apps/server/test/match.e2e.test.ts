@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeAll, afterAll } from "vitest";
 import { Client, type Room } from "@colyseus/sdk";
-import { ratingDelta, statePointsForWin, lagosWeekStart, QUESTIONS_PER_MATCH, type QuestionMsg, type ResultMsg } from "@ntc/shared";
+import { ratingDelta, statePointsForWin, lagosWeekStart, lagosDate, themeFor, themedWinCoins, FIRST_WIN_BONUS, QUESTIONS_PER_MATCH, type QuestionMsg, type ResultMsg } from "@ntc/shared";
 import { startServer } from "../src/index";
 import type { Sql } from "../src/db";
 
@@ -109,13 +109,16 @@ describe("ranked match end to end", () => {
     expect(pb.ratingDelta).toBe(-expectedDelta);
     expect(pa.statePoints).toBe(statePointsForWin(1000));
     expect(pb.statePoints).toBe(0);
-    expect(pa.coins).toBe(30);
+    // Win coins (more during a special themed week) + first win of the day.
+    const winCoins = themedWinCoins(themeFor(lagosDate())) + FIRST_WIN_BONUS;
+    expect(pa.coins).toBe(winCoins);
+    expect(pa.bonuses.map((b) => b.kind)).toContain("first_win");
     expect(pb.coins).toBe(5);
 
     // Database reflects the result.
     const dbA = await sql.one("select rating, coins, wins, ranked_games from profiles where id = $1", [a.userId]);
     const dbB = await sql.one("select rating, coins, losses from profiles where id = $1", [b.userId]);
-    expect(dbA).toMatchObject({ rating: 1000 + expectedDelta, coins: 230, wins: 1, ranked_games: 1 });
+    expect(dbA).toMatchObject({ rating: 1000 + expectedDelta, coins: 200 + winCoins, wins: 1, ranked_games: 1 });
     expect(dbB).toMatchObject({ rating: 1000 - expectedDelta, coins: 205, losses: 1 });
     const answers = await sql.one<{ n: number }>("select count(*)::int as n from match_answers where match_id = $1", [resA.matchId]);
     expect(answers!.n).toBe(14);

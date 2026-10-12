@@ -13,6 +13,7 @@ import {
   INTERSTITIAL_EVERY_N_MATCHES,
   CATEGORIES,
   lagosDate,
+  themeFor,
   leagueForRating,
   leagueProgress,
   nextLeague,
@@ -30,11 +31,14 @@ import { getMe, usernameAvailable, getProfileRow, toPublic, isPremium, getPublic
 import { listMissions, claimMission } from "../repo/missions";
 import { dailyStatus, getStreak, startDaily, dailyTable, completeDaily, ensureDailySet } from "../repo/daily";
 import { serveNext, submitAnswer } from "../repo/solo";
-import { createChallenge, challengeSummary, startChallenge, challengeTable, completeChallenge, getChallengeRow } from "../repo/challenges";
+import { createChallenge, challengeSummary, startChallenge, challengeTable, completeChallenge, getChallengeRow, incomingChallenges } from "../repo/challenges";
+import { listAchievements, claimAchievement, unclaimedAchievements, checkAchievements } from "../repo/achievements";
+import { listFriends, searchPlayers, requestFriend, acceptFriend, removeFriend, friendStatus, findRival } from "../repo/friends";
 import { stateWars, stateTopPlayers, dailyBoard } from "../repo/leaderboards";
 import { currentSeason, seasonHistory } from "../repo/seasons";
 import { purchaseProduct, buyItem, equipItem, shopCatalog } from "../repo/shop";
-import { notifyChallengeResult } from "../services/notifications";
+import { applyPremiumPerks } from "../repo/premium";
+import { notifyChallengeResult, notifyFriendRequest, notifyDirectChallenge } from "../services/notifications";
 import { analytics } from "../services/analytics";
 
 export const player = Router();
@@ -123,13 +127,21 @@ player.get(
   "/home",
   authed(async ({ sql, user }) => {
     const today = lagosDate();
+    const premiumPerks = await applyPremiumPerks(sql, user.userId);
     const prof = await getProfileRow(sql, user.userId);
-    const [missions, streak, daily, wars, today_] = await Promise.all([
+    // Backfill for players who earned achievements before they existed (or before their next match).
+    if (prof && !prof.is_guest && !(await sql.one("select 1 from user_achievements where user_id = $1 limit 1", [user.userId]))) {
+      await checkAchievements(sql, user.userId);
+    }
+    const [missions, streak, daily, wars, today_, rival, incoming, toClaim] = await Promise.all([
       listMissions(sql, user.userId, today),
       getStreak(sql, user.userId, today),
       dailyStatus(sql, user.userId, today),
       prof?.state_code ? stateWars(sql, prof.state_code) : Promise.resolve(null),
       sql.one<{ n: number }>("select count(*)::int as n from matches where (player_a = $1 or player_b = $1) and created_at > now() - interval '24 hours'", [user.userId]),
+      findRival(sql, user.userId),
+      incomingChallenges(sql, user.userId),
+      unclaimedAchievements(sql, user.userId),
     ]);
     const row = wars?.rows.find((r) => r.code === prof?.state_code);
     const res: HomeResponse & { chest: { available: boolean; amount: number } } = {
@@ -138,6 +150,12 @@ player.get(
       daily: { date: today, played: daily.played, score: daily.score, resetsAt: daily.resetsAt },
       stateRank: row ? { code: row.code, name: row.name, rank: row.rank, points: row.points } : null,
       matchesToday: today_?.n ?? 0,
+      firstWinAvailable: !prof?.is_guest && prof?.first_win_date !== today,
+      theme: themeFor(today),
+      rival,
+      incomingChallenges: incoming,
+      achievementsToClaim: toClaim,
+      premiumPerks,
       chest: { available: prof?.chest_date !== today, amount: prof && isPremium(prof) ? CHEST_COINS * 2 : CHEST_COINS },
     };
     return res;
@@ -218,6 +236,75 @@ player.post(
   }),
 );
 
+// ── Friends ────────────────────────────────────────────────────────────────
+player.get("/friends", authed(async ({ sql, user }) => listFriends(sql, user.userId)));
+
+player.get(
+  "/players/search",
+  authed(async ({ req, sql, user }) => ({ players: await searchPlayers(sql, user.userId, String(req.query.q ?? "").slice(0, 24)) })),
+);
+
+player.get("/friends/:id/status", authed(async ({ req, sql, user }) => ({ status: await friendStatus(sql, user.userId, String(req.params.id)) })));
+
+player.post(
+  "/friends/:id",
+  authed(async ({ req, sql, user }) => {
+    const other = String(req.params.id);
+    const r = await requestFriend(sql, user.userId, other);
+    if (r.created) void notifyFriendRequest(sql, other, user.userId, false).catch(() => {});
+    if (r.accepted) {
+      void notifyFriendRequest(sql, other, user.userId, true).catch(() => {});
+      await checkAchievements(sql, user.userId);
+      await checkAchievements(sql, other);
+    }
+    if (r.created || r.accepted) analytics.track(user.userId, r.accepted ? "friend_accepted" : "friend_requested");
+    return { status: r.status };
+  }),
+);
+
+player.post(
+  "/friends/:id/accept",
+  authed(async ({ req, sql, user }) => {
+    const other = String(req.params.id);
+    await acceptFriend(sql, user.userId, other);
+    await checkAchievements(sql, user.userId);
+    await checkAchievements(sql, other);
+    void notifyFriendRequest(sql, other, user.userId, true).catch(() => {});
+    analytics.track(user.userId, "friend_accepted");
+    return { status: "friends" };
+  }),
+);
+
+player.delete(
+  "/friends/:id",
+  authed(async ({ req, sql, user }) => {
+    await removeFriend(sql, user.userId, String(req.params.id));
+    return { status: "none" };
+  }),
+);
+
+/** Challenge one friend directly. Once the sender plays their round, the friend gets a push and a card on Home. */
+player.post(
+  "/friends/:id/challenge",
+  authed(async ({ req, sql, user }) => {
+    const other = String(req.params.id);
+    if ((await friendStatus(sql, user.userId, other)) !== "friends") throw new HttpError(403, "You can only challenge friends directly.");
+    const code = await createChallenge(sql, user.userId, other);
+    analytics.track(user.userId, "challenge_created", { direct: true });
+    return challengeSummary(sql, code, user.userId);
+  }),
+);
+
+// ── Achievements ───────────────────────────────────────────────────────────
+player.post(
+  "/achievements/:slug/claim",
+  authed(async ({ req, sql, user }) => {
+    const r = await claimAchievement(sql, user.userId, String(req.params.slug));
+    if (!r) throw new HttpError(409, "Nothing to claim for this achievement.");
+    return r;
+  }),
+);
+
 player.get("/challenges/:code", open(async ({ req, sql, user }) => challengeSummary(sql, String(req.params.code), user?.userId ?? null)));
 
 player.get(
@@ -249,6 +336,8 @@ player.post(
     if (r.done) {
       const outcome = await completeChallenge(sql, c, user.userId, r.totals);
       if (outcome) void notifyChallengeResult(sql, outcome.creatorId, user.userId, c.code).catch(() => {});
+      // A direct challenge reaches the friend once the sender has a score on the board.
+      if (user.userId === c.created_by && c.target_id) void notifyDirectChallenge(sql, c.target_id, user.userId, c.code).catch(() => {});
     }
     return r.result;
   }),
@@ -280,7 +369,7 @@ player.get(
   "/state-wars",
   authed(async ({ sql, user }) => {
     const p = await getProfileRow(sql, user.userId);
-    return stateWars(sql, p?.state_code ?? null);
+    return stateWars(sql, p?.state_code ?? null, undefined, user.userId);
   }),
 );
 
@@ -338,6 +427,7 @@ player.get(
       badges: categories.map((c) => ({ slug: c.slug, tier: badgeTier(c) })).filter((b): b is { slug: CategorySlug; tier: "bronze" | "silver" | "gold" } => !!b.tier),
       history,
       seasons: await seasonHistory(sql, id),
+      achievements: await listAchievements(sql, id),
     };
     return res;
   }),

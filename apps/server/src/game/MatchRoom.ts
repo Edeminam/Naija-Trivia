@@ -17,6 +17,7 @@ import {
   isAnswerAccepted,
   isDoubleWahala,
   selectQuestions,
+  themeFor,
   answerMessageSchema,
   banMessageSchema,
   powerUpKindSchema,
@@ -127,6 +128,8 @@ export class MatchRoom extends Room<{ state: MatchState }> {
   private roundTimer: { clear(): void } | null = null;
   private finished = false;
   private botName?: string;
+  /** This week's featured category: never offered for banning, always in the mix. */
+  private featured: { id: string; slug: string } | null = null;
 
   async onCreate(options: MatchRoomOptions) {
     this.mode = options.mode;
@@ -299,7 +302,11 @@ export class MatchRoom extends Room<{ state: MatchState }> {
     this.state.phase = "banning";
     const sql = await getDb();
     const cats = await activeCategories(sql);
-    const picked = [...cats].sort(() => Math.random() - 0.5).slice(0, Math.min(BAN_OPTION_COUNT, cats.length));
+    const theme = themeFor(lagosDate());
+    const feat = cats.find((c) => c.slug === theme.category);
+    this.featured = feat ? { id: feat.id, slug: feat.slug } : null;
+    const bannable = cats.filter((c) => c.id !== feat?.id);
+    const picked = [...bannable].sort(() => Math.random() - 0.5).slice(0, Math.min(BAN_OPTION_COUNT, bannable.length));
     this.state.banOptions = new ArraySchema(...picked.map((c) => new BanOptionState({ categoryId: c.id, slug: c.slug, name: c.name })));
     this.state.deadline = Date.now() + BAN_MS;
     this.broadcast("phase", {
@@ -342,7 +349,8 @@ export class MatchRoom extends Room<{ state: MatchState }> {
     this.state.phase = "loading";
     for (const p of this.state.players.values()) if (!p.banned) p.banned = this.randomBanOption();
     const banned = new Set([...this.state.players.values()].map((p) => p.banned));
-    const remaining = this.state.banOptions.toArray().filter((o) => !banned.has(o.categoryId));
+    const remaining: { categoryId: string; slug: string }[] = this.state.banOptions.toArray().filter((o) => !banned.has(o.categoryId));
+    if (this.featured) remaining.unshift({ categoryId: this.featured.id, slug: this.featured.slug });
     this.state.categories = new ArraySchema(...remaining.map((o) => o.slug));
 
     const sql = await getDb();

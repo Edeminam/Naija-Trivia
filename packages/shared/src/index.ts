@@ -9,4 +9,5 @@ export * from "./rules/selection";
 export * from "./rules/progression";
 export * from "./rules/time";
 export * from "./rules/bot";
+export * from "./rules/engagement";
 export * from "./avatarSvg";

@@ -110,4 +110,31 @@ Decisions made where the brief left room, or where a constraint forced a choice.
     resolves. The local server now re-runs the (idempotent) seed whenever `seed.sql` changes; the seed
     can promote `in_review` → `live` and activate a category but never demotes or deactivates anything an
     admin changed.
+37. **More ways to earn coins.** +50 for the first win of each Lagos day (ranked or practice, not guests).
+    Daily Naija streaks pay a bonus each time they reach 3/7/14/30/60/100 days (30–1,000 coins). 17
+    one-time achievements (`ACHIEVEMENTS` in shared) unlock on the event that earns them and are claimed
+    for coins on the profile, like missions. Existing players are backfilled on their next Home load.
+38. **Friends.** One `friendships` row per pair (pending → accepted); asking someone who already asked
+    you accepts. Add friends by username search, from a match result or a challenge page. The Friends
+    screen is a rating leaderboard with head-to-head records (ranked clashes + friend challenges). Your
+    "rival" is the friend you've played most in 30 days (else your highest-rated friend). Direct
+    challenges reuse friend challenges with a `target_id`; the friend is notified, and sees it on Home,
+    only once the sender has played their round, so there is always a score to beat. Live friend-vs-friend
+    rooms were not built; the in-match Rematch already covers live replays.
+39. **State Wars pays out.** A finished week is settled once (idempotent, by `state_weeks`): the top 3
+    states are recorded and every player who scored for them gets 200/100/50 coins plus a push. Every
+    10 minutes (8am–10pm Lagos) the ranking is compared with a snapshot and fans of a state that loses a
+    top-10 place get "X just overtook Y", at most once a day and inside the one-marketing-push cap.
+40. **Themed weeks.** `themeFor(date)`: recurring special weeks (Love, Children's Day, June 12,
+    Independence, Detty December) and otherwise a weekly rotation through the 10 categories. The featured
+    category can't be banned and is always in a clash, fills 3 of the 10 Daily Naija slots, and special
+    weeks pay 1.5x win coins plus a kickoff push. Events with moving dates (AFCON, Eid) need a dated entry
+    added once the dates are announced; there is no admin UI for themes yet.
+41. **Premium is worth more than its price.** On top of no ads, unlimited challenges, the double chest and
+    the Gold frame, Premium now pays 1,500 coins every 30 days while active, includes the Season Pass
+    every season (12 power-ups + Eko Nights frame) and gives 2 streak freezes a week instead of 1. Perks
+    are paid lazily (on the Home request that finds them due, and right after a Premium purchase), so
+    no cron is needed and a lapsed player simply stops receiving them. The Season Pass can't be bought
+    while Premium is active. Freezes are now counted per Lagos week (`streaks.freezes_used`) and bridge
+    one missed day each, so a Premium player can miss two days in a week without losing the streak.
 

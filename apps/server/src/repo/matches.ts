@@ -11,13 +11,18 @@ import {
   lagosWeekStart,
   SUSPICIOUS_ANSWER_MS,
   SUSPICIOUS_DAILY_THRESHOLD,
+  FIRST_WIN_BONUS,
+  themeFor,
+  themedWinCoins,
   type PlayerMatchResult,
   type MatchMode,
+  type MatchBonus,
 } from "@ntc/shared";
 import type { Sql } from "../db";
 import { applyXp } from "./profiles";
 import { bumpMissions } from "./missions";
 import { recordQuestionStats } from "./questions";
+import { checkAchievements } from "./achievements";
 
 export interface AnswerRecord {
   round: number;
@@ -68,13 +73,15 @@ export async function persistMatchResult(sql: Sql, input: PersistInput): Promise
     const fresh = new Map<string, any>();
     for (const h of humans) {
       const row = await tx.one(
-        "select id, rating, ranked_games, xp, level, coins, state_code, is_guest from profiles where id = $1 for update",
+        "select id, rating, ranked_games, xp, level, coins, state_code, is_guest, first_win_date::text as first_win_date from profiles where id = $1 for update",
         [h.id],
       );
       if (row) fresh.set(h.id, row);
     }
 
     const ratingOf = (p: MatchPlayerInput) => (p.isBot ? p.rating : (fresh.get(p.id)?.rating ?? p.rating));
+    const today = lagosDate();
+    const theme = themeFor(today);
     const players: Record<string, PlayerMatchResult> = {};
     const deltas: Record<string, number> = {};
 
@@ -110,6 +117,11 @@ export async function persistMatchResult(sql: Sql, input: PersistInput): Promise
         statePoints = statePointsForWin(ratingOf(opp));
         if (vsBot) statePoints = Math.max(1, Math.round(statePoints * BOT_STATE_POINT_FACTOR));
       }
+      const bonuses: MatchBonus[] = [];
+      if (result === "win" && !row?.is_guest) {
+        if (theme.special) bonuses.push({ kind: "theme", label: `${theme.name} bonus`, coins: themedWinCoins(theme) - coinsFor(result) });
+        if (row?.first_win_date !== today) bonuses.push({ kind: "first_win", label: "First win of the day", coins: FIRST_WIN_BONUS });
+      }
       players[me.id] = {
         playerId: me.id,
         result,
@@ -118,7 +130,9 @@ export async function persistMatchResult(sql: Sql, input: PersistInput): Promise
         ratingBefore: before,
         ratingAfter: after,
         ratingDelta: after - before,
-        coins: coinsFor(result),
+        coins: coinsFor(result) + bonuses.reduce((n, b) => n + b.coins, 0),
+        bonuses,
+        achievements: [],
         xp: xpGain,
         statePoints,
         levelBefore: lvl.before,
@@ -150,7 +164,6 @@ export async function persistMatchResult(sql: Sql, input: PersistInput): Promise
       ],
     );
     const matchId = match!.id;
-    const today = lagosDate();
     const week = lagosWeekStart();
 
     for (const h of humans) {
@@ -164,6 +177,8 @@ export async function persistMatchResult(sql: Sql, input: PersistInput): Promise
             ranked_games = ranked_games + $4::int,
             wins = wins + $5::int, losses = losses + $6::int, draws = draws + $7::int,
             coins = coins + $8, xp = xp + $9, level = $10,
+            peak_rating = greatest(peak_rating, $2),
+            first_win_date = case when $11::boolean then $12::date else first_win_date end,
             matches_since_ad = matches_since_ad + 1,
             guest_match_used = guest_match_used or is_guest,
             updated_at = now()
@@ -179,6 +194,8 @@ export async function persistMatchResult(sql: Sql, input: PersistInput): Promise
           r.coins,
           r.xp,
           r.levelAfter,
+          r.bonuses.some((b) => b.kind === "first_win"),
+          today,
         ],
       );
 
@@ -213,6 +230,7 @@ export async function persistMatchResult(sql: Sql, input: PersistInput): Promise
       );
 
       await flagIfSuspicious(tx, h.id, today);
+      if (!row?.is_guest) r.achievements = await checkAchievements(tx, h.id);
     }
 
     return { matchId, winnerId, players };

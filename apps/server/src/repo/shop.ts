@@ -4,9 +4,8 @@ import type { Sql } from "../db";
 import { HttpError, parse } from "../api/http";
 import { isPremium } from "./profiles";
 import { analytics } from "../services/analytics";
+import { applyPremiumPerks, grantSeasonPass } from "./premium";
 
-/** Season Pass: 3 of every power-up plus the season frame. */
-const SEASON_PASS_POWERUPS = 3;
 
 export async function shopCatalog(sql: Sql, userId: string) {
   const p = await sql.one("select coins, premium_until, frame_id, button_theme_id from profiles where id = $1", [userId]);
@@ -27,7 +26,11 @@ export async function shopCatalog(sql: Sql, userId: string) {
 export async function purchaseProduct(sql: Sql, userId: string, raw: unknown): Promise<PurchaseResponse> {
   const body = parse(purchaseSchema, raw);
   const product = PRODUCTS.find((p) => p.id === body.productId)!;
-  return sql.tx(async (tx) => {
+  const res = await sql.tx(async (tx) => {
+    if (product.kind === "pass") {
+      const me = await tx.one("select premium_until from profiles where id = $1", [userId]);
+      if (me && isPremium(me)) throw new HttpError(409, "The Season Pass is already included with your Premium.", "pass_included");
+    }
     const receiptId = `mock_${randomUUID()}`;
     await tx.query("insert into purchases (user_id, product_id, platform, amount_naira, provider, receipt) values ($1, $2, $3, $4, 'mock', $5)", [
       userId,
@@ -43,20 +46,16 @@ export async function purchaseProduct(sql: Sql, userId: string, raw: unknown): P
         [userId, String(product.premiumDays)],
       );
     }
-    if (product.kind === "pass") {
-      for (const pu of POWER_UPS) {
-        await tx.query(
-          `insert into inventory (user_id, item_id, kind, quantity) values ($1, $2, 'power_up', $3)
-           on conflict (user_id, item_id) do update set quantity = inventory.quantity + $3, updated_at = now()`,
-          [userId, `pu_${pu.kind}`, SEASON_PASS_POWERUPS],
-        );
-      }
-      await tx.query("insert into inventory (user_id, item_id, kind, quantity) values ($1, 'frame_eko', 'cosmetic', 1) on conflict (user_id, item_id) do nothing", [userId]);
-    }
+    if (product.kind === "pass") await grantSeasonPass(tx, userId);
     const p = await tx.one("select coins, premium_until from profiles where id = $1", [userId]);
     analytics.track(userId, "purchase_completed", { productId: product.id, naira: product.priceNaira, provider: "mock" });
     return { ok: true as const, productId: product.id, coins: p!.coins, premiumUntil: p!.premium_until ? new Date(p!.premium_until).toISOString() : null, receiptId };
   });
+  if (!product.premiumDays) return res;
+  // New or renewed Premium: pay any perks that are due right away.
+  const premiumPerks = await applyPremiumPerks(sql, userId);
+  const after = await sql.one<{ coins: number }>("select coins from profiles where id = $1", [userId]);
+  return { ...res, coins: after!.coins, premiumPerks };
 }
 
 export async function buyItem(sql: Sql, userId: string, raw: unknown) {

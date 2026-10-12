@@ -82,7 +82,7 @@ export default function SettingsScreen() {
               icon={Crown}
               title="Plan"
               value={p.isPremium ? "Premium" : "Free"}
-              subtitle={p.isPremium ? `Active until ${premiumUntilLabel(p.premiumUntil)}` : "Go Premium for no ads, unlimited challenges and more"}
+              subtitle={p.isPremium ? `Active until ${premiumUntilLabel(p.premiumUntil)}` : "Go Premium for monthly coins, the Season Pass and no ads"}
               onPress={() => router.push("/shop")}
             />
           </Card>

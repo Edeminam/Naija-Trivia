@@ -1,6 +1,7 @@
 import type { LeagueId, PowerUpKind, CategorySlug, ProductId } from "./constants";
 import type { Settings } from "./schemas";
 import type { PlayerResult } from "./rules/progression";
+import type { ActiveTheme } from "./rules/engagement";
 
 // ── Profile ────────────────────────────────────────────────────────────────
 export interface PublicProfile {
@@ -58,6 +59,9 @@ export interface StreakInfo {
   current: number;
   best: number;
   freezeAvailable: boolean;
+  /** Freezes left this week (each one bridges one missed day) */
+  freezesLeft: number;
+  freezesPerWeek: number;
   playedToday: boolean;
 }
 
@@ -67,6 +71,21 @@ export interface HomeResponse {
   daily: { date: string; played: boolean; score: number | null; resetsAt: number };
   stateRank: { code: string; name: string; rank: number; points: number } | null;
   matchesToday: number;
+  /** First win of the day bonus still up for grabs */
+  firstWinAvailable: boolean;
+  theme: ActiveTheme;
+  /** The friend you've played most recently and often, with the head-to-head record */
+  rival: { friend: PublicProfile; record: HeadToHead } | null;
+  /** Open challenges a friend sent directly to you */
+  incomingChallenges: { code: string; from: PublicProfile; expiresAt: string; scoreToBeat: number }[];
+  achievementsToClaim: number;
+  /** Premium perks granted on this visit (monthly coins, this season's pass), if any */
+  premiumPerks: PremiumPerksGranted | null;
+}
+
+export interface PremiumPerksGranted {
+  coins: number;
+  seasonPass: boolean;
 }
 
 // ── Match protocol ─────────────────────────────────────────────────────────
@@ -135,6 +154,16 @@ export interface PlayerMatchResult {
   leagueBefore: LeagueId;
   leagueAfter: LeagueId;
   shieldSaved: boolean;
+  /** Extra coins on top of the base reward (already included in `coins`) */
+  bonuses: MatchBonus[];
+  /** Achievement slugs unlocked by this match */
+  achievements: string[];
+}
+
+export interface MatchBonus {
+  kind: "first_win" | "theme";
+  label: string;
+  coins: number;
 }
 
 export interface ResultMsg {
@@ -193,6 +222,8 @@ export interface StateWarsResponse {
   endsAt: number;
   rows: StateWarsRow[];
   myState: string | null;
+  /** Last week's podium and what it paid the viewer */
+  lastWeek: { weekStart: string; podium: { rank: number; code: string; name: string; points: number; prize: number }[]; myPrize: number } | null;
 }
 
 export interface LeaderboardPlayer {
@@ -289,6 +320,43 @@ export interface ProfileStatsResponse {
   history: MatchHistoryItem[];
   /** Finished seasons, newest first */
   seasons: { season: number; league: LeagueId; rating: number }[];
+  achievements: AchievementProgress[];
+}
+
+export interface AchievementProgress {
+  slug: string;
+  progress: number;
+  target: number;
+  unlocked: boolean;
+  claimed: boolean;
+}
+
+// ── Friends ────────────────────────────────────────────────────────────────
+export interface HeadToHead {
+  wins: number;
+  losses: number;
+  draws: number;
+}
+
+export interface FriendItem {
+  profile: PublicProfile;
+  record: HeadToHead;
+  /** This week's State Wars points */
+  weekPoints: number;
+  since: string;
+}
+
+export interface FriendsResponse {
+  friends: FriendItem[];
+  incoming: { profile: PublicProfile; at: string }[];
+  outgoing: { profile: PublicProfile; at: string }[];
+}
+
+export type FriendStatus = "none" | "friends" | "incoming" | "outgoing" | "self";
+
+export interface PlayerSearchResult {
+  profile: PublicProfile;
+  status: FriendStatus;
 }
 
 // ── Shop ───────────────────────────────────────────────────────────────────
@@ -298,4 +366,6 @@ export interface PurchaseResponse {
   coins: number;
   premiumUntil: string | null;
   receiptId: string;
+  /** Perks paid immediately on a Premium purchase */
+  premiumPerks?: PremiumPerksGranted | null;
 }

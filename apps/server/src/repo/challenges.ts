@@ -6,6 +6,7 @@ import { getPublicProfiles, isPremium } from "./profiles";
 import { HttpError } from "../api/http";
 import { env } from "../env";
 import type { SoloTable } from "./solo";
+import { checkAchievements } from "./achievements";
 
 /** Free players get 3 open challenges per day; Premium is unlimited. */
 export const FREE_CHALLENGES_PER_DAY = 3;
@@ -23,7 +24,7 @@ export function challengeLinks(code: string, creatorName: string) {
   return { shareUrl, whatsappUrl: `https://wa.me/?text=${encodeURIComponent(text)}`, text, creatorName };
 }
 
-export async function createChallenge(sql: Sql, userId: string) {
+export async function createChallenge(sql: Sql, userId: string, targetId: string | null = null) {
   const prof = await sql.one("select rating, premium_until, username from profiles where id = $1", [userId]);
   if (!prof) throw new HttpError(404, "Profile not found");
   if (!isPremium(prof)) {
@@ -44,14 +45,14 @@ export async function createChallenge(sql: Sql, userId: string) {
     code = makeCode();
   }
   await sql.query(
-    "insert into challenges (code, created_by, question_ids, categories, expires_at) values ($1, $2, $3::uuid[], $4::text[], now() + ($5 || ' milliseconds')::interval)",
-    [code, userId, pgArray(picks.map((p) => p.id)), pgArray(chosen.map((c) => c.slug)), String(CHALLENGE_TTL_MS)],
+    "insert into challenges (code, created_by, question_ids, categories, expires_at, target_id) values ($1, $2, $3::uuid[], $4::text[], now() + ($5 || ' milliseconds')::interval, $6)",
+    [code, userId, pgArray(picks.map((p) => p.id)), pgArray(chosen.map((c) => c.slug)), String(CHALLENGE_TTL_MS), targetId],
   );
   return code;
 }
 
 export async function getChallengeRow(sql: Sql, code: string) {
-  const c: any = await sql.one("select id, code, created_by, question_ids, categories, expires_at, created_at from challenges where code = $1", [code.toUpperCase()]);
+  const c: any = await sql.one("select id, code, created_by, target_id, question_ids, categories, expires_at, created_at from challenges where code = $1", [code.toUpperCase()]);
   if (!c) throw new HttpError(404, "This challenge link doesn't exist.", "not_found");
   return c;
 }
@@ -103,14 +104,53 @@ export async function startChallenge(sql: Sql, code: string, userId: string) {
 /** When someone finishes: give XP/coins and, if the creator has a score, record a friend match for history. */
 export async function completeChallenge(sql: Sql, c: { id: string; created_by: string; categories: string[] }, userId: string, totals: { score: number; correct: number; total_ms: number }) {
   await sql.query("update profiles set xp = xp + $2, coins = coins + 10, updated_at = now() where id = $1", [userId, XP.perCorrect * totals.correct]);
-  if (userId === c.created_by) return null;
+  if (userId === c.created_by) {
+    // Anyone who played before the creator gets their result recorded now.
+    const others = await sql.query("select user_id, score, total_ms from challenge_entries where challenge_id = $1 and user_id <> $2 and finished_at is not null", [c.id, userId]);
+    for (const o of others) await recordFriendMatch(sql, c, { userId: c.created_by, ...totals }, { userId: o.user_id, score: o.score, total_ms: o.total_ms });
+    await checkAchievements(sql, userId);
+    return null;
+  }
   const creator = await sql.one("select score, total_ms from challenge_entries where challenge_id = $1 and user_id = $2 and finished_at is not null", [c.id, c.created_by]);
-  if (!creator) return null;
-  const winner =
-    creator.score === totals.score ? (creator.total_ms === totals.total_ms ? null : creator.total_ms < totals.total_ms ? c.created_by : userId) : creator.score > totals.score ? c.created_by : userId;
-  await sql.query(
-    "insert into matches (type, player_a, player_b, winner, score_a, score_b, categories) values ('friend', $1, $2, $3, $4, $5, $6::text[])",
-    [c.created_by, userId, winner, creator.score, totals.score, pgArray(c.categories)],
-  );
+  if (!creator) {
+    await checkAchievements(sql, userId);
+    return null;
+  }
+  const winner = await recordFriendMatch(sql, c, { userId: c.created_by, score: creator.score, total_ms: creator.total_ms }, { userId, ...totals });
   return { creatorId: c.created_by, winner };
+}
+
+type Side = { userId: string; score: number; total_ms: number };
+
+/** Record a finished challenge pairing as a 'friend' match (highest score wins, fastest breaks ties). */
+async function recordFriendMatch(sql: Sql, c: { categories: string[] }, creator: Side, other: Side) {
+  const winner =
+    creator.score === other.score ? (creator.total_ms === other.total_ms ? null : creator.total_ms < other.total_ms ? creator.userId : other.userId) : creator.score > other.score ? creator.userId : other.userId;
+  await sql.query("insert into matches (type, player_a, player_b, winner, score_a, score_b, categories) values ('friend', $1, $2, $3, $4, $5, $6::text[])", [
+    creator.userId,
+    other.userId,
+    winner,
+    creator.score,
+    other.score,
+    pgArray(c.categories),
+  ]);
+  await checkAchievements(sql, other.userId);
+  await checkAchievements(sql, creator.userId);
+  return winner;
+}
+
+/** Open challenges a friend sent straight to this player (once the sender has set a score) that they haven't played yet. */
+export async function incomingChallenges(sql: Sql, userId: string) {
+  const rows = await sql.query<{ code: string; created_by: string; expires_at: string; score: number }>(
+    `select c.code, c.created_by, c.expires_at, ce.score from challenges c
+       join challenge_entries ce on ce.challenge_id = c.id and ce.user_id = c.created_by and ce.finished_at is not null
+      where c.target_id = $1 and c.expires_at > now()
+        and not exists (select 1 from challenge_entries e where e.challenge_id = c.id and e.user_id = $1)
+      order by c.created_at desc limit 5`,
+    [userId],
+  );
+  const profiles = await getPublicProfiles(sql, rows.map((r) => r.created_by));
+  return rows
+    .filter((r) => profiles.has(r.created_by))
+    .map((r) => ({ code: r.code, from: profiles.get(r.created_by)!, expiresAt: new Date(r.expires_at).toISOString(), scoreToBeat: r.score }));
 }

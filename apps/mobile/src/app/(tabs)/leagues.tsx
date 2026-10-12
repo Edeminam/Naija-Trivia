@@ -1,6 +1,6 @@
 import { View } from "react-native";
 import { router } from "expo-router";
-import { CalendarClock, Info, Swords, Check, Lock } from "lucide-react-native";
+import { CalendarClock, Info, Swords, Check, Lock, Users, ChevronRight } from "lucide-react-native";
 import { LEAGUES, leagueForRating } from "@ntc/shared";
 import { Screen, SectionTitle, Txt, Card, LeagueBadge, ProgressBar, Icon, Button, Skeleton, SkeletonCard, ErrorState, AdirePattern } from "../../ui";
 import { useLeagues } from "../../features/statewars/api";
@@ -58,6 +58,15 @@ export default function Leagues() {
               <Txt variant="bodyStrong">Season ends in <Txt variant="bodyStrong" tabular>{text}</Txt></Txt>
               <Txt variant="caption" tone="muted">Rewards pay out for your league at the end, and your finish is kept on your profile. Then everyone drops at most one league.</Txt>
             </View>
+          </Card>
+
+          <Card className="p-4 mt-3 flex-row items-center gap-3" onPress={() => router.push("/friends")} accessibilityLabel="Friends leaderboard">
+            <View className="h-11 w-11 items-center justify-center rounded-xl bg-primary-soft"><Icon as={Users} tone="primary" /></View>
+            <View className="flex-1">
+              <Txt variant="bodyStrong">Friends leaderboard</Txt>
+              <Txt variant="caption" tone="muted">See where you rank among your friends</Txt>
+            </View>
+            <Icon as={ChevronRight} tone="faint" />
           </Card>
 
           <SectionTitle title="Leagues & rewards" />

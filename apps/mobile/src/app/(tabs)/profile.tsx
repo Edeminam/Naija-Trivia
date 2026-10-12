@@ -1,10 +1,11 @@
 import { View } from "react-native";
 import { router } from "expo-router";
-import { Settings, Crown, Medal, History, Swords, MapPin, Bot, Users } from "lucide-react-native";
+import { Settings, Crown, Medal, History, Swords, MapPin, Bot, Users, ChevronRight } from "lucide-react-native";
 import { categoryBySlug, stateByCode, leagueForRating, leagueProgress, LEAGUES, type MatchHistoryItem } from "@ntc/shared";
 import { Screen, SectionTitle, Txt, Card, Avatar, LeagueBadge, ProgressBar, IconButton, EmptyState, ErrorState, SkeletonCard, Skeleton, Icon, Chip, AdirePattern } from "../../ui";
 import { useMe } from "../../features/me";
 import { useProfileStats } from "../../features/profile/api";
+import { AchievementsCard } from "../../features/achievements/AchievementsCard";
 import { cn } from "../../lib/cn";
 
 const TIER_COLOR = { bronze: "#C98A55", silver: "#B8C2C8", gold: "#E8B44A" } as const;
@@ -109,6 +110,25 @@ export default function Profile() {
             </View>
           </Card>
           <Txt variant="caption" tone="faint" className="mt-2 text-center">{LEAGUES.find((l) => l.id === s.profile.league)?.name} league · {s.wins}W {s.losses}L {s.draws}D</Txt>
+
+          {!p?.isGuest ? (
+            <Card className="mt-4 p-4 flex-row items-center gap-3" onPress={() => router.push("/friends")} accessibilityLabel="Friends">
+              <View className="h-10 w-10 items-center justify-center rounded-xl bg-primary-soft"><Icon as={Users} tone="primary" /></View>
+              <View className="flex-1">
+                <Txt variant="bodyStrong">Friends</Txt>
+                <Txt variant="caption" tone="muted">Leaderboard, head-to-head records and direct challenges</Txt>
+              </View>
+              <Icon as={ChevronRight} tone="faint" />
+            </Card>
+          ) : null}
+
+          {/* Cached stats from before achievements existed have no `achievements`. */}
+          {s.achievements?.length ? (
+            <>
+              <SectionTitle title={`Achievements · ${s.achievements.filter((a) => a.unlocked).length}/${s.achievements.length}`} />
+              <AchievementsCard list={s.achievements} />
+            </>
+          ) : null}
 
           <SectionTitle title="Stats by category" />
           <Card className="p-4 gap-4">

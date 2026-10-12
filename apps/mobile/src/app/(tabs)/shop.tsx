@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { View } from "react-native";
 import { POWER_UP_ICONS as PU_ICON } from "../../features/icons";
-import { Crown, Check, PlayCircle, ShieldCheck, Sparkles, Gift, Infinity as InfinityIcon, Ban, Ticket } from "lucide-react-native";
-import { LEAGUES, type ProductId } from "@ntc/shared";
+import { Crown, Check, PlayCircle, ShieldCheck, Sparkles, Gift, Infinity as InfinityIcon, Ban, Ticket, Coins, Snowflake } from "lucide-react-native";
+import { LEAGUES, PREMIUM_MONTHLY_COINS, STREAK_FREEZES_PER_WEEK, type ProductId } from "@ntc/shared";
 import { Screen, SectionTitle, Txt, Card, Button, CoinCounter, CoinIcon, Avatar, Icon, BottomSheet, Segmented, Chip, Skeleton, SkeletonCard, ErrorState, toast } from "../../ui";
 import { useShop, useBuyItem, useEquip, useShopRefresh, type ShopData } from "../../features/shop/api";
 import { purchases } from "../../features/shop/PurchaseService";
@@ -41,7 +41,11 @@ function ConfirmSheet({ pending, onClose, onDone }: { pending: Pending; onClose:
           try {
             const r = await purchases.purchase(pending.productId);
             haptic.success();
-            toast.success("Purchase complete", pending.title);
+            const perks = r.premiumPerks;
+            toast.success(
+              "Purchase complete",
+              perks ? [perks.coins ? `+${perks.coins.toLocaleString("en-NG")} coins` : "", perks.seasonPass ? "Season Pass unlocked" : ""].filter(Boolean).join(" · ") : pending.title,
+            );
             onDone(r.coins);
             onClose();
           } catch (e: any) {
@@ -60,6 +64,9 @@ function ConfirmSheet({ pending, onClose, onDone }: { pending: Pending; onClose:
 function PremiumCard({ data, onBuy }: { data: ShopData; onBuy: (p: Pending) => void }) {
   const [plan, setPlan] = useState<"premium_yearly" | "premium_monthly">("premium_yearly");
   const benefits = [
+    { icon: Coins, text: `${PREMIUM_MONTHLY_COINS.toLocaleString("en-NG")} coins every month` },
+    { icon: Ticket, text: "Season Pass every season (12 power-ups + frame)" },
+    { icon: Snowflake, text: `${STREAK_FREEZES_PER_WEEK.premium} streak freezes a week instead of ${STREAK_FREEZES_PER_WEEK.free}` },
     { icon: Ban, text: "No ads, ever" },
     { icon: InfinityIcon, text: "Unlimited friend challenges" },
     { icon: Gift, text: "Double daily chest" },
@@ -97,7 +104,7 @@ function PremiumCard({ data, onBuy }: { data: ShopData; onBuy: (p: Pending) => v
         variant="accent"
         size="lg"
         full
-        onPress={() => onBuy({ productId: plan, title: plan === "premium_yearly" ? "Premium · 12 months" : "Premium · 1 month", detail: "No ads, unlimited challenges, double chest, Premium frame." })}
+        onPress={() => onBuy({ productId: plan, title: plan === "premium_yearly" ? "Premium · 12 months" : "Premium · 1 month", detail: `${PREMIUM_MONTHLY_COINS.toLocaleString("en-NG")} coins a month, the Season Pass, 2 streak freezes a week, no ads and more.` })}
       />
       {plan === "premium_yearly" ? <Txt variant="caption" tone="muted" className="text-center">Works out at {purchases.priceLabel("premium_yearly").replace(/[\d,]+/, (n) => Math.round(Number(n.replace(/,/g, "")) / 12).toLocaleString("en-NG"))}/month — save 30%</Txt> : null}
     </Card>
@@ -254,13 +261,17 @@ export default function Shop() {
                   <Txt variant="title" tabular>{purchases.priceLabel(p.id)}</Txt>
                 </Card>
               ))}
-              <Card className="p-4 flex-row items-center gap-3" onPress={() => setPending({ productId: "season_pass", title: "Season Pass", detail: "3 of every power-up + Eko Nights frame this season" })} accessibilityLabel="Season pass">
+              <Card
+                className="p-4 flex-row items-center gap-3"
+                onPress={d.premium.active ? undefined : () => setPending({ productId: "season_pass", title: "Season Pass", detail: "3 of every power-up + Eko Nights frame this season" })}
+                accessibilityLabel={d.premium.active ? "Season pass, included with your Premium" : "Season pass"}
+              >
                 <View className="h-12 w-12 items-center justify-center rounded-2xl bg-primary-soft"><Icon as={Ticket} size={24} tone="primary" /></View>
                 <View className="flex-1">
                   <Txt variant="bodyStrong">Season Pass</Txt>
                   <Txt variant="caption" tone="muted">12 power-ups + Eko Nights frame</Txt>
                 </View>
-                <Txt variant="title" tabular>{purchases.priceLabel("season_pass")}</Txt>
+                {d.premium.active ? <Chip label="Included" icon={Crown} tone="accent" /> : <Txt variant="title" tabular>{purchases.priceLabel("season_pass")}</Txt>}
               </Card>
             </View>
             <Txt variant="caption" tone="faint" className="text-center mt-6">Prices in naira. Purchases are tied to your account.</Txt>

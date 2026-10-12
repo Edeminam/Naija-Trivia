@@ -1,8 +1,10 @@
 import { View } from "react-native";
 import { router } from "expo-router";
-import { Flame, Gift, CheckCircle2, Snowflake, Play, Trophy } from "lucide-react-native";
-import { nextLagosMidnight, type MissionProgress, type StreakInfo } from "@ntc/shared";
-import { Card, Txt, Icon, Button, ProgressBar, Chip, CoinIcon, toast } from "../../ui";
+import { Flame, Gift, CheckCircle2, Snowflake, Play, Trophy, Sparkles, Swords, ChevronRight, Medal } from "lucide-react-native";
+import { nextLagosMidnight, nextStreakMilestone, categoryBySlug, LAGOS_OFFSET_MS, type MissionProgress, type StreakInfo, type ActiveTheme } from "@ntc/shared";
+import { Card, Txt, Icon, Button, ProgressBar, Chip, CoinIcon, Avatar, PressableScale, toast } from "../../ui";
+import { CATEGORY_ICONS } from "../icons";
+import type { HomeData } from "./api";
 import { useCountdown } from "../../lib/useCountdown";
 import { useClaimMission, useClaimChest } from "./api";
 import { haptic } from "../../lib/haptics";
@@ -27,10 +29,17 @@ export function DailyNaijaCard({ played, score, resetsAt, streak }: { played: bo
         </View>
       </View>
       <View className="flex-row items-center justify-between mt-4">
-        <View className="flex-row items-center gap-1.5 flex-1">
-          <Icon as={Snowflake} size={14} tone={streak.freezeAvailable ? "primary" : "faint"} />
-          <Txt variant="caption" tone="faint" numberOfLines={1}>{streak.freezeAvailable ? "Streak freeze ready" : "Freeze used this week"}</Txt>
-        </View>
+        {(() => {
+          const next = nextStreakMilestone(streak.current);
+          return (
+            <View className="flex-row items-center gap-1.5 flex-1">
+              <Icon as={next ? Flame : Snowflake} size={14} tone={next ? "danger" : streak.freezeAvailable ? "primary" : "faint"} />
+              <Txt variant="caption" tone="faint" numberOfLines={1}>
+                {next ? `${next.days - streak.current} more day${next.days - streak.current === 1 ? "" : "s"} to +${next.coins} bonus` : streak.freezeAvailable ? (streak.freezesLeft > 1 ? `${streak.freezesLeft} streak freezes ready` : "Streak freeze ready") : "Freezes used this week"}
+              </Txt>
+            </View>
+          );
+        })()}
         {played ? <Chip label="See ranking" icon={Trophy} tone="accent" /> : <Chip label="Play · +20 coins" icon={Play} tone="accent" />}
       </View>
     </Card>
@@ -114,6 +123,76 @@ export function ChestCard({ available, amount }: { available: boolean; amount: n
           })
         }
       />
+    </Card>
+  );
+}
+
+const LAGOS_END_OF = (date: string) => Date.parse(`${date}T23:59:59Z`) - LAGOS_OFFSET_MS;
+
+/** This week's theme: the featured category is in every clash and part of Daily Naija. */
+export function ThemeCard({ theme }: { theme: ActiveTheme }) {
+  const { text } = useCountdown(LAGOS_END_OF(theme.endsOn));
+  const cat = categoryBySlug(theme.category);
+  return (
+    <Card className="p-4 flex-row items-center gap-3 overflow-hidden" accessibilityLabel={`${theme.name}. ${theme.tagline}. Ends in ${text}`}>
+      <View className={cn("h-12 w-12 items-center justify-center rounded-2xl", theme.special ? "bg-accent-soft" : "bg-primary-soft")}>
+        <Icon as={CATEGORY_ICONS[theme.category] ?? Sparkles} size={24} tone={theme.special ? "accent" : "primary"} />
+      </View>
+      <View className="flex-1 gap-0.5">
+        <Txt variant="overline" tone={theme.special ? "accent" : "primary"}>{theme.special ? "Special week" : "This week"} · ends in <Txt variant="overline" tone={theme.special ? "accent" : "primary"} tabular>{text}</Txt></Txt>
+        <Txt variant="bodyStrong">{theme.name}</Txt>
+        <Txt variant="caption" tone="muted" numberOfLines={2}>{theme.special ? `${theme.tagline} Wins pay 50% more coins.` : `${cat?.name ?? "This category"} is in every clash and in Daily Naija.`}</Txt>
+      </View>
+    </Card>
+  );
+}
+
+export function IncomingChallenges({ items }: { items: HomeData["incomingChallenges"] }) {
+  if (!items?.length) return null;
+  return (
+    <Card className="overflow-hidden">
+      {items.map((c, i) => (
+        <PressableScale key={c.code} scaleTo={0.99} onPress={() => router.push({ pathname: "/c/[code]", params: { code: c.code } })} accessibilityRole="button" accessibilityLabel={`${c.from.username} challenged you. Score to beat ${c.scoreToBeat}`} className={cn("flex-row items-center gap-3 p-4", i > 0 && "border-t border-line")}>
+          <Avatar id={c.from.avatarId} size={44} league={c.from.league} frameId={c.from.frameId} />
+          <View className="flex-1">
+            <Txt variant="overline" tone="danger">Challenge for you</Txt>
+            <Txt variant="bodyStrong" numberOfLines={2}>{c.from.username} challenged you</Txt>
+            <Txt variant="caption" tone="muted">Score to beat: <Txt variant="caption" tabular>{c.scoreToBeat.toLocaleString("en-NG")}</Txt></Txt>
+          </View>
+          <Chip label="Play" icon={Swords} tone="primary" />
+        </PressableScale>
+      ))}
+    </Card>
+  );
+}
+
+export function RivalCard({ rival }: { rival: NonNullable<HomeData["rival"]> }) {
+  const r = rival.record;
+  const played = r.wins + r.losses + r.draws;
+  const line = !played ? "No games yet. Settle it!" : r.wins > r.losses ? `You lead ${r.wins}–${r.losses}` : r.wins < r.losses ? `${rival.friend.username} leads ${r.losses}–${r.wins}` : `Level at ${r.wins}–${r.losses}`;
+  return (
+    <Card className="p-4 flex-row items-center gap-3" onPress={() => router.push("/friends")} accessibilityLabel={`Your rival ${rival.friend.username}. ${line}`}>
+      <Avatar id={rival.friend.avatarId} size={48} league={rival.friend.league} frameId={rival.friend.frameId} />
+      <View className="flex-1">
+        <Txt variant="overline" tone="accent">Your rival</Txt>
+        <Txt variant="bodyStrong" numberOfLines={1}>{rival.friend.username}</Txt>
+        <Txt variant="caption" tone="muted">{line}{r.draws ? ` · ${r.draws} drawn` : ""}</Txt>
+      </View>
+      <Icon as={ChevronRight} tone="faint" />
+    </Card>
+  );
+}
+
+export function AchievementsNudge({ count }: { count: number }) {
+  if (!count) return null;
+  return (
+    <Card className="p-4 flex-row items-center gap-3" onPress={() => router.push("/profile")} accessibilityLabel={`${count} achievements ready to claim`}>
+      <View className="h-10 w-10 items-center justify-center rounded-xl bg-accent-soft"><Icon as={Medal} tone="accent" /></View>
+      <View className="flex-1">
+        <Txt variant="bodyStrong">{count === 1 ? "1 achievement unlocked" : `${count} achievements unlocked`}</Txt>
+        <Txt variant="caption" tone="muted">Claim your coins on your profile</Txt>
+      </View>
+      <Icon as={ChevronRight} tone="faint" />
     </Card>
   );
 }

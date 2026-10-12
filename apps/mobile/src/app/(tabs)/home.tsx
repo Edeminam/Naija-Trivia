@@ -1,13 +1,15 @@
+import { useEffect } from "react";
 import { View } from "react-native";
 import { router } from "expo-router";
 import Animated, { FadeInDown } from "react-native-reanimated";
-import { Swords, Users, Trophy, ChevronRight, WifiOff, UserPlus } from "lucide-react-native";
+import { Swords, Users, Trophy, ChevronRight, WifiOff, UserPlus, Gift } from "lucide-react-native";
 import { LAGOS_OFFSET_MS, leagueForRating, leagueProgress, LEAGUES } from "@ntc/shared";
-import { Screen, SectionTitle, Txt, Button, Card, Avatar, CoinCounter, Chip, LeagueBadge, ProgressBar, SkeletonCard, Skeleton, ErrorState, Icon, PressableScale } from "../../ui";
+import { Screen, SectionTitle, Txt, Button, Card, Avatar, CoinCounter, Chip, LeagueBadge, ProgressBar, SkeletonCard, Skeleton, ErrorState, Icon, PressableScale, toast } from "../../ui";
 import { useMe } from "../../features/me";
 import { PlanPill } from "../../features/PlanPill";
 import { useHome } from "../../features/home/api";
-import { DailyNaijaCard, MissionsCard, ChestCard } from "../../features/home/components";
+import { DailyNaijaCard, MissionsCard, ChestCard, ThemeCard, IncomingChallenges, RivalCard, AchievementsNudge } from "../../features/home/components";
+import { FIRST_WIN_BONUS } from "@ntc/shared";
 import { useOnline } from "../../lib/useNetwork";
 import { useReducedMotion } from "../../lib/motion";
 
@@ -41,6 +43,16 @@ export default function Home() {
   const reduce = useReducedMotion();
   const p = me.data?.profile;
   const enter = (i: number) => (reduce ? undefined : FadeInDown.delay(60 * i).duration(260));
+
+  // Premium perks are paid on the Home request that finds them due; announce them once.
+  const perks = home.isFetchedAfterMount ? home.data?.premiumPerks : null;
+  useEffect(() => {
+    if (!perks) return;
+    void me.refetch();
+    const parts = [perks.coins ? `+${perks.coins.toLocaleString("en-NG")} coins` : "", perks.seasonPass ? "this season's Season Pass" : ""].filter(Boolean);
+    toast.success("Premium perks landed 👑", `${parts.join(" and ")} added to your account.`);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [home.dataUpdatedAt]);
 
   if (!p) {
     return (
@@ -103,6 +115,11 @@ export default function Home() {
             </View>
           </View>
           <ProgressBar value={leagueProgress(p.rating)} height={6} label="League progress" />
+          {home.data?.firstWinAvailable ? (
+            <View className="flex-row">
+              <Chip label={`First win today: +${FIRST_WIN_BONUS} bonus coins`} icon={Gift} tone="accent" />
+            </View>
+          ) : null}
           <View className="gap-3">
             <Button
               label="Play Clash"
@@ -122,7 +139,7 @@ export default function Home() {
       {home.data?.stateRank ? (
         <Animated.View entering={enter(1)} className="mt-4 flex-row">
           <Chip
-            label={home.data.stateRank.points > 0 ? `${home.data.stateRank.name} is #${home.data.stateRank.rank} this week` : `${home.data.stateRank.name} hasn't scored yet — win one for them`}
+            label={home.data.stateRank.points > 0 ? `${home.data.stateRank.name} is #${home.data.stateRank.rank} this week` : `${home.data.stateRank.name} hasn't scored yet, win one for them`}
             icon={Trophy}
             tone="accent"
             onPress={() => router.push("/state-wars")}
@@ -139,6 +156,12 @@ export default function Home() {
         </View>
       ) : (
         <>
+          {home.data.incomingChallenges?.length ? (
+            <View className="mt-4"><IncomingChallenges items={home.data.incomingChallenges} /></View>
+          ) : null}
+          {home.data.theme ? (
+            <View className="mt-4"><ThemeCard theme={home.data.theme} /></View>
+          ) : null}
           <SectionTitle title="Daily Naija" />
           <Animated.View entering={enter(2)}>
             <DailyNaijaCard played={home.data.daily.played} score={home.data.daily.score} resetsAt={home.data.daily.resetsAt} streak={home.data.streak} />
@@ -146,10 +169,17 @@ export default function Home() {
           <View className="mt-3">
             <ChestCard available={home.data.chest.available} amount={home.data.chest.amount} />
           </View>
+          {home.data.rival ? (
+            <>
+              <SectionTitle title="Rivalry" action="Friends" onAction={() => router.push("/friends")} />
+              <RivalCard rival={home.data.rival} />
+            </>
+          ) : null}
           <SectionTitle title="Today's missions" />
           <Animated.View entering={enter(3)}>
             <MissionsCard missions={home.data.missions} />
           </Animated.View>
+          {home.data.achievementsToClaim ? <View className="mt-3"><AchievementsNudge count={home.data.achievementsToClaim} /></View> : null}
         </>
       )}
     </Screen>

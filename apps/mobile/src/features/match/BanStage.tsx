@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { View } from "react-native";
 import Animated, { FadeIn, ZoomIn } from "react-native-reanimated";
 import { X } from "lucide-react-native";
-import { categoryBySlug } from "@ntc/shared";
+import { categoryBySlug, themeFor, lagosDate } from "@ntc/shared";
 import { Txt, PressableScale, Icon, ProgressBar, Chip } from "../../ui";
 import { cn } from "../../lib/cn";
 import { useMatch, match } from "./store";
@@ -61,6 +61,21 @@ export function BanStage() {
           );
         })}
       </View>
+      {(() => {
+        // Mirrors the server: this week's featured category can't be banned and is always in.
+        const theme = themeFor(lagosDate());
+        const cat = categoryBySlug(theme.category);
+        return cat ? (
+          <View className="flex-row items-center gap-3 rounded-card border border-line bg-surface p-3" accessibilityLabel={`${theme.name}: ${cat.name} is always in this week`}>
+            <View className="h-9 w-9 items-center justify-center rounded-xl" style={{ backgroundColor: `${cat.tint}22` }}>
+              <CategoryIcon slug={cat.slug} size={18} />
+            </View>
+            <Txt variant="caption" tone="muted" className="flex-1">
+              <Txt variant="caption" tone="default">{theme.name}:</Txt> {cat.name} is locked in for every clash this week.
+            </Txt>
+          </View>
+        ) : null;
+      })()}
     </Animated.View>
   );
 }

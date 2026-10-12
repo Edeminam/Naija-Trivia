@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { View } from "react-native";
 import { router, Redirect } from "expo-router";
 import Animated, { FadeInDown, ZoomIn } from "react-native-reanimated";
-import { RotateCcw, Share2, Home as HomeIcon, Check, X, Minus, Flag, Bot, TrendingUp, TrendingDown, MapPin, Sparkles, UserPlus } from "lucide-react-native";
+import { RotateCcw, Share2, Home as HomeIcon, Check, X, Minus, Flag, Bot, TrendingUp, TrendingDown, MapPin, Sparkles, UserPlus, Gift } from "lucide-react-native";
 import { LEAGUES, leagueProgress, stateByCode, categoryBySlug } from "@ntc/shared";
 import { Screen, Txt, Button, Card, Avatar, AnimatedNumber, ProgressBar, LeagueBadge, CoinIcon, Icon, IconButton, Confetti, AdirePattern, Chip, toast } from "../../ui";
 import { useMatch, match } from "../../features/match/store";
@@ -14,6 +14,8 @@ import { api } from "../../lib/api";
 import { SERVER_URL } from "../../lib/config";
 import { cn } from "../../lib/cn";
 import { useReducedMotion } from "../../lib/motion";
+import { FriendButton } from "../../features/friends/FriendButton";
+import { achievementTitle } from "../../features/achievements/AchievementsCard";
 
 function Reward({ icon, label, value, prefix = "+", tone = "default", delay }: { icon: React.ReactNode; label: string; value: number; prefix?: string; tone?: "default" | "primary" | "danger" | "accent"; delay: number }) {
   return (
@@ -40,6 +42,15 @@ export default function Result() {
     void fetch(`${SERVER_URL}/health`).catch(() => {});
   }, []);
 
+
+  // Celebrate achievements unlocked by this match (once).
+  const unlocked = r && myId ? (r.players[myId]?.achievements ?? []) : [];
+  useEffect(() => {
+    if (!unlocked.length) return;
+    const t = setTimeout(() => toast.success(unlocked.length === 1 ? `Achievement unlocked: ${achievementTitle(unlocked[0]!)}` : `${unlocked.length} achievements unlocked`, "Claim the coins on your profile."), 1200);
+    return () => clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [r?.matchId]);
 
   const data = useMemo(() => {
     if (!r || !myId) return null;
@@ -113,6 +124,7 @@ export default function Result() {
               <AnimatedNumber value={opp?.score ?? 0} variant="h1" duration={1100} />
             </View>
           </View>
+          {!r.isBot && !isGuest && oppId ? <FriendButton id={oppId} name={opp?.username ?? "your opponent"} /> : null}
           {r.isBot ? <Chip label="Practice opponent · half rating & state points" icon={Bot} /> : null}
           {mine.shieldSaved ? <Chip label="Shield saved your rating" tone="primary" /> : null}
         </Card>
@@ -131,6 +143,11 @@ export default function Result() {
           ) : null}
           {!isGuest ? <Reward icon={<Icon as={MapPin} tone="accent" />} label={stateByCode(me?.stateCode)?.code ?? "State"} value={mine.statePoints} tone="accent" delay={750} /> : null}
         </Animated.View>
+        {mine.bonuses?.length ? (
+          <View className="flex-row flex-wrap justify-center gap-2 mt-3">
+            {mine.bonuses.map((b) => <Chip key={b.kind} label={`${b.label} +${b.coins}`} icon={Gift} tone="accent" />)}
+          </View>
+        ) : null}
 
         {!isGuest ? (
           <Card className="p-4 mt-4 flex-row items-center gap-4">

@@ -2,7 +2,7 @@ import { useState } from "react";
 import { View } from "react-native";
 import { router, useLocalSearchParams } from "expo-router";
 import { Flame, Snowflake, Play, Trophy, Users2 } from "lucide-react-native";
-import { stateByCode, addDays, lagosDate } from "@ntc/shared";
+import { stateByCode, addDays, lagosDate, nextStreakMilestone, STREAK_MILESTONES } from "@ntc/shared";
 import { Screen, SectionTitle, Txt, Button, Card, Icon, Segmented, SkeletonCard, SkeletonRow, ErrorState, EmptyState, Confetti, Chip } from "../../ui";
 import { useDaily, useDailyBoard } from "../../features/daily/api";
 import { useMe } from "../../features/me";
@@ -35,7 +35,7 @@ export default function Daily() {
               </View>
               <View className="flex-1">
                 <Txt variant="display" tabular>{d.streak.current}<Txt variant="h3" tone="muted"> day streak</Txt></Txt>
-                <Txt variant="caption" tone="muted">Best {d.streak.best} · {d.streak.freezeAvailable ? "1 freeze ready this week" : "Freeze used this week"}</Txt>
+                <Txt variant="caption" tone="muted">Best {d.streak.best} · {d.streak.freezeAvailable ? `${d.streak.freezesLeft ?? 1} of ${d.streak.freezesPerWeek ?? 1} freeze${(d.streak.freezesPerWeek ?? 1) > 1 ? "s" : ""} left this week` : "No freezes left this week"}</Txt>
               </View>
               <Icon as={Snowflake} tone={d.streak.freezeAvailable ? "primary" : "faint"} />
             </View>
@@ -56,6 +56,14 @@ export default function Daily() {
                 );
               })}
             </View>
+            {(() => {
+              const next = nextStreakMilestone(d.streak.current);
+              return next ? (
+                <Txt variant="caption" tone="muted" className="text-center">
+                  Streak bonuses at {STREAK_MILESTONES.map((m) => m.days).join(", ")} days · next: <Txt variant="caption" tone="accent">{next.days} days, +{next.coins} coins</Txt>
+                </Txt>
+              ) : null;
+            })()}
             {d.played ? (
               <View className="gap-3">
                 <View className="flex-row gap-2.5">
