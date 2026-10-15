@@ -21,6 +21,7 @@ export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [busy, setBusy] = useState(false);
+  const [creating, setCreating] = useState(false);
 
   const finish = async (token: string, userId: string) => {
     session.set({ token, userId });
@@ -29,7 +30,7 @@ export default function Login() {
       router.replace("/");
     } catch (e: any) {
       session.set(null);
-      toast.error(e.status === 403 ? "This account isn't an admin" : e.message);
+      toast.error(e.status === 403 ? "This account isn't an admin. Add its email to ADMIN_EMAILS on the server." : e.message);
     }
   };
 
@@ -37,9 +38,17 @@ export default function Login() {
     e.preventDefault();
     if (!supabase) return;
     setBusy(true);
-    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+    const { data, error } = creating
+      ? await supabase.auth.signUp({ email, password, options: { emailRedirectTo: `${window.location.origin}/login` } })
+      : await supabase.auth.signInWithPassword({ email, password });
     setBusy(false);
-    if (error || !data.session) return void toast.error(error?.message ?? "Sign-in failed");
+    if (error) return void toast.error(error.message);
+    // With "Confirm email" on (Supabase's default) sign-up returns no session until the link is clicked.
+    if (!data.session) {
+      if (!creating) return void toast.error("Sign-in failed");
+      setCreating(false);
+      return void toast.success(`Check ${email} for a confirmation link, then sign in here.`);
+    }
     await finish(data.session.access_token, data.session.user.id);
   };
 
@@ -77,11 +86,14 @@ export default function Login() {
               </div>
               <div className="grid gap-1.5">
                 <Label htmlFor="password">Password</Label>
-                <Input id="password" type="password" autoComplete="current-password" value={password} onChange={(e) => setPassword(e.target.value)} required />
+                <Input id="password" type="password" autoComplete={creating ? "new-password" : "current-password"} minLength={creating ? 8 : undefined} value={password} onChange={(e) => setPassword(e.target.value)} required />
               </div>
               <Button type="submit" disabled={busy} className="mt-1">
-                {busy ? <Loader2 className="animate-spin" /> : <ShieldCheck />} Sign in
+                {busy ? <Loader2 className="animate-spin" /> : <ShieldCheck />} {creating ? "Create account" : "Sign in"}
               </Button>
+              <button type="button" onClick={() => setCreating((c) => !c)} className="text-sm text-muted-foreground underline-offset-4 hover:underline">
+                {creating ? "Already have an account? Sign in" : "First time here? Create your account"}
+              </button>
             </form>
           ) : (
             <div className="grid gap-3">
@@ -94,7 +106,9 @@ export default function Login() {
               </Button>
             </div>
           )}
-          <p className="text-center text-xs text-muted-foreground">Admin access requires <code className="rounded bg-muted px-1">profiles.is_admin = true</code>.</p>
+          <p className="text-center text-xs text-muted-foreground">
+            Admins are the emails listed in <code className="rounded bg-muted px-1">ADMIN_EMAILS</code> on the game server.
+          </p>
         </CardContent>
       </Card>
     </main>
