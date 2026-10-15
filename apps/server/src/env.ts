@@ -24,4 +24,11 @@ export const env = {
   expoAccessToken: process.env.EXPO_ACCESS_TOKEN || null,
   adminOrigins: (process.env.ADMIN_ORIGINS ?? "http://localhost:3000").split(","),
   isTest: process.env.NODE_ENV === "test" || !!process.env.VITEST,
+  isProduction: process.env.NODE_ENV === "production",
 };
+
+// Dev auth can run in production (keyless quick-play deploys), but its tokens are only as safe as the
+// signing secret, and the default one is public in this repo.
+if (env.isProduction && env.allowDevAuth && !process.env.DEV_JWT_SECRET) {
+  throw new Error("Set DEV_JWT_SECRET to a long random string: dev auth is on in production");
+}

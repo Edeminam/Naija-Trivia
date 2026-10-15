@@ -13,7 +13,7 @@ const TAIL = ["_lagos", "_9ja", "baba", "_sharp", "_odogwu", "_wizzy", "x", "_ng
 dev.post(
   "/dev/demo-data",
   open(async ({ sql }) => {
-    if (!env.allowDevAuth) throw new HttpError(404, "Not available");
+    if (!env.allowDevAuth || env.isProduction) throw new HttpError(404, "Not available");
     const week = lagosWeekStart();
     const lastWeek = addDays(week, -7);
     const today = lagosDate();

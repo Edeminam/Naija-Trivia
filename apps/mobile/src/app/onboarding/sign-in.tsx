@@ -104,13 +104,22 @@ export default function SignIn() {
               <Icon as={Terminal} tone="accent" />
             </View>
             <View className="flex-1">
-              <Txt variant="title">Local dev mode</Txt>
-              <Txt variant="caption" tone="muted">Supabase keys aren't set, so phone, Google and Apple sign-in are off. Use a quick local account instead.</Txt>
+              {__DEV__ ? (
+                <>
+                  <Txt variant="title">Local dev mode</Txt>
+                  <Txt variant="caption" tone="muted">Supabase keys aren't set, so phone, Google and Apple sign-in are off. Use a quick local account instead.</Txt>
+                </>
+              ) : (
+                <>
+                  <Txt variant="title">Quick sign-in</Txt>
+                  <Txt variant="caption" tone="muted">Pick a username to keep your coins, rating and streak on this device.</Txt>
+                </>
+              )}
             </View>
           </View>
           <Input label="Username (optional)" placeholder="e.g. jollof_king" autoCapitalize="none" autoCorrect={false} value={devName} onChangeText={setDevName} error={devValid ? null : "3–16 letters, numbers or _"} />
           <Button
-            label="Quick sign-in (dev)"
+            label={__DEV__ ? "Quick sign-in (dev)" : "Continue"}
             size="lg"
             full
             disabled={!devValid}

@@ -129,6 +129,18 @@ writes happen on the server.
 
 ## Deployment
 
+**Quick play (no Supabase yet).** The server can go online in the same keyless mode as local dev:
+guests tap *Play as guest*, and *Continue* with a username saves progress on that device. In production
+a taken username is refused (no password to check), `admin: true` is ignored and demo data is off.
+Accounts can't move between devices until Supabase is set up.
+```bash
+fly launch --no-deploy --copy-config
+fly volumes create ntc_data --size 1 --region lhr   # embedded Postgres lives here (PGLITE_DIR in fly.toml)
+fly secrets set DEV_JWT_SECRET=$(openssl rand -hex 32) PUBLIC_SERVER_URL=https://<app>.fly.dev PUBLIC_APP_URL=https://<web>.vercel.app
+fly deploy
+```
+Then deploy `apps/mobile` to Vercel with `EXPO_PUBLIC_SERVER_URL=https://<app>.fly.dev` (see *Web app* below).
+
 **Game server → Fly.io** (or Railway; any Docker host)
 ```bash
 fly launch --no-deploy --copy-config   # uses ./fly.toml and apps/server/Dockerfile

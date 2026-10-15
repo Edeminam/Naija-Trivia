@@ -8,6 +8,12 @@ primary_region = "lhr"   # closest Fly region to Lagos with full features; jnb i
 [env]
   PORT = "2567"
   NODE_ENV = "production"
+  # Without DATABASE_URL (quick play, no Supabase) the embedded Postgres lives on the volume below.
+  PGLITE_DIR = "/data/pglite"
+
+[mounts]
+  source = "ntc_data"
+  destination = "/data"
 
 [http_service]
   internal_port = 2567
@@ -22,6 +28,6 @@ primary_region = "lhr"   # closest Fly region to Lagos with full features; jnb i
 [[http_service.checks]]
   interval = "15s"
   timeout = "3s"
-  grace_period = "20s"
+  grace_period = "90s"   # the first boot on an empty volume applies migrations and loads the seed
   method = "GET"
   path = "/health"

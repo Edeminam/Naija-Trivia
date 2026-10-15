@@ -56,7 +56,8 @@ export async function issueDevToken(userId: string, isAnonymous: boolean): Promi
     .setSubject(userId)
     .setIssuer("ntc-dev")
     .setIssuedAt()
-    .setExpirationTime("30d")
+    // Without Supabase there's no password to sign back in with, so the token is the account: keep it a year.
+    .setExpirationTime("365d")
     .sign(devKey);
 }
 
