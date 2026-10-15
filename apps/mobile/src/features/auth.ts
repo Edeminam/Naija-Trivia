@@ -3,7 +3,7 @@ import * as WebBrowser from "expo-web-browser";
 import * as Linking from "expo-linking";
 import * as AppleAuthentication from "expo-apple-authentication";
 import { api } from "../lib/api";
-import { supabase } from "../lib/supabase";
+import { getSupabase } from "../lib/supabase";
 import { HAS_SUPABASE } from "../lib/config";
 import { useSession } from "../stores/session";
 import { queryClient } from "../lib/queryClient";
@@ -21,11 +21,14 @@ async function adopt(token: string, userId: string, provider: "dev" | "supabase"
 }
 
 // Keep the server token fresh when Supabase rotates the access token.
-supabase?.auth.onAuthStateChange((_e, session) => {
-  if (session) void useSession.getState().setSession({ token: session.access_token, userId: session.user.id, provider: "supabase" });
-});
+void getSupabase().then((supabase) =>
+  supabase?.auth.onAuthStateChange((_e, session) => {
+    if (session) void useSession.getState().setSession({ token: session.access_token, userId: session.user.id, provider: "supabase" });
+  }),
+);
 
 export async function playAsGuest() {
+  const supabase = await getSupabase();
   if (supabase) {
     const { data, error } = await supabase.auth.signInAnonymously();
     if (error || !data.session) throw new Error(error?.message ?? "Couldn't start a guest session");
@@ -49,9 +52,10 @@ export async function devSignIn(username?: string) {
   await adopt(r.token, r.userId, "dev");
 }
 
-const isAnonymousSession = async () => !!(await supabase?.auth.getUser())?.data.user?.is_anonymous;
+const isAnonymousSession = async () => !!(await (await getSupabase())?.auth.getUser())?.data.user?.is_anonymous;
 
 export async function sendPhoneOtp(phoneE164: string) {
+  const supabase = await getSupabase();
   if (!supabase) throw new Error("Phone sign-in needs Supabase keys");
   // A guest links the phone to the same account (keeps progress); otherwise a normal OTP sign-in.
   const { error } = (await isAnonymousSession()) ? await supabase.auth.updateUser({ phone: phoneE164 }) : await supabase.auth.signInWithOtp({ phone: phoneE164 });
@@ -59,6 +63,7 @@ export async function sendPhoneOtp(phoneE164: string) {
 }
 
 export async function verifyPhoneOtp(phoneE164: string, code: string) {
+  const supabase = await getSupabase();
   if (!supabase) throw new Error("Phone sign-in needs Supabase keys");
   const linking = await isAnonymousSession();
   const { data, error } = await supabase.auth.verifyOtp({ phone: phoneE164, token: code, type: linking ? "phone_change" : "sms" });
@@ -68,6 +73,7 @@ export async function verifyPhoneOtp(phoneE164: string, code: string) {
 }
 
 export async function signInWithGoogle() {
+  const supabase = await getSupabase();
   if (!supabase) throw new Error("Google sign-in needs Supabase keys");
   const redirectTo = Linking.createURL("/auth/callback");
   const linking = await isAnonymousSession();
@@ -99,6 +105,7 @@ export async function signInWithGoogle() {
 export const appleAvailable = () => (Platform.OS === "ios" ? AppleAuthentication.isAvailableAsync() : Promise.resolve(false));
 
 export async function signInWithApple() {
+  const supabase = await getSupabase();
   if (!supabase) throw new Error("Apple sign-in needs Supabase keys");
   const cred = await AppleAuthentication.signInAsync({ requestedScopes: [AppleAuthentication.AppleAuthenticationScope.FULL_NAME] });
   if (!cred.identityToken) throw new Error("Apple didn't return a token");
@@ -109,7 +116,7 @@ export async function signInWithApple() {
 }
 
 export async function signOut() {
-  await supabase?.auth.signOut().catch(() => {});
+  await (await getSupabase())?.auth.signOut().catch(() => {});
   await useSession.getState().clear();
   queryClient.clear();
 }

@@ -4,6 +4,9 @@ const { withNativeWind } = require("nativewind/metro");
 
 const config = getDefaultConfig(__dirname);
 
+// Web loads WOFF2 font subsets (see src/theme/fonts.web.ts).
+config.resolver.assetExts.push("woff2");
+
 // Node-only modules pulled in by @colyseus/sdk's fallback transport. React Native has a global WebSocket.
 const EMPTY = path.resolve(__dirname, "shims/empty.js");
 const NODE_ONLY = new Set(["ws"]);

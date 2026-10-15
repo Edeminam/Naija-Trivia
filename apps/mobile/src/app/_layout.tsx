@@ -5,13 +5,14 @@ import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import * as SplashScreen from "expo-splash-screen";
 import { useFonts } from "expo-font";
-import { Inter_400Regular, Inter_500Medium, Inter_600SemiBold, Inter_700Bold } from "@expo-google-fonts/inter";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { PersistQueryClientProvider } from "@tanstack/react-query-persist-client";
 import { ThemeProvider, useTheme } from "../theme/ThemeProvider";
+import { FONT_SOURCES } from "../theme/fonts";
 import { queryClient, persister, PERSISTED_KEYS } from "../lib/queryClient";
 import "../lib/outbox";
+import "../features/daily/offline";
 import { ToastHost } from "../ui";
 import { useSession } from "../stores/session";
 import { usePrefs } from "../stores/prefs";
@@ -38,15 +39,7 @@ function Shell() {
 }
 
 export default function RootLayout() {
-  const [fontsLoaded, fontError] = useFonts({
-    "Satoshi-Medium": require("../../assets/fonts/Satoshi-Medium.ttf"),
-    "Satoshi-Bold": require("../../assets/fonts/Satoshi-Bold.ttf"),
-    "Satoshi-Black": require("../../assets/fonts/Satoshi-Black.ttf"),
-    Inter_400Regular,
-    Inter_500Medium,
-    Inter_600SemiBold,
-    Inter_700Bold,
-  });
+  const [fontsLoaded, fontError] = useFonts(FONT_SOURCES);
   const hydrated = useSession((s) => s.hydrated);
   const prefsHydrated = usePrefs((s) => s.hydrated);
   const ready = (fontsLoaded || !!fontError) && hydrated && prefsHydrated;

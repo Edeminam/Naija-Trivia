@@ -1,15 +1,65 @@
 import { useState } from "react";
 import { View } from "react-native";
 import { router, useLocalSearchParams } from "expo-router";
-import { Flame, Snowflake, Play, Trophy, Users2 } from "lucide-react-native";
+import { Flame, Snowflake, Play, Trophy, Users2, Download, WifiOff, CloudUpload, ChevronRight } from "lucide-react-native";
 import { stateByCode, addDays, lagosDate, nextStreakMilestone, STREAK_MILESTONES } from "@ntc/shared";
-import { Screen, SectionTitle, Txt, Button, Card, Icon, Segmented, SkeletonCard, SkeletonRow, ErrorState, EmptyState, Confetti, Chip } from "../../ui";
+import { Screen, SectionTitle, Txt, Button, Card, Icon, Segmented, SkeletonCard, SkeletonRow, ErrorState, EmptyState, Confetti, Chip, Modal, toast } from "../../ui";
+import { useOfflineDaily, downloadOfflineDaily } from "../../features/daily/offline";
 import { useDaily, useDailyBoard } from "../../features/daily/api";
 import { useMe } from "../../features/me";
 import { LeaderRow } from "../../features/LeaderRow";
 import { useCountdown } from "../../lib/useCountdown";
 import { useOnline } from "../../lib/useNetwork";
 import { cn } from "../../lib/cn";
+
+/** Buttons for a day that's in offline mode: play, wait for sync, or re-download on a new device. */
+function OfflineActions({ online }: { online: boolean }) {
+  const { pack, run, syncing } = useOfflineDaily();
+  const [busy, setBusy] = useState(false);
+  const today = lagosDate();
+  if (pack?.date === today && run?.finished) {
+    return (
+      <View className="gap-2 items-center">
+        <Icon as={CloudUpload} size={28} tone="accent" />
+        <Txt variant="bodyStrong" className="text-center">Answers locked in</Txt>
+        <Txt variant="caption" tone="muted" className="text-center">{syncing ? "Scoring your run…" : online ? "Sending your answers…" : "We'll score them when you're back online."}</Txt>
+      </View>
+    );
+  }
+  if (pack?.date === today) {
+    return (
+      <View className="gap-2">
+        <Button label={run?.answers.length ? `Resume offline · question ${(run?.current ?? 0) + 1}` : "Play offline"} icon={WifiOff} size="lg" full variant="accent" onPress={() => router.push("/daily/offline")} />
+        <Txt variant="caption" tone="muted" className="text-center">Saved on this phone · works without data · no speed bonus</Txt>
+      </View>
+    );
+  }
+  // Locked to offline on the server but not on this phone (e.g. reinstalled): fetch the set again.
+  return (
+    <View className="gap-2">
+      <Button
+        label="Download today's offline Daily"
+        icon={Download}
+        size="lg"
+        full
+        variant="accent"
+        disabled={!online}
+        loading={busy}
+        onPress={async () => {
+          setBusy(true);
+          try {
+            await downloadOfflineDaily();
+          } catch (e: any) {
+            toast.error("Couldn't download", e.message);
+          } finally {
+            setBusy(false);
+          }
+        }}
+      />
+      <Txt variant="caption" tone="muted" className="text-center">Today's Daily was saved for offline play</Txt>
+    </View>
+  );
+}
 
 export default function Daily() {
   const { done } = useLocalSearchParams<{ done?: string }>();
@@ -21,12 +71,25 @@ export default function Daily() {
   const board = useDailyBoard(scope === "state" ? myState : null);
   const d = daily.data;
   const { text } = useCountdown(d?.resetsAt);
+  const offline = useOfflineDaily();
+  const savedToday = !!offline.pack && offline.pack.date === lagosDate();
+  const [confirmOffline, setConfirmOffline] = useState(false);
+  const [saving, setSaving] = useState(false);
 
   return (
     <View className="flex-1 bg-bg">
       <Screen title="Daily Naija" back refreshing={daily.isRefetching} onRefresh={() => { void daily.refetch(); void board.refetch(); }}>
+        {offline.result ? (
+          <Card className="p-4 mb-4 flex-row items-center gap-3" onPress={() => router.push("/daily/offline")} accessibilityLabel="See your offline Daily result">
+            <Icon as={CloudUpload} tone="accent" />
+            <Txt variant="bodyStrong" className="flex-1">Your offline Daily was scored: {offline.result.score.toLocaleString("en-NG")}</Txt>
+            <Icon as={ChevronRight} tone="faint" />
+          </Card>
+        ) : null}
         {!d ? (
-          daily.isError ? <ErrorState offline={(daily.error as any)?.offline} onRetry={() => daily.refetch()} /> : <SkeletonCard lines={4} />
+          savedToday ? (
+            <Card variant="hero" tint="accent" className="p-5 gap-3"><OfflineActions online={online} /></Card>
+          ) : daily.isError ? <ErrorState offline={(daily.error as any)?.offline} onRetry={() => daily.refetch()} /> : <SkeletonCard lines={4} />
         ) : (
           <Card variant="hero" tint="accent" className="p-5 gap-5">
             <View className="flex-row items-center gap-4">
@@ -80,9 +143,12 @@ export default function Daily() {
                 </View>
                 <Txt variant="caption" tone="muted" className="text-center">Next Daily Naija in <Txt variant="caption" tabular>{text}</Txt></Txt>
               </View>
+            ) : d.mode === "offline" || savedToday ? (
+              <OfflineActions online={online} />
             ) : (
               <View className="gap-2">
                 <Button label={d.inProgress ? `Resume · question ${d.nextIndex + 1}` : "Play today's 10"} icon={Play} size="lg" full variant="accent" disabled={!online} onPress={() => router.push("/daily/play")} testID="play-daily" />
+                {!d.inProgress ? <Button label="Save for offline" icon={Download} variant="ghost" full disabled={!online} onPress={() => setConfirmOffline(true)} /> : null}
                 <Txt variant="caption" tone="muted" className="text-center">One attempt per day · +20 coins · resets in <Txt variant="caption" tabular>{text}</Txt></Txt>
               </View>
             )}
@@ -105,6 +171,26 @@ export default function Daily() {
         {d?.played ? <Chip label="Come back tomorrow to keep the streak" icon={Flame} tone="danger" className="self-center mt-4" /> : null}
       </Screen>
       {done && d?.played ? <Confetti count={40} /> : null}
+      <Modal
+        open={confirmOffline}
+        onClose={() => setConfirmOffline(false)}
+        title="Save today's Daily for offline?"
+        body="You'll be able to play today's 10 without data. Answers are scored when you're back online; correct answers earn 100 points each with no speed bonus. Once saved, today's Daily can only be played offline."
+        confirmLabel="Save for offline"
+        loading={saving}
+        onConfirm={async () => {
+          setSaving(true);
+          try {
+            await downloadOfflineDaily();
+            toast.success("Saved for offline", "Play it any time today, even without data.");
+            setConfirmOffline(false);
+          } catch (e: any) {
+            toast.error("Couldn't save", e.message);
+          } finally {
+            setSaving(false);
+          }
+        }}
+      />
     </View>
   );
 }

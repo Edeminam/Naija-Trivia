@@ -3,7 +3,8 @@ import { PREMIUM_MONTHLY_COINS, FIRST_WIN_BONUS, COINS, STATE_WAR_PRIZES, QUESTI
 import { createTestDb, type Sql } from "../src/db";
 import { createDevUser } from "../src/auth";
 import { persistMatchResult, type MatchPlayerInput } from "../src/repo/matches";
-import { completeDaily, getStreak } from "../src/repo/daily";
+import { completeDaily, getStreak, startOfflineDaily, submitOfflineDaily, dailyStatus, startDaily } from "../src/repo/daily";
+import { getQuestions, shuffleSeeded } from "../src/repo/questions";
 import { applyPremiumPerks } from "../src/repo/premium";
 import { purchaseProduct } from "../src/repo/shop";
 import { listAchievements, claimAchievement } from "../src/repo/achievements";
@@ -232,5 +233,60 @@ describe("free challenge limit", () => {
     await expect(createChallenge(sql, free)).rejects.toThrow(/2 challenges a day/);
     await sql.query("update profiles set premium_until = now() + interval '30 days' where id = $1", [free]);
     await expect(createChallenge(sql, free)).resolves.toBeTruthy();
+  });
+});
+
+describe("offline Daily Naija", () => {
+  /** The option id the server considers correct for a question, as this player would see it. */
+  async function correctOption(userId: string, questionId: string) {
+    const q = (await getQuestions(sql, [questionId]))[0]!;
+    return shuffleSeeded(q, `${userId}:daily`).correctOptionId;
+  }
+
+  it("downloads without answers, locks the day offline, and scores on submit with no speed bonus", async () => {
+    const p = await player("off_a");
+    const date = lagosDate();
+    const pack = await startOfflineDaily(sql, p, date);
+    expect(pack.questions).toHaveLength(10);
+    expect(JSON.stringify(pack)).not.toMatch(/correct/i);
+    expect((await dailyStatus(sql, p, date)).mode).toBe("offline");
+    // Re-downloading an unfinished offline run is fine (e.g. after reinstalling).
+    expect((await startOfflineDaily(sql, p, date)).questions.map((q) => q.questionId)).toEqual(pack.questions.map((q) => q.questionId));
+
+    // Right on the first 6, wrong on the next 3, last one unanswered.
+    const answers = [];
+    for (const q of pack.questions.slice(0, 9)) {
+      const right = await correctOption(p, q.questionId);
+      answers.push({ index: q.index, optionId: q.index < 6 ? right : q.options.find((o) => o.id !== right)!.id, ms: 2500 });
+    }
+    const r = await submitOfflineDaily(sql, p, date, answers);
+    expect(r).toMatchObject({ score: 600, correct: 6 });
+    expect(r.results.filter((x) => x.correct)).toHaveLength(6);
+    expect(r.rewards.coins).toBeGreaterThanOrEqual(20);
+    expect(r.rewards.streak).toMatchObject({ current: 1, advanced: true });
+    const st = await dailyStatus(sql, p, date);
+    expect(st).toMatchObject({ played: true, score: 600, correct: 6, mode: "offline" });
+    await expect(submitOfflineDaily(sql, p, date, answers)).rejects.toThrow(/already submitted/);
+  });
+
+  it("refuses offline mode once a day was started online, and stale submissions", async () => {
+    const p = await player("off_b");
+    const date = lagosDate();
+    await startDaily(sql, p, date);
+    await expect(startOfflineDaily(sql, p, date)).rejects.toThrow(/started today's Daily online/);
+    await expect(submitOfflineDaily(sql, p, addDays(date, -5), [])).rejects.toThrow(/too old/);
+  });
+
+  it("a late-synced day pays coins but doesn't rewind a newer streak", async () => {
+    const p = await player("off_c");
+    const today = lagosDate();
+    const yesterday = addDays(today, -1);
+    await startOfflineDaily(sql, p, yesterday);
+    // They played today online before their phone synced yesterday's offline run.
+    await sql.tx((tx) => completeDaily(tx, p, 5, today));
+    const r = await submitOfflineDaily(sql, p, yesterday, []);
+    expect(r.rewards.streak).toMatchObject({ advanced: false, current: 1 });
+    expect(r.rewards.milestone).toBeNull();
+    expect((await getStreak(sql, p, today)).current).toBe(1);
   });
 });

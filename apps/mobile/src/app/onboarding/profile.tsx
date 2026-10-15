@@ -4,7 +4,7 @@ import { router } from "expo-router";
 import Animated, { FadeInRight, FadeOutLeft } from "react-native-reanimated";
 import { Check, X, ArrowRight } from "lucide-react-native";
 import { useQueryClient } from "@tanstack/react-query";
-import { usernameSchema, stateByCode, type MeResponse } from "@ntc/shared";
+import { usernameError, stateByCode, type MeResponse } from "@ntc/shared";
 import { Screen, Txt, Button, Input, Icon, Avatar, toast } from "../../ui";
 import { AvatarPicker } from "../../features/profile/AvatarPicker";
 import { StatePicker } from "../../features/profile/StatePicker";
@@ -21,8 +21,8 @@ function useUsernameCheck(name: string): Check {
   const [res, setRes] = useState<Check>({ state: "idle" });
   useEffect(() => {
     if (!name) return setRes({ state: "idle" });
-    const local = usernameSchema.safeParse(name);
-    if (!local.success) return setRes({ state: "bad", msg: local.error.issues[0]?.message });
+    const problem = usernameError(name);
+    if (problem) return setRes({ state: "bad", msg: problem });
     setRes({ state: "checking" });
     const t = setTimeout(async () => {
       try {

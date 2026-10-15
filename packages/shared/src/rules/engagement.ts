@@ -29,6 +29,10 @@ export const PREMIUM_STIPEND_DAYS = 30;
 /** Daily Naija streak freezes per Lagos week (Monday–Sunday). */
 export const STREAK_FREEZES_PER_WEEK = { free: 1, premium: 2 } as const;
 
+// ── Offline Daily Naija ────────────────────────────────────────────────────
+/** An offline run can be submitted up to this many days after its date (it still counts for that day). */
+export const OFFLINE_DAILY_GRACE_DAYS = 2;
+
 // ── State Wars weekly prizes ───────────────────────────────────────────────
 /** Coins for everyone who scored for the 1st, 2nd and 3rd placed state that week. */
 export const STATE_WAR_PRIZES: readonly number[] = [200, 100, 50];

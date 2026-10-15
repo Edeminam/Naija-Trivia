@@ -1,5 +1,5 @@
 import type { LeagueId, PowerUpKind, CategorySlug, ProductId } from "./constants";
-import type { Settings } from "./schemas";
+import type { Settings } from "./validation";
 import type { PlayerResult } from "./rules/progression";
 import type { ActiveTheme } from "./rules/engagement";
 
@@ -273,6 +273,33 @@ export interface DailyStatus {
   nationalRank: number | null;
   stateRank: number | null;
   players: number;
+  /** "offline" once today's set was downloaded for offline play (then it can't be played online) */
+  mode: "online" | "offline" | null;
+}
+
+// ── Offline Daily Naija ────────────────────────────────────────────────────
+/** Today's 10 questions for offline play. No answers: those stay on the server until you submit. */
+export interface OfflineDailyPack {
+  date: string;
+  questions: { index: number; questionId: string; text: string; category: CategorySlug; options: WireOption[] }[];
+  durationMs: number;
+  /** Lagos date after which an offline run can no longer be submitted */
+  submitBy: string;
+}
+
+export interface OfflineDailyAnswer {
+  index: number;
+  optionId: string | null;
+  /** client-measured answer time; only used to break ties */
+  ms: number;
+}
+
+export interface OfflineDailyResult {
+  date: string;
+  score: number;
+  correct: number;
+  results: { index: number; questionId: string; text: string; correct: boolean; correctOptionId: string; correctText: string; points: number; fact: string }[];
+  rewards: { coins: number; xp: number; streak: { current: number; usedFreeze: boolean; freezesUsed: number; advanced: boolean }; milestone: { days: number; coins: number } | null; achievements: string[] };
 }
 
 export interface ChallengeSummary {

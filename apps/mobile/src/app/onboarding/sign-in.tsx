@@ -6,7 +6,7 @@ import { Smartphone, Terminal } from "lucide-react-native";
 import { Screen, Txt, Button, Input, Card, Icon, toast } from "../../ui";
 import { authMode, toE164, sendPhoneOtp, signInWithGoogle, signInWithApple, appleAvailable, devSignIn } from "../../features/auth";
 import { useTheme } from "../../theme/ThemeProvider";
-import { usernameSchema } from "@ntc/shared";
+import { usernameError } from "@ntc/shared";
 import { queryClient } from "../../lib/queryClient";
 import { api } from "../../lib/api";
 import type { MeResponse } from "@ntc/shared";
@@ -38,7 +38,7 @@ export default function SignIn() {
     }
   };
 
-  const devValid = devName.length === 0 || usernameSchema.safeParse(devName).success;
+  const devValid = devName.length === 0 || !usernameError(devName);
 
   return (
     <Screen back edges={["top", "bottom"]}>

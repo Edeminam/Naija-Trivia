@@ -1,12 +1,13 @@
 import { z } from "zod";
 import { CATEGORIES, STATES, AVATARS, REPORT_REASONS, POWER_UPS, PRODUCTS } from "./constants";
+import { USERNAME_MIN, USERNAME_MAX, USERNAME_PATTERN, USERNAME_ERRORS, type Settings } from "./validation";
 
 export const usernameSchema = z
   .string()
   .trim()
-  .min(3, "At least 3 characters")
-  .max(16, "16 characters max")
-  .regex(/^[a-zA-Z0-9_]+$/, "Letters, numbers and _ only");
+  .min(USERNAME_MIN, USERNAME_ERRORS.short)
+  .max(USERNAME_MAX, USERNAME_ERRORS.long)
+  .regex(USERNAME_PATTERN, USERNAME_ERRORS.chars);
 
 export const stateCodeSchema = z.enum(STATES.map((s) => s.code) as [string, ...string[]]);
 export const avatarIdSchema = z.enum(AVATARS.map((a) => a.id) as [string, ...string[]]);
@@ -27,18 +28,7 @@ export const settingsSchema = z.object({
   dataSaver: z.boolean(),
   reduceMotion: z.boolean(),
   pidginFlavour: z.enum(["light", "full", "off"]),
-});
-export type Settings = z.infer<typeof settingsSchema>;
-
-export const DEFAULT_SETTINGS: Settings = {
-  theme: "system",
-  sound: true,
-  haptics: true,
-  notifications: false,
-  dataSaver: false,
-  reduceMotion: false,
-  pidginFlavour: "light",
-};
+}) satisfies z.ZodType<Settings>;
 
 export const profilePatchSchema = z.object({
   avatarId: avatarIdSchema.optional(),
@@ -100,4 +90,11 @@ export const banMessageSchema = z.object({ categoryId: z.string() });
 export const challengeAnswerSchema = z.object({
   index: z.number().int().min(0).max(9),
   optionId: z.string().nullable(),
+});
+
+export const offlineDailySubmitSchema = z.object({
+  date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+  answers: z
+    .array(z.object({ index: z.number().int().min(0).max(49), optionId: z.string().max(64).nullable(), ms: z.number().min(0).max(600_000) }))
+    .max(50),
 });

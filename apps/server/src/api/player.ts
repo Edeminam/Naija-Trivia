@@ -6,6 +6,7 @@ import {
   usernameSchema,
   reportSchema,
   challengeAnswerSchema,
+  offlineDailySubmitSchema,
   COSMETICS,
   POWER_UPS,
   PRODUCTS,
@@ -29,7 +30,7 @@ import { env } from "../env";
 import { createDevUser, issueDevToken } from "../auth";
 import { getMe, usernameAvailable, getProfileRow, toPublic, isPremium, getPublicProfiles as getPublicProfilesFor } from "../repo/profiles";
 import { listMissions, claimMission } from "../repo/missions";
-import { dailyStatus, getStreak, startDaily, dailyTable, completeDaily, ensureDailySet } from "../repo/daily";
+import { dailyStatus, getStreak, startDaily, dailyTable, completeDaily, ensureDailySet, startOfflineDaily, submitOfflineDaily } from "../repo/daily";
 import { serveNext, submitAnswer } from "../repo/solo";
 import { createChallenge, challengeSummary, startChallenge, challengeTable, completeChallenge, getChallengeRow, incomingChallenges } from "../repo/challenges";
 import { listAchievements, claimAchievement, unclaimedAchievements, checkAchievements } from "../repo/achievements";
@@ -195,6 +196,7 @@ player.post(
     const date = lagosDate();
     const status = await dailyStatus(sql, user.userId, date);
     if (status.played) throw new HttpError(409, "You've already played today's Daily Naija.", "already_played");
+    if (status.mode === "offline") throw new HttpError(409, "You saved today's Daily for offline play. Play it from the Daily screen.", "offline_mode");
     const ids = await startDaily(sql, user.userId, date);
     const r = await serveNext(sql, dailyTable(user.userId, date, ids));
     if (r.finished) {
@@ -215,6 +217,19 @@ player.post(
     let rewards = null;
     if (r.done) rewards = await completeDaily(sql, user.userId, r.totals.correct, date);
     return { ...r.result, rewards };
+  }),
+);
+
+// Offline Daily: download today's set (locks the day to offline mode), then submit answers when back online.
+player.post("/daily/offline", authed(async ({ sql, user }) => startOfflineDaily(sql, user.userId)));
+
+player.post(
+  "/daily/offline/submit",
+  authed(async ({ req, sql, user }) => {
+    const body = parse(offlineDailySubmitSchema, req.body);
+    const r = await submitOfflineDaily(sql, user.userId, body.date, body.answers);
+    analytics.track(user.userId, "daily_offline_submitted", { correct: r.correct });
+    return r;
   }),
 );
 

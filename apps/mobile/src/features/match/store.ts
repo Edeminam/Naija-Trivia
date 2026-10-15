@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { Client, type Room } from "@colyseus/sdk";
+import type { Client, Room } from "@colyseus/sdk";
 import type { QuestionMsg, RevealMsg, ResultMsg, PowerUpKind, CategorySlug, LeagueId } from "@ntc/shared";
 import { WS_URL } from "../../lib/config";
 import { getToken } from "../../stores/session";
@@ -101,8 +101,12 @@ const set = (patch: Partial<MatchStore>) => useMatch.setState(patch);
 const toLocal = (serverTs: number) => serverTs - useMatch.getState().offset;
 const syncClock = (serverNow: number) => set({ offset: serverNow - Date.now() });
 
-function getClient() {
-  if (!client) client = new Client(WS_URL);
+/** The realtime client is loaded on first use so it stays out of the start-up bundle on web. */
+async function getClient() {
+  if (!client) {
+    const { Client } = await import("@colyseus/sdk");
+    client ??= new Client(WS_URL);
+  }
   client.auth.token = getToken() ?? "";
   return client;
 }
@@ -176,7 +180,7 @@ function wireRoom(r: Room, gen: number) {
     useMatch.setState({ ...initial(), mode, stage: "found" });
     const g = ++generation;
     try {
-      const next = await getClient().consumeSeatReservation(m.reservation);
+      const next = await (await getClient()).consumeSeatReservation(m.reservation);
       room = next;
       wireRoom(next, g);
     } catch (e) {
@@ -220,7 +224,7 @@ export const match = {
     const gen = ++generation;
     useMatch.setState({ ...initial(), mode, stage: "searching", searchStartedAt: Date.now() });
     try {
-      const q = await getClient().joinOrCreate("queue", { mode });
+      const q = await (await getClient()).joinOrCreate("queue", { mode });
       if (gen !== generation) return void q.leave();
       queueRoom = q;
       q.onMessage("queued", (m: { serverNow: number }) => syncClock(m.serverNow));
@@ -230,7 +234,7 @@ export const match = {
         if (gen !== generation) return;
         await leaveQueue();
         try {
-          const r = await getClient().consumeSeatReservation(m.reservation);
+          const r = await (await getClient()).consumeSeatReservation(m.reservation);
           if (gen !== generation) return void r.leave();
           room = r;
           wireRoom(r, gen);

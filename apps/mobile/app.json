@@ -58,7 +58,15 @@
       "backgroundColor": "#0B0F0D"
     },
     "plugins": [
-      "expo-router",
+      [
+        "expo-router",
+        {
+          "asyncRoutes": {
+            "web": "production",
+            "default": false
+          }
+        }
+      ],
       "expo-secure-store",
       "expo-sharing",
       "expo-localization",
