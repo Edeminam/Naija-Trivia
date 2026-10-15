@@ -1,4 +1,5 @@
 import "dotenv/config";
+import { fileURLToPath } from "node:url";
 
 const num = (v: string | undefined, d: number) => (v ? Number(v) : d);
 
@@ -15,7 +16,7 @@ export const env = {
   /** HS256 secret for dev / guest tokens issued by this server. */
   devJwtSecret: process.env.DEV_JWT_SECRET ?? "naija-trivia-clash-local-dev-secret-change-me",
   allowDevAuth: process.env.ALLOW_DEV_AUTH ? process.env.ALLOW_DEV_AUTH === "true" : !process.env.SUPABASE_JWT_SECRET,
-  pgliteDir: process.env.PGLITE_DIR ?? new URL("../.data/pglite", import.meta.url).pathname,
+  pgliteDir: process.env.PGLITE_DIR ?? fileURLToPath(new URL("../.data/pglite", import.meta.url)),
   posthogKey: process.env.POSTHOG_KEY || null,
   sentryDsn: process.env.SENTRY_DSN || null,
   expoAccessToken: process.env.EXPO_ACCESS_TOKEN || null,

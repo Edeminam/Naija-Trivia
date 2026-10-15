@@ -460,7 +460,7 @@ player.get(
     const active = new Set((await sql.query("select slug from categories where active")).map((r) => r.slug));
     const categories: CategoryStat[] = cats.filter((c) => active.has(c.slug)).map((c) => ({ slug: c.slug as CategorySlug, answered: c.answered, correct: c.correct, accuracy: c.accuracy }));
     const hist = await sql.query(
-      `select m.id, m.type, m.is_bot, m.bot_name, m.player_a, m.player_b, m.winner, m.score_a, m.score_b, m.rating_delta_a, m.rating_delta_b, m.created_at,
+      `select m.id, m.type, m.is_bot, m.bot_name, m.player_a, m.player_b, m.winner, m.bot_won, m.score_a, m.score_b, m.rating_delta_a, m.rating_delta_b, m.created_at,
               o.username as opp_username, o.avatar_id as opp_avatar, o.state_code as opp_state
          from matches m
          left join profiles o on o.id = case when m.player_a = $1 then m.player_b else m.player_a end
@@ -474,7 +474,7 @@ player.get(
         id: m.id,
         type: m.type,
         isBot: m.is_bot,
-        result: m.winner === null ? "draw" : m.winner === id ? "win" : "loss",
+        result: m.bot_won ? "loss" : m.winner === null ? "draw" : m.winner === id ? "win" : "loss",
         myScore: mine ? m.score_a : m.score_b,
         oppScore: mine ? m.score_b : m.score_a,
         ratingDelta: mine ? m.rating_delta_a : m.rating_delta_b,
@@ -570,7 +570,7 @@ player.get(
   "/matches/:id/public",
   open(async ({ req, sql }) => {
     const m = await sql.one(
-      `select m.id, m.type, m.is_bot, m.bot_name, m.bot_rating, m.winner, m.score_a, m.score_b, m.categories, m.created_at, m.player_a, m.player_b
+      `select m.id, m.type, m.is_bot, m.bot_name, m.bot_rating, m.winner, m.bot_won, m.score_a, m.score_b, m.categories, m.created_at, m.player_a, m.player_b
          from matches m where m.id = $1`,
       [String(req.params.id)],
     );
@@ -584,7 +584,7 @@ player.get(
       b: m.is_bot ? { username: m.bot_name ?? "Practice opponent", avatarId: "musa", stateCode: "LA", rating: m.bot_rating ?? 1000 } : (profiles.get(m.player_b) ?? null),
       scoreA: m.score_a,
       scoreB: m.score_b,
-      winner: m.winner === m.player_a ? "a" : m.winner ? "b" : null,
+      winner: m.bot_won ? "b" : m.winner === m.player_a ? "a" : m.winner ? "b" : null,
       categories: m.categories,
       createdAt: new Date(m.created_at).toISOString(),
     };

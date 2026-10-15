@@ -68,6 +68,7 @@ export async function persistMatchResult(sql: Sql, input: PersistInput): Promise
   const outcome = decideWinner(input.a, input.b);
   const winnerId = outcome === "draw" ? null : outcome === "a" ? input.a.id : input.b.id;
   const vsBot = input.a.isBot || input.b.isBot;
+  const winnerIsBot = (outcome === "a" && input.a.isBot) || (outcome === "b" && input.b.isBot);
   const humans = [input.a, input.b].filter((p) => !p.isBot).sort((x, y) => (x.id < y.id ? -1 : 1));
 
   return sql.tx(async (tx) => {
@@ -143,9 +144,9 @@ export async function persistMatchResult(sql: Sql, input: PersistInput): Promise
     }
 
     const match = await tx.one<{ id: string }>(
-      `insert into matches (type, player_a, player_b, is_bot, bot_name, bot_rating, winner, score_a, score_b, rating_delta_a, rating_delta_b, categories,
+      `insert into matches (type, player_a, player_b, is_bot, bot_name, bot_rating, winner, bot_won, score_a, score_b, rating_delta_a, rating_delta_b, categories,
                             season_id)
-       values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12::text[], (select id from seasons where now() between starts_at and ends_at order by number desc limit 1))
+       values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13::text[], (select id from seasons where now() between starts_at and ends_at order by number desc limit 1))
        returning id`,
       [
         vsBot ? "bot" : "ranked",
@@ -154,7 +155,9 @@ export async function persistMatchResult(sql: Sql, input: PersistInput): Promise
         vsBot,
         vsBot ? (input.botName ?? "Practice opponent") : null,
         vsBot ? (input.a.isBot ? input.a.rating : input.b.rating) : null,
-        winnerId,
+        // Bot ids aren't profile uuids: a bot win is stored as bot_won with no winner.
+        winnerIsBot ? null : winnerId,
+        winnerIsBot,
         input.a.isBot ? input.b.score : input.a.score,
         input.a.isBot ? input.a.score : input.b.score,
         input.a.isBot ? (deltas[input.b.id] ?? 0) : (deltas[input.a.id] ?? 0),

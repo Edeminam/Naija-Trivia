@@ -290,3 +290,23 @@ describe("offline Daily Naija", () => {
     expect((await getStreak(sql, p, today)).current).toBe(1);
   });
 });
+
+describe("matches against bots", () => {
+  const bot = (score: number): MatchPlayerInput => ({ ...seat("bot:test", score), isBot: true, answers: [] });
+
+  it("saves a bot win as a loss, not a draw", async () => {
+    const p = await player("lost_to_bot");
+    const r = await persistMatchResult(sql, { mode: "ranked", categories: [], a: seat(p, 0), b: bot(676), botName: "Ebi_Bot" });
+    expect(r.winnerId).toBe("bot:test");
+    expect(r.players[p]?.result).toBe("loss");
+    const m = await sql.one<{ winner: string | null; bot_won: boolean }>("select winner, bot_won from matches where id = $1", [r.matchId]);
+    expect(m).toEqual({ winner: null, bot_won: true });
+  });
+
+  it("still records a human win over a bot", async () => {
+    const p = await player("beat_bot");
+    const r = await persistMatchResult(sql, { mode: "ranked", categories: [], a: bot(100), b: seat(p, 900) });
+    const m = await sql.one<{ winner: string | null; bot_won: boolean }>("select winner, bot_won from matches where id = $1", [r.matchId]);
+    expect(m).toEqual({ winner: p, bot_won: false });
+  });
+});
