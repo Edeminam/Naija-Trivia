@@ -53,9 +53,11 @@ player.post(
   open(async ({ req, sql }) => {
     if (!env.allowDevAuth) throw new HttpError(404, "Not available");
     const body = parse(z.object({ guest: z.boolean().default(false), username: usernameSchema.optional(), admin: z.boolean().optional() }), req.body ?? {});
-    // Locally a username signs you back in to that account (handy for testing). A public deploy has no
-    // password to check, so a taken username is refused rather than handed over, and nobody can claim admin.
-    if (env.isProduction && body.username && (await sql.one("select 1 from profiles where lower(username) = lower($1)", [body.username]))) {
+    // There's no password to check, so a taken username is refused rather than handed over: each demo account
+    // belongs to whoever picked the name (they stay signed in on their device). The one exception is the admin
+    // dashboard's local sign-in, which reuses "admin"; in production nobody can claim admin at all.
+    const localAdmin = body.admin && !env.isProduction;
+    if (body.username && !localAdmin && (await sql.one("select 1 from profiles where lower(username) = lower($1)", [body.username]))) {
       throw new HttpError(409, "That username is taken. Try another one.", "username_taken");
     }
     const userId = await createDevUser(sql, { guest: body.guest, username: body.username, admin: env.isProduction ? false : body.admin });

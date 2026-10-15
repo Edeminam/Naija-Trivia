@@ -131,7 +131,7 @@ writes happen on the server.
 
 **Quick play (no Supabase yet).** The server can go online in the same keyless mode as local dev:
 guests tap *Play as guest*, and *Continue* with a username saves progress on that device. In production
-a taken username is refused (no password to check), `admin: true` is ignored and demo data is off.
+a taken username is refused (no password to check; this applies locally too), `admin: true` is ignored and demo data is off.
 Accounts can't move between devices until Supabase is set up.
 ```bash
 fly launch --no-deploy --copy-config

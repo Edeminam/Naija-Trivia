@@ -176,7 +176,8 @@ Decisions made where the brief left room, or where a constraint forced a choice.
     `is_admin` for that.
 51. **Quick play deploys.** Until Supabase is set up, production runs the keyless dev auth (one-tap guests,
     username-only accounts) so the web game is as easy to get into as the emulator. Because there's no
-    password, production refuses a username that's taken instead of signing into it, ignores `admin: true`,
+    password, a username that's taken is refused instead of signed into (locally too, so friends sharing a
+    local server each own their name; only the admin dashboard's local `admin` sign-in is exempt), production ignores `admin: true`,
     turns off demo data, and won't start without its own `DEV_JWT_SECRET` (the default is public in this
     repo). Tokens last 365 days, since the token is the account; it lives on one device. Data is PGlite on a
     Fly volume (`/data/pglite`). Setting `SUPABASE_JWT_SECRET` + `DATABASE_URL` later switches to real auth.
