@@ -7,6 +7,7 @@ import {
   reportSchema,
   challengeAnswerSchema,
   offlineDailySubmitSchema,
+  directChallengeSchema,
   COSMETICS,
   POWER_UPS,
   PRODUCTS,
@@ -15,6 +16,7 @@ import {
   CATEGORIES,
   lagosDate,
   themeFor,
+  featuredLiveEvent,
   leagueForRating,
   leagueProgress,
   nextLeague,
@@ -32,13 +34,14 @@ import { getMe, usernameAvailable, getProfileRow, toPublic, isPremium, getPublic
 import { listMissions, claimMission } from "../repo/missions";
 import { dailyStatus, getStreak, startDaily, dailyTable, completeDaily, ensureDailySet, startOfflineDaily, submitOfflineDaily } from "../repo/daily";
 import { serveNext, submitAnswer } from "../repo/solo";
-import { createChallenge, challengeSummary, startChallenge, challengeTable, completeChallenge, getChallengeRow, incomingChallenges } from "../repo/challenges";
+import { createChallenge, challengeSummary, startChallenge, challengeTable, completeChallenge, getChallengeRow, incomingChallenges, settleDueStakes } from "../repo/challenges";
 import { listAchievements, claimAchievement, unclaimedAchievements, checkAchievements } from "../repo/achievements";
 import { listFriends, searchPlayers, requestFriend, acceptFriend, removeFriend, friendStatus, findRival } from "../repo/friends";
 import { stateWars, stateTopPlayers, dailyBoard } from "../repo/leaderboards";
 import { currentSeason, seasonHistory } from "../repo/seasons";
 import { purchaseProduct, buyItem, equipItem, shopCatalog } from "../repo/shop";
 import { applyPremiumPerks } from "../repo/premium";
+import { eventStatus, startEvent, eventTableFor, completeEvent, requireLive } from "../repo/events";
 import { notifyChallengeResult, notifyFriendRequest, notifyDirectChallenge } from "../services/notifications";
 import { analytics } from "../services/analytics";
 
@@ -129,6 +132,7 @@ player.get(
   authed(async ({ sql, user }) => {
     const today = lagosDate();
     const premiumPerks = await applyPremiumPerks(sql, user.userId);
+    await settleDueStakes(sql, user.userId);
     const prof = await getProfileRow(sql, user.userId);
     // Backfill for players who earned achievements before they existed (or before their next match).
     if (prof && !prof.is_guest && !(await sql.one("select 1 from user_achievements where user_id = $1 limit 1", [user.userId]))) {
@@ -145,6 +149,8 @@ player.get(
       unclaimedAchievements(sql, user.userId),
     ]);
     const row = wars?.rows.find((r) => r.code === prof?.state_code);
+    const ev = featuredLiveEvent();
+    const evPlayed = ev ? !!(await sql.one("select 1 from event_entries where event_id = $1 and user_id = $2 and finished_at is not null", [ev.event.id, user.userId])) : false;
     const res: HomeResponse & { chest: { available: boolean; amount: number } } = {
       missions,
       streak,
@@ -157,6 +163,7 @@ player.get(
       incomingChallenges: incoming,
       achievementsToClaim: toClaim,
       premiumPerks,
+      liveEvent: ev ? { id: ev.event.id, name: ev.event.name, tagline: ev.event.tagline, live: ev.live, startsAt: ev.start, endsAt: ev.end, played: evPlayed } : null,
       chest: { available: prof?.chest_date !== today, amount: prof && isPremium(prof) ? CHEST_COINS * 2 : CHEST_COINS },
     };
     return res;
@@ -241,6 +248,49 @@ player.get(
   }),
 );
 
+// ── Live events ────────────────────────────────────────────────────────────
+player.get(
+  "/events/current",
+  authed(async ({ sql, user }) => {
+    const ev = featuredLiveEvent();
+    return { event: ev ? await eventStatus(sql, ev.event.id, user.userId) : null };
+  }),
+);
+
+player.get("/events/:id", authed(async ({ req, sql, user }) => eventStatus(sql, String(req.params.id), user.userId)));
+
+player.post(
+  "/events/:id/next",
+  authed(async ({ req, sql, user }) => {
+    const id = String(req.params.id);
+    const mine = await sql.one("select finished_at from event_entries where event_id = $1 and user_id = $2", [id, user.userId]);
+    if (mine?.finished_at) throw new HttpError(409, "You've already played this event.", "already_played");
+    requireLive(id);
+    const t = await startEvent(sql, user.userId, id);
+    const r = await serveNext(sql, t);
+    if (r.finished && r.timedOut) {
+      const e = await sql.one("select correct from event_entries where event_id = $1 and user_id = $2", [id, user.userId]);
+      await completeEvent(sql, user.userId, e?.correct ?? 0);
+    }
+    return r;
+  }),
+);
+
+player.post(
+  "/events/:id/answer",
+  authed(async ({ req, sql, user }) => {
+    const body = parse(challengeAnswerSchema, req.body);
+    const t = await eventTableFor(sql, user.userId, String(req.params.id));
+    const r = await submitAnswer(sql, t, body.index, body.optionId);
+    let rewards = null;
+    if (r.done) {
+      rewards = await completeEvent(sql, user.userId, r.totals.correct);
+      analytics.track(user.userId, "event_completed", { event: t.key, score: r.totals.score });
+    }
+    return { ...r.result, rewards };
+  }),
+);
+
 // ── Friend challenges ──────────────────────────────────────────────────────
 player.post(
   "/challenges",
@@ -304,8 +354,9 @@ player.post(
   authed(async ({ req, sql, user }) => {
     const other = String(req.params.id);
     if ((await friendStatus(sql, user.userId, other)) !== "friends") throw new HttpError(403, "You can only challenge friends directly.");
-    const code = await createChallenge(sql, user.userId, other);
-    analytics.track(user.userId, "challenge_created", { direct: true });
+    const { stake } = parse(directChallengeSchema, req.body ?? {});
+    const code = await createChallenge(sql, user.userId, other, stake);
+    analytics.track(user.userId, "challenge_created", { direct: true, stake });
     return challengeSummary(sql, code, user.userId);
   }),
 );
@@ -325,6 +376,7 @@ player.get("/challenges/:code", open(async ({ req, sql, user }) => challengeSumm
 player.get(
   "/me/challenges",
   authed(async ({ sql, user }) => {
+    await settleDueStakes(sql, user.userId);
     const rows = await sql.query(
       `select distinct c.code, c.created_at from challenges c left join challenge_entries e on e.challenge_id = c.id
         where c.created_by = $1 or e.user_id = $1 order by c.created_at desc limit 10`,

@@ -5,6 +5,8 @@ import {
   QUESTION_MS,
   OFFLINE_DAILY_GRACE_DAYS,
   STREAK_FREEZES_PER_WEEK,
+  STREAK_FREEZE_COST,
+  STREAK_FREEZE_MAX_OWNED,
   addDays,
   lagosDate,
   lagosWeekStart,
@@ -24,7 +26,7 @@ import { pgArray, type Sql } from "../db";
 import { bumpMissions } from "./missions";
 import { checkAchievements } from "./achievements";
 import { isPremium } from "./profiles";
-import { getQuestions, shuffleSeeded, recordQuestionStats } from "./questions";
+import { getQuestions, playerLocale, shuffleSeeded, recordQuestionStats } from "./questions";
 import { HttpError } from "../api/http";
 import type { SoloTable } from "./solo";
 
@@ -41,7 +43,7 @@ export async function ensureDailySet(sql: Sql, date = lagosDate()): Promise<stri
   );
   const exclude = new Set(recent.map((r) => r.id));
   const pool = await sql.query<{ id: string; difficulty: number; slug: string }>(
-    "select q.id, q.difficulty, c.slug from questions q join categories c on c.id = q.category_id where q.status = 'live' and c.active",
+    "select q.id, q.difficulty, c.slug from questions q join categories c on c.id = q.category_id where q.status = 'live' and (q.release_at is null or q.release_at <= now()) and c.active",
   );
   const h = (s: string) => createHash("sha1").update(`${date}:${s}`).digest("hex");
   const sorted = pool.filter((q) => !exclude.has(q.id)).sort((a, b) => (h(a.id) < h(b.id) ? -1 : 1));
@@ -66,7 +68,7 @@ export async function ensureDailySet(sql: Sql, date = lagosDate()): Promise<stri
 const DAY_MS = 86_400_000;
 const daysBetween = (from: string, to: string) => Math.round((Date.parse(`${to}T00:00:00Z`) - Date.parse(`${from}T00:00:00Z`)) / DAY_MS);
 
-type StreakRow = { current: number; best: number; last_date: string | null; freeze_used_week: string | null; freezes_used: number };
+type StreakRow = { current: number; best: number; last_date: string | null; freeze_used_week: string | null; freezes_used: number; freezes_owned: number };
 
 /** Freezes per week: Premium players get more. */
 async function freezeAllowance(sql: Sql, userId: string) {
@@ -74,47 +76,73 @@ async function freezeAllowance(sql: Sql, userId: string) {
   return p && isPremium(p) ? STREAK_FREEZES_PER_WEEK.premium : STREAK_FREEZES_PER_WEEK.free;
 }
 
-/** Freezes left in the Lagos week containing `today`. */
+/** Free freezes left in the Lagos week containing `today`. */
 const freezesLeft = (s: StreakRow | null, week: string, allowance: number) => Math.max(0, allowance - (s?.freeze_used_week === week ? s.freezes_used : 0));
 
-const STREAK_COLS = "current, best, last_date::text as last_date, freeze_used_week::text as freeze_used_week, freezes_used";
+const STREAK_COLS = "current, best, last_date::text as last_date, freeze_used_week::text as freeze_used_week, freezes_used, freezes_owned";
 
 export async function getStreak(sql: Sql, userId: string, today = lagosDate()): Promise<StreakInfo> {
   const s = await sql.one<StreakRow>(`select ${STREAK_COLS} from streaks where user_id = $1`, [userId]);
   const week = lagosWeekStart(Date.parse(`${today}T12:00:00Z`));
   const allowance = await freezeAllowance(sql, userId);
   const left = freezesLeft(s, week, allowance);
-  const base = { freezeAvailable: left > 0, freezesLeft: left, freezesPerWeek: allowance };
+  const owned = s?.freezes_owned ?? 0;
+  const base = { freezeAvailable: left + owned > 0, freezesLeft: left, freezesPerWeek: allowance, freezesOwned: owned };
   if (!s) return { current: 0, best: 0, playedToday: false, ...base };
-  // Still alive if played today or yesterday, or if the missed days can be covered by freezes left this week.
+  // Still alive if played today or yesterday, or if the missed days can be covered by free + bought freezes.
   const missed = s.last_date ? daysBetween(s.last_date, today) - 1 : Infinity;
-  const alive = missed <= 0 || missed <= left;
+  const alive = missed <= 0 || missed <= left + owned;
   return { current: alive ? s.current : 0, best: s.best, playedToday: s.last_date === today, ...base };
 }
 
-/** Called when today's Daily Naija is completed. Freezes bridge missed days (one freeze per day). */
+/**
+ * Called when today's Daily Naija is completed. Each missed day uses one freeze: this week's free
+ * ones first, then bought ones. If the gap is longer than the freezes available, nothing is used.
+ */
 export async function advanceStreak(sql: Sql, userId: string, today = lagosDate()) {
   const s = await sql.one<StreakRow>(`select ${STREAK_COLS} from streaks where user_id = $1 for update`, [userId]);
   const week = lagosWeekStart(Date.parse(`${today}T12:00:00Z`));
   // Already played today, or a late-synced offline run for an earlier day: the streak doesn't move.
-  if (s?.last_date && s.last_date >= today) return { current: s.current, usedFreeze: false, freezesUsed: 0, advanced: false };
+  if (s?.last_date && s.last_date >= today) return { current: s.current, usedFreeze: false, freezesUsed: 0, boughtUsed: 0, advanced: false };
   const left = freezesLeft(s, week, await freezeAllowance(sql, userId));
+  const owned = s?.freezes_owned ?? 0;
   const missed = s?.last_date ? daysBetween(s.last_date, today) - 1 : Infinity;
   let current = 1;
-  let freezesUsed = 0;
+  let freeUsed = 0;
+  let boughtUsed = 0;
   if (s && missed === 0) current = s.current + 1;
-  else if (s && missed > 0 && missed <= left) {
+  else if (s && missed > 0 && missed <= left + owned) {
     current = s.current + 1;
-    freezesUsed = missed;
+    freeUsed = Math.min(missed, left);
+    boughtUsed = missed - freeUsed;
   }
-  const usedThisWeek = (s?.freeze_used_week === week ? s.freezes_used : 0) + freezesUsed;
+  const usedThisWeek = (s?.freeze_used_week === week ? s.freezes_used : 0) + freeUsed;
   const best = Math.max(current, s?.best ?? 0);
   await sql.query(
-    `insert into streaks (user_id, current, best, last_date, freeze_used_week, freezes_used) values ($1, $2, $3, $4, $5, $6)
-     on conflict (user_id) do update set current = $2, best = $3, last_date = $4, freeze_used_week = $5, freezes_used = $6, updated_at = now()`,
-    [userId, current, best, today, usedThisWeek ? week : null, usedThisWeek],
+    `insert into streaks (user_id, current, best, last_date, freeze_used_week, freezes_used, freezes_owned) values ($1, $2, $3, $4, $5, $6, $7)
+     on conflict (user_id) do update set current = $2, best = $3, last_date = $4, freeze_used_week = $5, freezes_used = $6, freezes_owned = $7, updated_at = now()`,
+    [userId, current, best, today, usedThisWeek ? week : null, usedThisWeek, owned - boughtUsed],
   );
-  return { current, usedFreeze: freezesUsed > 0, freezesUsed, advanced: true };
+  const freezesUsed = freeUsed + boughtUsed;
+  return { current, usedFreeze: freezesUsed > 0, freezesUsed, boughtUsed, advanced: true };
+}
+
+/** Buy one streak freeze with coins (held until a missed day needs it). */
+export async function buyStreakFreeze(sql: Sql, userId: string) {
+  return sql.tx(async (tx) => {
+    const s = await tx.one<{ freezes_owned: number }>("select freezes_owned from streaks where user_id = $1 for update", [userId]);
+    if ((s?.freezes_owned ?? 0) >= STREAK_FREEZE_MAX_OWNED) {
+      throw new HttpError(409, `You can hold ${STREAK_FREEZE_MAX_OWNED} streak freezes at a time.`, "freeze_limit");
+    }
+    const paid = await tx.one<{ coins: number }>("update profiles set coins = coins - $2 where id = $1 and coins >= $2 returning coins", [userId, STREAK_FREEZE_COST]);
+    if (!paid) throw new HttpError(402, `You need ${STREAK_FREEZE_COST} coins.`, "insufficient_coins");
+    const r = await tx.one<{ freezes_owned: number }>(
+      `insert into streaks (user_id, freezes_owned) values ($1, 1)
+       on conflict (user_id) do update set freezes_owned = streaks.freezes_owned + 1, updated_at = now() returning freezes_owned`,
+      [userId],
+    );
+    return { coins: paid.coins, itemId: "streak_freeze", freezesOwned: r!.freezes_owned };
+  });
 }
 
 export function dailyTable(userId: string, date: string, questionIds: string[]): SoloTable {
@@ -142,7 +170,7 @@ export async function completeDaily(sql: Sql, userId: string, correct: number, d
 
 export async function dailyStatus(sql: Sql, userId: string, date = lagosDate()): Promise<DailyStatus> {
   await ensureDailySet(sql, date);
-  const e = await sql.one("select current_index, score, correct, finished_at, served_at, mode from daily_entries where daily_date = $1 and user_id = $2", [date, userId]);
+  const e = await sql.one("select current_index, score, correct, finished_at, served_at, mode, answers from daily_entries where daily_date = $1 and user_id = $2", [date, userId]);
   const rank = e?.finished_at ? await sql.one("select national_rank, state_rank, players from daily_rank($1, $2)", [date, userId]) : null;
   const players = await sql.one<{ n: number }>("select count(*)::int as n from daily_entries where daily_date = $1 and finished_at is not null", [date]);
   return {
@@ -158,6 +186,9 @@ export async function dailyStatus(sql: Sql, userId: string, date = lagosDate()):
     stateRank: rank?.state_rank ?? null,
     players: players?.n ?? 0,
     mode: e ? e.mode : null,
+    results: e?.finished_at
+      ? Array.from({ length: DAILY_QUESTION_COUNT }, (_, i) => !!((typeof e.answers === "string" ? JSON.parse(e.answers) : e.answers) as { index: number; correct: boolean }[]).find((a) => a.index === i)?.correct)
+      : null,
   };
 }
 
@@ -176,7 +207,7 @@ export async function startOfflineDaily(sql: Sql, userId: string, date = lagosDa
     const p = await sql.one<{ state_code: string | null }>("select state_code from profiles where id = $1", [userId]);
     await sql.query("insert into daily_entries (daily_date, user_id, state_code, mode) values ($1, $2, $3, 'offline') on conflict do nothing", [date, userId, p?.state_code ?? null]);
   }
-  const qs = await getQuestions(sql, ids);
+  const qs = await getQuestions(sql, ids, await playerLocale(sql, userId));
   const byId = new Map(qs.map((q) => [q.id, q]));
   return {
     date,
@@ -201,7 +232,7 @@ export async function submitOfflineDaily(sql: Sql, userId: string, date: string,
     if (!e || e.mode !== "offline") throw new HttpError(404, "No offline Daily to submit for that day.", "not_found");
     if (e.finished_at) throw new HttpError(409, "This offline Daily was already submitted.", "already_submitted");
     const ids = (await tx.one<{ question_ids: string[] }>("select question_ids from daily_sets where daily_date = $1", [date]))!.question_ids;
-    const qs = new Map((await getQuestions(tx, ids)).map((q) => [q.id, q]));
+    const qs = new Map((await getQuestions(tx, ids, await playerLocale(tx, userId))).map((q) => [q.id, q]));
     const given = new Map(answers.map((a) => [a.index, a]));
     let score = 0;
     let correctN = 0;

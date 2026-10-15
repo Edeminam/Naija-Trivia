@@ -8,7 +8,7 @@ import { Screen, SectionTitle, Txt, Button, Card, Avatar, CoinCounter, Chip, Lea
 import { useMe } from "../../features/me";
 import { PlanPill } from "../../features/PlanPill";
 import { useHome } from "../../features/home/api";
-import { DailyNaijaCard, MissionsCard, ChestCard, ThemeCard, IncomingChallenges, RivalCard, AchievementsNudge } from "../../features/home/components";
+import { DailyNaijaCard, MissionsCard, ChestCard, ThemeCard, IncomingChallenges, RivalCard, AchievementsNudge, LiveEventCard } from "../../features/home/components";
 import { FIRST_WIN_BONUS } from "@ntc/shared";
 import { useOnline } from "../../lib/useNetwork";
 import { useReducedMotion } from "../../lib/motion";
@@ -156,6 +156,9 @@ export default function Home() {
         </View>
       ) : (
         <>
+          {home.data.liveEvent ? (
+            <View className="mt-4"><LiveEventCard event={home.data.liveEvent} /></View>
+          ) : null}
           {home.data.incomingChallenges?.length ? (
             <View className="mt-4"><IncomingChallenges items={home.data.incomingChallenges} /></View>
           ) : null}

@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { View } from "react-native";
 import { POWER_UP_ICONS as PU_ICON } from "../../features/icons";
-import { Crown, Check, PlayCircle, ShieldCheck, Sparkles, Gift, Infinity as InfinityIcon, Ban, Ticket, Coins, Snowflake } from "lucide-react-native";
-import { LEAGUES, PREMIUM_MONTHLY_COINS, STREAK_FREEZES_PER_WEEK, type ProductId } from "@ntc/shared";
+import { Crown, Check, PlayCircle, ShieldCheck, Sparkles, Gift, Infinity as InfinityIcon, Ban, Ticket, Coins, Snowflake, CalendarClock } from "lucide-react-native";
+import { LEAGUES, PREMIUM_MONTHLY_COINS, STREAK_FREEZES_PER_WEEK, type CosmeticDef, type ProductId } from "@ntc/shared";
 import { Screen, SectionTitle, Txt, Card, Button, CoinCounter, CoinIcon, Avatar, Icon, BottomSheet, Segmented, Chip, Skeleton, SkeletonCard, ErrorState, toast } from "../../ui";
 import { useShop, useBuyItem, useEquip, useShopRefresh, type ShopData } from "../../features/shop/api";
 import { purchases } from "../../features/shop/PurchaseService";
@@ -10,6 +10,7 @@ import { ads } from "../../features/ads/AdService";
 import { useMe } from "../../features/me";
 import { haptic } from "../../lib/haptics";
 import { cn } from "../../lib/cn";
+import { useCountdown } from "../../lib/useCountdown";
 
 
 type Pending = { productId: ProductId; title: string; detail: string } | null;
@@ -111,6 +112,49 @@ function PremiumCard({ data, onBuy }: { data: ShopData; onBuy: (p: Pending) => v
   );
 }
 
+type ShopCosmetic = ShopData["cosmetics"][number];
+
+/** One cosmetic tile: a frame on the player's avatar, or a button theme swatch. */
+function CosmeticTile({ c, avatarId, coins, equipped, onBuy, onEquip }: { c: ShopCosmetic; avatarId: string; coins: number; equipped: boolean; onBuy: () => void; onEquip: () => void }) {
+  return (
+    <Card className={cn("w-[48.5%] p-4 items-center gap-2", equipped && "border-primary")}>
+      {c.kind === "frame" ? (
+        <Avatar id={avatarId} size={64} frameId={c.id} />
+      ) : (
+        <View className="h-16 w-full flex-row items-center gap-2 rounded-btn border-2 px-3" style={{ backgroundColor: c.colors[0], borderColor: c.colors[1] }}>
+          <View className="h-7 w-7 items-center justify-center rounded-lg" style={{ backgroundColor: c.colors[1] }}><Txt variant="label" style={{ color: "#F4F6F5" }}>A</Txt></View>
+        </View>
+      )}
+      <Txt variant="bodyStrong" numberOfLines={1}>{c.name}</Txt>
+      <Txt variant="caption" tone="faint">{c.kind === "frame" ? "Avatar frame" : "Button theme"}</Txt>
+      {c.owned ? (
+        <Button label={equipped ? "Equipped" : "Equip"} icon={equipped ? Check : undefined} size="sm" variant={equipped ? "ghost" : "secondary"} full disabled={equipped} onPress={onEquip} />
+      ) : (
+        <Button label={`${c.cost}`} size="sm" variant="secondary" full disabled={coins < c.cost} onPress={onBuy} accessibilityHint={`Costs ${c.cost} coins`} />
+      )}
+    </Card>
+  );
+}
+
+function WeeklyDrops({ items, endsAt, avatarId, coins, equipped, onBuy, onEquip }: { items: ShopCosmetic[]; endsAt: number; avatarId: string; coins: number; equipped: ShopData["equipped"]; onBuy: (c: CosmeticDef) => void; onEquip: (c: CosmeticDef) => void }) {
+  const { text } = useCountdown(endsAt);
+  if (!items.length) return null;
+  return (
+    <>
+      <SectionTitle title="This week's drops" />
+      <View className="flex-row items-center gap-2 -mt-2 mb-3">
+        <Icon as={CalendarClock} size={14} tone="muted" />
+        <Txt variant="caption" tone="muted">New items in <Txt variant="caption" tabular>{text}</Txt> · each comes back every few weeks</Txt>
+      </View>
+      <View className="flex-row flex-wrap justify-between gap-y-3">
+        {items.map((c) => (
+          <CosmeticTile key={c.id} c={c} avatarId={avatarId} coins={coins} equipped={equipped.frameId === c.id || equipped.buttonThemeId === c.id} onBuy={() => onBuy(c)} onEquip={() => onEquip(c)} />
+        ))}
+      </View>
+    </>
+  );
+}
+
 export default function Shop() {
   const shop = useShop();
   const me = useMe();
@@ -121,14 +165,20 @@ export default function Shop() {
   const [adBusy, setAdBusy] = useState(false);
   const d = shop.data;
   const coins = me.data?.profile.coins ?? d?.coins ?? 0;
+  const avatarId = me.data?.profile.avatarId ?? "ada";
+  // Rotating items show in the weekly drops while featured; afterwards only if you own them.
+  const featured = new Set(d?.featured?.ids ?? []);
+  const inMain = (c: ShopCosmetic) => !c.rotating || (c.owned && !featured.has(c.id));
+  const equipCosmetic = (c: CosmeticDef) =>
+    equip.mutate(c.kind === "frame" ? { frameId: c.id } : { buttonThemeId: c.id }, { onSuccess: () => toast.success(c.kind === "frame" ? "Frame equipped" : "Theme applied") });
 
-  const buyItem = (kind: "power_up" | "cosmetic", itemId: string, name: string) =>
+  const buyItem = (kind: "power_up" | "cosmetic" | "streak_freeze", itemId: string, name: string) =>
     buy.mutate(
       { kind, itemId },
       {
         onSuccess: () => {
           haptic.success();
-          toast.success(`${name} added`, kind === "power_up" ? "Use it in your next clash." : "Equip it below.");
+          toast.success(`${name} added`, kind === "power_up" ? "Use it in your next clash." : kind === "streak_freeze" ? "It kicks in if you miss a day after your free freezes." : "Tap Equip to wear it.");
         },
         onError: (e: any) => toast.error("Couldn't buy", e.message),
       },
@@ -176,6 +226,38 @@ export default function Shop() {
               </Card>
             ) : null}
 
+            <WeeklyDrops
+              items={(d.featured?.ids ?? []).map((id) => d.cosmetics.find((c) => c.id === id)).filter((c): c is ShopCosmetic => !!c)}
+              endsAt={d.featured?.endsAt ?? 0}
+              avatarId={avatarId}
+              coins={coins}
+              equipped={d.equipped}
+              onBuy={(c) => buyItem("cosmetic", c.id, c.name)}
+              onEquip={equipCosmetic}
+            />
+
+            {d.streakFreeze ? (
+              <>
+                <SectionTitle title="Streak freezes" />
+                <Card className="p-4 flex-row items-center gap-3">
+                  <View className="h-11 w-11 items-center justify-center rounded-xl bg-primary-soft"><Icon as={Snowflake} tone="primary" /></View>
+                  <View className="flex-1">
+                    <Txt variant="bodyStrong">Streak freeze{d.streakFreeze.owned ? ` · ${d.streakFreeze.owned} held` : ""}</Txt>
+                    <Txt variant="caption" tone="muted">Covers one missed Daily after your free {d.premium.active ? "freezes" : "freeze"} this week. Hold up to {d.streakFreeze.max}.</Txt>
+                  </View>
+                  <Button
+                    label={d.streakFreeze.owned >= d.streakFreeze.max ? "Full" : `${d.streakFreeze.cost}`}
+                    size="sm"
+                    variant="secondary"
+                    disabled={d.streakFreeze.owned >= d.streakFreeze.max || coins < d.streakFreeze.cost}
+                    loading={buy.isPending && buy.variables?.kind === "streak_freeze"}
+                    onPress={() => buyItem("streak_freeze", "streak_freeze", "Streak freeze")}
+                    accessibilityHint={`Costs ${d.streakFreeze.cost} coins`}
+                  />
+                </Card>
+              </>
+            ) : null}
+
             <SectionTitle title="Power-ups" />
             <Txt variant="caption" tone="muted" className="-mt-2 mb-3">One per match. You also get 1 free power-up every day.</Txt>
             <View className="flex-row flex-wrap justify-between gap-y-3">
@@ -205,7 +287,7 @@ export default function Shop() {
 
             <SectionTitle title="Avatar frames" />
             <View className="flex-row flex-wrap justify-between gap-y-3">
-              {d.cosmetics.filter((c) => c.kind === "frame").map((c) => {
+              {d.cosmetics.filter((c) => c.kind === "frame" && inMain(c)).map((c) => {
                 const equipped = d.equipped.frameId === c.id;
                 return (
                   <Card key={c.id} className={cn("w-[48.5%] p-4 items-center gap-2", equipped && "border-primary")}>
@@ -227,7 +309,7 @@ export default function Shop() {
 
             <SectionTitle title="Answer button themes" />
             <View className="gap-3">
-              {d.cosmetics.filter((c) => c.kind === "button_theme").map((c) => {
+              {d.cosmetics.filter((c) => c.kind === "button_theme" && inMain(c)).map((c) => {
                 const equipped = d.equipped.buttonThemeId === c.id;
                 return (
                   <Card key={c.id} className={cn("p-3 flex-row items-center gap-3", equipped && "border-primary")}>

@@ -20,6 +20,13 @@ export function usernameError(raw: string): string | null {
   return null;
 }
 
+/** Languages questions can be shown in. English is the source; others fall back to English per question. */
+export type QuestionLocale = "en" | "pcm";
+export const QUESTION_LOCALES: readonly { id: QuestionLocale; name: string }[] = [
+  { id: "en", name: "English" },
+  { id: "pcm", name: "Pidgin" },
+];
+
 export interface Settings {
   theme: "system" | "dark" | "light";
   sound: boolean;
@@ -28,6 +35,8 @@ export interface Settings {
   dataSaver: boolean;
   reduceMotion: boolean;
   pidginFlavour: "light" | "full" | "off";
+  /** Language questions are shown in, where a translation exists */
+  questionLanguage: QuestionLocale;
 }
 
 export const DEFAULT_SETTINGS: Settings = {
@@ -38,4 +47,5 @@ export const DEFAULT_SETTINGS: Settings = {
   dataSaver: false,
   reduceMotion: false,
   pidginFlavour: "light",
+  questionLanguage: "en",
 };

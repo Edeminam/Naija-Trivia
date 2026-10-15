@@ -11,10 +11,21 @@ import { proverbs } from "./bank/proverbs";
 import { naijaLife } from "./bank/naija-life";
 import { techBusiness } from "./bank/tech-business";
 import { MORE } from "./bank/more";
+import { TRANSLATIONS } from "./bank/translations";
+import { DROPS } from "./bank/drops";
+import type { QuestionLocale } from "@ntc/shared";
 
 export type { CategoryBank, Seed };
 /** The original 100-question banks plus later additions (bank/more), merged per category. */
-export const BANKS: CategoryBank[] = [nollywood, afrobeats, football, history, geography, food, pidgin, proverbs, naijaLife, techBusiness].map((b) => ({ ...b, questions: [...b.questions, ...(MORE[b.category] ?? [])] }));
+export const BANKS: CategoryBank[] = [nollywood, afrobeats, football, history, geography, food, pidgin, proverbs, naijaLife, techBusiness].map((b) => ({
+  ...b,
+  questions: [
+    ...b.questions,
+    ...(MORE[b.category] ?? []),
+    // Weekly drops: written ahead, released one Monday at a time.
+    ...DROPS.flatMap((d) => (d.questions[b.category] ?? []).map((s) => ({ ...s, release: d.release }))),
+  ],
+}));
 
 /** Stable UUID derived from a string (sha1-based, v5-style layout). */
 export function stableUuid(input: string): string {
@@ -43,6 +54,10 @@ export interface BuiltQuestion {
   fact: string;
   sourceUrl: string;
   status: "live" | "in_review";
+  /** Lagos midnight of the Monday this question goes live, or null if it's live now */
+  releaseAt: string | null;
+  /** Other-language versions, options already in this question's stored order */
+  translations: { locale: Exclude<QuestionLocale, "en">; text: string; options: string[]; fact: string }[];
 }
 
 /** Shuffle authored options (correct first) into a stable order and record the correct index. */
@@ -67,6 +82,11 @@ export function buildQuestions(): BuiltQuestion[] {
         fact: s.fact,
         sourceUrl: s.sourceUrl,
         status: s.status,
+        releaseAt: s.release ? `${s.release}T00:00:00+01:00` : null,
+        translations: Object.entries(TRANSLATIONS).flatMap(([locale, byText]) => {
+          const t = byText?.[s.text];
+          return t ? [{ locale: locale as Exclude<QuestionLocale, "en">, text: t.text, options: order.map((i) => t.options[i]!), fact: t.fact }] : [];
+        }),
       });
     }
   }

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, ListChecks, Inbox, Flag, Upload, ShieldAlert, type LucideIcon } from "lucide-react";
+import { LayoutDashboard, ListChecks, Inbox, Flag, Upload, ShieldAlert, CalendarRange, type LucideIcon } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { cn } from "@/lib/utils";
 import { api } from "@/lib/api";
@@ -11,6 +11,7 @@ const ITEMS: { href: string; label: string; icon: LucideIcon; badge?: "review" |
   { href: "/", label: "Overview", icon: LayoutDashboard },
   { href: "/questions", label: "Questions", icon: ListChecks },
   { href: "/review", label: "Review queue", icon: Inbox, badge: "review" },
+  { href: "/content", label: "Content pipeline", icon: CalendarRange },
   { href: "/reports", label: "Reports", icon: Flag, badge: "reports" },
   { href: "/import", label: "CSV import", icon: Upload },
   { href: "/fair-play", label: "Fair play", icon: ShieldAlert },

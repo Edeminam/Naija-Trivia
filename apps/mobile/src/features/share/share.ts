@@ -42,3 +42,12 @@ export async function shareChallengeCard(code: string, link: string) {
   analytics.track("share_challenge_card");
   await shareCard(`/share/challenge/${code}.png`, link, "I don challenge you for Naija Trivia Clash! 7 questions, same as mine. Oya!");
 }
+
+/** Daily Naija result: Status-sized card plus a spoiler-free emoji grid for chats. */
+export async function shareDaily(userId: string, date: string, d: { score: number; correct: number; results: boolean[]; streak: number }) {
+  analytics.track("share_daily", { correct: d.correct });
+  const grid = d.results.map((ok) => (ok ? "🟩" : "🟥")).join("");
+  const day = new Date(`${date}T12:00:00Z`).toLocaleDateString("en-NG", { day: "numeric", month: "short" });
+  const message = `Daily Naija ${day}: ${d.correct}/10 · ${d.score.toLocaleString("en-NG")} pts${d.streak > 1 ? ` · 🔥${d.streak}` : ""}\n${grid}\nSame 10 questions for everybody. Can you beat me?`;
+  await shareCard(`/share/daily/${userId}/${date}.png`, `${SERVER_URL}/l/d/${userId}/${date}`, message);
+}

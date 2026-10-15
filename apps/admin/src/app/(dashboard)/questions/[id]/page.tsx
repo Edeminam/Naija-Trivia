@@ -16,7 +16,7 @@ export default function EditQuestion({ params }: { params: Promise<{ id: string 
   const d = q.data;
   return (
     <>
-      <PageHeader title="Edit question" description={d ? `Created ${new Date(d.createdAt).toLocaleDateString()}${d.authorName ? ` by ${d.authorName}` : ""}${d.reviewerName ? ` · reviewed by ${d.reviewerName}` : ""}` : undefined} actions={d ? <StatusBadge status={d.status} /> : null} />
+      <PageHeader title="Edit question" description={d ? `Created ${new Date(d.createdAt).toLocaleDateString()}${d.authorName ? ` by ${d.authorName}` : ""}${d.reviewerName ? ` · reviewed by ${d.reviewerName}` : ""}` : undefined} actions={d ? <StatusBadge status={d.status} releaseAt={d.releaseAt} scheduled={d.scheduled} /> : null} />
       {q.isError ? (
         <Card><ErrorBox error={q.error} onRetry={() => q.refetch()} /></Card>
       ) : !d ? (

@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { CATEGORIES, STATES, AVATARS, REPORT_REASONS, POWER_UPS, PRODUCTS } from "./constants";
+import { CHALLENGE_STAKES } from "./rules/engagement";
 import { USERNAME_MIN, USERNAME_MAX, USERNAME_PATTERN, USERNAME_ERRORS, type Settings } from "./validation";
 
 export const usernameSchema = z
@@ -28,6 +29,7 @@ export const settingsSchema = z.object({
   dataSaver: z.boolean(),
   reduceMotion: z.boolean(),
   pidginFlavour: z.enum(["light", "full", "off"]),
+  questionLanguage: z.enum(["en", "pcm"]),
 }) satisfies z.ZodType<Settings>;
 
 export const profilePatchSchema = z.object({
@@ -74,8 +76,16 @@ export const purchaseSchema = z.object({
 });
 
 export const buyItemSchema = z.object({
-  kind: z.enum(["power_up", "cosmetic"]),
+  kind: z.enum(["power_up", "cosmetic", "streak_freeze"]),
   itemId: z.string(),
+});
+
+export const directChallengeSchema = z.object({
+  stake: z
+    .number()
+    .int()
+    .refine((n) => (CHALLENGE_STAKES as readonly number[]).includes(n), "Pick one of the stake amounts")
+    .default(0),
 });
 
 export const powerUpKindSchema = z.enum(POWER_UPS.map((p) => p.kind) as [string, ...string[]]);

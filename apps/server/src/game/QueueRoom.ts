@@ -1,5 +1,5 @@
 import { Room, matchMaker, type Client } from "@colyseus/core";
-import { pairQueue, MATCHMAKING_TIMEOUT_MS, ratingWindow } from "@ntc/shared";
+import { pairQueue, MATCHMAKING_TIMEOUT_MS, ratingWindow, isNewPlayer } from "@ntc/shared";
 import { verifyToken, ensureProfile, type AuthUser } from "../auth";
 import { getDb } from "../db";
 import { getProfileRow } from "../repo/profiles";
@@ -56,7 +56,7 @@ export class QueueRoom extends Room {
       await this.presence.subscribe(channel(auth.userId), cb);
     }
     const joinedAt = Date.now();
-    await store.add({ userId: auth.userId, rating: row.rating, joinedAt, mode });
+    await store.add({ userId: auth.userId, rating: row.rating, joinedAt, mode, newPlayer: isNewPlayer(row.ranked_games ?? 0) });
     client.send("queued", { joinedAt, serverNow: joinedAt, window: ratingWindow(0), timeoutMs: MATCHMAKING_TIMEOUT_MS });
   }
 

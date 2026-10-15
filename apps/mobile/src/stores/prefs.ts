@@ -35,4 +35,5 @@ export const settingsOf = (s: PrefsState): Settings => ({
   dataSaver: s.dataSaver,
   reduceMotion: s.reduceMotion,
   pidginFlavour: s.pidginFlavour,
+  questionLanguage: s.questionLanguage,
 });

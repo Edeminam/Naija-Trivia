@@ -1,9 +1,10 @@
-import { lagosDate, lagosWeekStart, themeFor, stateByCode, LAGOS_OFFSET_MS } from "@ntc/shared";
+import { lagosDate, lagosWeekStart, themeFor, stateByCode, featuredLiveEvent, liveEventById, LAGOS_OFFSET_MS } from "@ntc/shared";
 import type { Sql } from "../db";
 import { env } from "../env";
 import { errors } from "./errors";
 import { currentSeason } from "../repo/seasons";
 import { settleStateWeek, detectOvertakes } from "../repo/leaderboards";
+import { settleEndedEvents } from "../repo/events";
 
 interface PushMessage {
   to: string;
@@ -136,12 +137,45 @@ async function announceTheme(sql: Sql, today: string) {
   await sendExpoPush(msgs);
 }
 
+/** Push everyone (inside the marketing cap) in the first 10 minutes of a live event. */
+async function announceLiveEvent(sql: Sql, now: number) {
+  const ev = featuredLiveEvent(now);
+  if (!ev?.live || now - ev.start > 10 * 60_000) return;
+  const kind = `event_${ev.event.id}`;
+  const due = await sql.query<{ id: string; push_token: string }>(
+    `select p.id, p.push_token from profiles p
+      where p.push_token is not null and coalesce((p.settings->>'notifications')::boolean, false)
+        and not exists (select 1 from notification_log n where n.user_id = p.id and n.kind = $1)
+      limit 500`,
+    [kind],
+  );
+  const msgs: PushMessage[] = [];
+  for (const u of due) {
+    if (!(await canSendMarketing(sql, u.id))) continue;
+    msgs.push({ to: u.push_token, title: `🔴 ${ev.event.name} is live`, body: `${ev.event.tagline} 10 questions, top 10 win coins. ${ev.event.durationMin} minutes only.`, data: { url: `/event/${ev.event.id}` } });
+    await log(sql, u.id, kind, true);
+  }
+  await sendExpoPush(msgs);
+}
+
+/** Pay prizes for events that just ended and tell the winners. */
+async function settleEventsAndAnnounce(sql: Sql, now: number) {
+  for (const r of await settleEndedEvents(sql, now)) {
+    const name = liveEventById(r.eventId)?.name ?? "the live event";
+    for (const p of r.paid) {
+      await pushTo(sql, p.userId, `event_prize_${r.eventId}`, `You finished #${p.rank} in ${name} 🏆`, `+${p.coins} coins are in your wallet.`, `/event/${r.eventId}`);
+    }
+  }
+}
+
 /** Runs every minute: daily reminder, season heads-up, State Wars settlement/overtakes, themed-week kickoff. */
 export async function runNotificationTick(sql: Sql, now = Date.now()) {
   const lagosHour = new Date(now + LAGOS_OFFSET_MS).getUTCHours();
   const lagosMinute = new Date(now + LAGOS_OFFSET_MS).getUTCMinutes();
   const today = lagosDate(now);
   await settleAndAnnounce(sql);
+  await settleEventsAndAnnounce(sql, now);
+  await announceLiveEvent(sql, now);
   if (lagosMinute % 10 === 0 && lagosHour >= 8 && lagosHour < 22) await announceOvertakes(sql, today);
   if (lagosHour === 10) await announceTheme(sql, today);
   if (lagosHour === 19) {

@@ -3,7 +3,7 @@ import { Platform, View } from "react-native";
 import { router } from "expo-router";
 import { useQueryClient } from "@tanstack/react-query";
 import { Volume2, Vibrate, Bell, Wifi, Sparkles, MessageCircle, LogOut, Trash2, MapPin, UserCircle2, ShieldCheck, Crown } from "lucide-react-native";
-import { stateByCode, type MeResponse } from "@ntc/shared";
+import { stateByCode, type MeResponse, QUESTION_LOCALES } from "@ntc/shared";
 import { Screen, SectionTitle, Card, ListRow, Segmented, Txt, Modal, BottomSheet, Button, toast } from "../ui";
 import { usePrefs } from "../stores/prefs";
 import { useMe } from "../features/me";
@@ -42,6 +42,22 @@ export default function SettingsScreen() {
         <Segmented label="Theme" value={prefs.theme} onChange={(theme) => prefs.set({ theme })} options={[{ value: "system", label: "System" }, { value: "dark", label: "Dark" }, { value: "light", label: "Light" }]} />
         <Txt variant="label" tone="muted" className="mt-2">Pidgin flavour in copy</Txt>
         <Segmented label="Pidgin flavour" value={prefs.pidginFlavour} onChange={(pidginFlavour) => prefs.set({ pidginFlavour })} options={[{ value: "off", label: "Off" }, { value: "light", label: "Light" }, { value: "full", label: "Full" }]} />
+      </Card>
+
+      <SectionTitle title="Questions" />
+      <Card className="p-4 gap-3">
+        <Txt variant="label" tone="muted">Show questions in</Txt>
+        <Segmented
+          label="Question language"
+          value={prefs.questionLanguage ?? "en"}
+          onChange={(questionLanguage) => prefs.set({ questionLanguage })}
+          options={QUESTION_LOCALES.map((l) => ({ value: l.id, label: l.name }))}
+        />
+        <Txt variant="caption" tone="muted">
+          {prefs.questionLanguage === "pcm"
+            ? "Questions wey get Pidgin version go show for Pidgin. The rest go still show for English. Same answers, same points."
+            : "Pidgin versions are rolling out category by category. Anything not translated yet stays in English."}
+        </Txt>
       </Card>
 
       <SectionTitle title="Gameplay" />

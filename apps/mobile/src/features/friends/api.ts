@@ -42,5 +42,5 @@ export function useFriendAction() {
 }
 
 export function useChallengeFriend() {
-  return useMutation({ mutationFn: (id: string) => api.post<ChallengeSummary>(`/friends/${id}/challenge`) });
+  return useMutation({ mutationFn: ({ id, stake }: { id: string; stake: number }) => api.post<ChallengeSummary>(`/friends/${id}/challenge`, { stake }) });
 }

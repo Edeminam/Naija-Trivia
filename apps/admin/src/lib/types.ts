@@ -19,6 +19,10 @@ export interface AdminQuestion {
   reviewerNotes: string | null;
   authorName: string | null;
   reviewerName: string | null;
+  /** When it went (or goes) live; in the future = scheduled for a weekly drop */
+  releaseAt: string | null;
+  /** Live but not released yet */
+  scheduled: boolean;
   createdAt: string;
   updatedAt: string;
   reports?: { reason: string; note: string | null; status: string; created_at: string }[];

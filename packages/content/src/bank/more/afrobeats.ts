@@ -1,4 +1,4 @@
-import { q, u, W, type Seed } from "../helpers";
+import { q, W, type Seed } from "../helpers";
 
 export const afrobeatsMore: Seed[] = [
   // ── Difficulty 1 ──────────────────────────────────────────────────────
@@ -81,8 +81,8 @@ export const afrobeatsMore: Seed[] = [
   q(3, "Which singer released 'Ada Ada' (2014) and 'Golibe'?", ["Flavour", "Phyno", "Kcee", "J. Martins"], "'Ada Ada' became a wedding staple.", W + "Flavour_N%27abania"),
   q(3, "Which singer had a 2013 hit with 'Limpopo'?", ["Kcee", "Flavour", "Harrysong", "Iyanya"], "The song came with a popular dance.", W + "Kcee"),
   q(3, "Which singer had a 2012 hit with 'Kukere'?", ["Iyanya", "Kcee", "Tekno", "Runtown"], "The song's dance swept Nigerian parties.", W + "Iyanya"),
-  u(3, "Wizkid sold out how many consecutive nights at London's O2 Arena in 2021?", ["3", "1", "2", "5"], "The shows were part of his Made in Lagos tour.", W + "Wizkid"),
-  u(3, "Ayra Starr's 'Rush' made her the first African female solo artist to pass how many Spotify streams on a song?", ["100 million", "1 billion", "10 million", "500 million"], "'Rush' was released in 2022.", W + "Ayra_Starr"),
+  q(3, "Wizkid sold out how many consecutive nights at London's O2 Arena in 2021?", ["3", "1", "2", "5"], "The shows were part of his Made in Lagos tour.", W + "Wizkid"),
+  q(3, "Ayra Starr's 'Rush' made her the youngest African female artist to pass how many YouTube views on a song?", ["100 million", "1 billion", "10 million", "500 million"], "'Rush' was released in 2022.", W + "Ayra_Starr"),
 
   // ── Difficulty 4 ──────────────────────────────────────────────────────
   q(4, "Which Fela Kuti album led to the army's 1977 raid on Kalakuta Republic?", ["Zombie", "Shuffering and Shmiling", "Sorrow, Tears and Blood", "Beasts of No Nation"], "Soldiers burned Kalakuta down after the album's success.", W + "Zombie_(album)"),
@@ -102,7 +102,7 @@ export const afrobeatsMore: Seed[] = [
   q(4, "Which singer came second on Idols West Africa (2007) and later sang 'In the Music'?", ["Omawumi", "Timi Dakolo", "Waje", "Praiz"], "Omawumi is from Warri.", W + "Omawumi"),
   q(4, "Who won the first season of Idols West Africa in 2007?", ["Timi Dakolo", "Omawumi", "Iyanya", "Chidinma"], "Timi Dakolo is known for 'Great Nation'.", W + "Timi_Dakolo"),
   q(4, "Chidinma Ekile rose to fame by winning which show?", ["MTN Project Fame West Africa", "Nigerian Idol", "The Voice Nigeria", "Glo X-Factor"], "Her breakthrough hit was 'Kedike'.", W + "Chidinma"),
-  u(4, "Which Wizkid album was the first by an African artist to pass 1 billion Spotify streams?", ["Made in Lagos", "Ayo", "More Love, Less Ego", "Superstar"], "Its hit 'Essence' featured Tems.", W + "Made_in_Lagos"),
+  q(4, "Which Wizkid album was the first by an African artist to pass 1 billion Spotify streams?", ["Made in Lagos", "Ayo", "More Love, Less Ego", "Superstar"], "Its hit 'Essence' featured Tems.", W + "Made_in_Lagos"),
 
   // ── Difficulty 5 ──────────────────────────────────────────────────────
   q(5, "Fela Kuti studied music at which London college?", ["Trinity College of Music", "Royal Academy of Music", "Goldsmiths", "King's College"], "His parents had hoped he would study medicine.", W + "Fela_Kuti"),
@@ -116,8 +116,8 @@ export const afrobeatsMore: Seed[] = [
   q(5, "Which producer-turned-singer made 'Finesse' with BNXN in 2022?", ["Pheelz", "Sarz", "Young John", "Rexxie"], "Pheelz produced many of Olamide's hits.", W + "Pheelz"),
   q(5, "BNXN (formerly Buju) changed his stage name in 2022 after a dispute with which artist?", ["Buju Banton", "Burna Boy", "Wizkid", "Bujuman"], "The Jamaican reggae star raised the issue.", W + "BNXN"),
   q(5, "Seun Kuti's Grammy-nominated 2018 album featuring Carlos Santana is titled?", ["Black Times", "Many Things", "IMF", "A Long Way to the Beginning"], "Seun leads his father's old band, Egypt 80.", W + "Seun_Kuti"),
-  u(5, "Who produced Wizkid's 'Ojuelegba'?", ["Legendury Beatz", "Sarz", "Kel-P", "Masterkraft"], "Legendury Beatz is a duo of brothers.", W + "Ojuelegba_(song)"),
-  u(5, "Bright Chimezie popularised which style of Igbo music?", ["Zigima sound", "Ikwokilikwo", "Egwu Ekpili", "Ogene"], "His hit 'Because of English' mocks people who show off with English.", W + "Bright_Chimezie"),
-  u(5, "'Nwanne Di Na Mba' is a classic by which highlife musician?", ["Celestine Ukwu", "Oliver De Coque", "Osita Osadebe", "Bright Chimezie"], "The title means 'there are brothers in other lands' in Igbo.", W + "Celestine_Ukwu"),
-  u(5, "Sikiru Ayinde Barrister said he named fuji music after what?", ["Japan's Mount Fuji", "A Yoruba god", "A Lagos street", "His mother's name"], "He said he saw a poster of Mount Fuji at an airport.", W + "Fuji_music"),
+  q(5, "Who produced Wizkid's 'Ojuelegba'?", ["Legendury Beatz", "Sarz", "Kel-P", "Masterkraft"], "Legendury Beatz is a duo of brothers.", W + "Ojuelegba_(song)"),
+  q(5, "Bright Chimezie popularised which style of Igbo music?", ["Zigima sound", "Ikwokilikwo", "Egwu Ekpili", "Ogene"], "His hit 'Because of English' mocks people who show off with English.", W + "Bright_Chimezie"),
+  q(5, "'Nwanne Di Na Mba' is a classic by which highlife musician?", ["Celestine Ukwu", "Oliver De Coque", "Osita Osadebe", "Bright Chimezie"], "The title means 'there are brothers in other lands' in Igbo.", W + "Celestine_Ukwu"),
+  q(5, "Sikiru Ayinde Barrister said he named fuji music after what?", ["Japan's Mount Fuji", "A Yoruba god", "A Lagos street", "His mother's name"], "He said he saw a poster of Mount Fuji at an airport.", W + "Fuji_music"),
 ];

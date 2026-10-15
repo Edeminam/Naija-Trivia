@@ -48,11 +48,11 @@ lines.push(`-- Questions (${questions.length})`);
 for (let i = 0; i < questions.length; i += 100) {
   const chunk = questions.slice(i, i + 100);
   lines.push(
-    "insert into questions (id, category_id, text, options, correct_index, difficulty, fact, source_url, status) values",
+    "insert into questions (id, category_id, text, options, correct_index, difficulty, fact, source_url, status, release_at) values",
     chunk
       .map(
         (q) =>
-          `  (${lit(q.id)}, ${lit(catId(q.category))}, ${lit(q.text)}, ${lit(JSON.stringify(q.options))}::jsonb, ${q.correctIndex}, ${q.difficulty}, ${lit(q.fact)}, ${lit(q.sourceUrl)}, '${q.status}')`,
+          `  (${lit(q.id)}, ${lit(catId(q.category))}, ${lit(q.text)}, ${lit(JSON.stringify(q.options))}::jsonb, ${q.correctIndex}, ${q.difficulty}, ${lit(q.fact)}, ${lit(q.sourceUrl)}, '${q.status}', ${q.releaseAt ? `${lit(q.releaseAt)}::timestamptz` : "null"})`,
       )
       .join(",\n") +
       "\non conflict (id) do update set text = excluded.text, options = excluded.options, correct_index = excluded.correct_index, difficulty = excluded.difficulty, fact = excluded.fact, source_url = excluded.source_url,\n" +
@@ -61,8 +61,24 @@ for (let i = 0; i < questions.length; i += 100) {
   );
 }
 
+// release_at is only set on insert: an editor who publishes a scheduled question early keeps that change.
+
+// Translations (live once the English question is; editors can pause one in the admin)
+const translated = questions.flatMap((q) => q.translations.map((t) => ({ id: q.id, ...t })));
+lines.push(`-- Question translations (${translated.length})`);
+for (let i = 0; i < translated.length; i += 100) {
+  lines.push(
+    "insert into question_translations (question_id, locale, text, options, fact) values",
+    translated
+      .slice(i, i + 100)
+      .map((t) => `  (${lit(t.id)}, ${lit(t.locale)}, ${lit(t.text)}, ${lit(JSON.stringify(t.options))}::jsonb, ${lit(t.fact)})`)
+      .join(",\n") + "\non conflict (question_id, locale) do update set text = excluded.text, options = excluded.options, fact = excluded.fact;",
+    "",
+  );
+}
+
 // Three Daily Naija sets: a balanced mix of live questions, easy → hard.
-const live = questions.filter((q) => q.status === "live");
+const live = questions.filter((q) => q.status === "live" && !q.releaseAt);
 const rand = mulberry32(20261006);
 const used = new Set<string>();
 const dates = ["2026-10-06", "2026-10-07", "2026-10-08"];

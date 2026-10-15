@@ -1,4 +1,4 @@
-import { q, u, W, type CategoryBank } from "./helpers";
+import { q, W, type CategoryBank } from "./helpers";
 
 const ECON = W + "Economy_of_Nigeria";
 const BANKS = W + "List_of_banks_in_Nigeria";
@@ -91,17 +91,17 @@ export const techBusiness: CategoryBank = {
     q(4, "Which agency develops and regulates IT in Nigeria?", ["NITDA", "NCC", "NAFDAC", "NERC"], "NITDA stands for National Information Technology Development Agency.", W + "National_Information_Technology_Development_Agency"),
     q(4, "Which agency regulates telecoms in Nigeria?", ["NCC", "NITDA", "NERC", "NBC"], "NCC stands for Nigerian Communications Commission.", W + "Nigerian_Communications_Commission"),
     q(4, "Which USSD code belongs to UBA?", ["*919#", "*737#", "*894#", "*901#"], "UBA stands for United Bank for Africa.", BANKS),
-    u(4, "Moniepoint became a 'unicorn' (valued at $1 billion+) in which year?", ["2024", "2019", "2021", "2016"], "Google's Africa fund was among its backers.", W + "Moniepoint"),
-    u(4, "Billionaire Mike Adenuga is popularly nicknamed?", ["The Bull", "The Lion", "The Eagle", "The Oracle"], "He rarely gives interviews.", W + "Mike_Adenuga"),
-    u(4, "Nigeria's cashless policy was first piloted in which city in 2012?", ["Lagos", "Abuja", "Kano", "Port Harcourt"], "It set daily limits on cash withdrawals.", W + "Central_Bank_of_Nigeria"),
+    q(4, "Moniepoint became a 'unicorn' (valued at $1 billion+) in which year?", ["2024", "2019", "2021", "2016"], "Google's Africa fund was among its backers.", W + "Moniepoint"),
+    q(4, "Billionaire Mike Adenuga is popularly nicknamed?", ["The Bull", "The Lion", "The Eagle", "The Oracle"], "He rarely gives interviews.", W + "Mike_Adenuga"),
+    q(4, "Nigeria's cashless policy was first piloted in which city in 2012?", ["Lagos", "Abuja", "Kano", "Port Harcourt"], "It set daily limits on cash withdrawals.", W + "Central_Bank_of_Nigeria"),
 
     // ── Difficulty 5 ──────────────────────────────────────────────────────
     q(5, "First Bank began in 1894 under which name?", ["Bank of British West Africa", "Colonial Bank", "Barclays DCO", "Royal Niger Bank"], "It was founded by Alfred Jones, a Liverpool shipping magnate.", W + "First_Bank_of_Nigeria"),
     q(5, "Aliko Dangote's great-grandfather, a famous Kano trader, was?", ["Alhassan Dantata", "Ado Bayero", "Isyaku Rabiu", "Aminu Kano"], "Dantata was once the richest man in West Africa.", W + "Alhassan_Dantata"),
     q(5, "In which year was the Central Bank of Nigeria established?", ["1958", "1960", "1963", "1973"], "It began operations in 1959.", W + "Central_Bank_of_Nigeria"),
     q(5, "Which American accelerator backed Paystack in 2016?", ["Y Combinator", "Techstars", "500 Startups", "Google for Startups"], "It was Y Combinator's first Nigerian company.", W + "Paystack"),
-    u(5, "Which company was Nigeria's first private GSM licence holder to launch services, in August 2001?", ["Econet Wireless", "MTN", "Glo", "Mtel"], "Econet's network later became Airtel.", W + "Airtel_Nigeria"),
-    u(5, "NIGCOMSAT-1, Nigeria's first communications satellite, was launched from which country in 2007?", ["China", "Russia", "India", "United States"], "It failed in orbit in 2008 and was replaced in 2011.", W + "NigComSat-1"),
+    q(5, "Which company was Nigeria's first private GSM licence holder to launch services, in August 2001?", ["Econet Wireless", "MTN", "Glo", "Mtel"], "Econet's network later became Airtel.", W + "Airtel_Nigeria"),
+    q(5, "NIGCOMSAT-1, Nigeria's first communications satellite, was launched from which country in 2007?", ["China", "Russia", "India", "United States"], "It failed in orbit in 2008 and was replaced in 2011.", W + "NigComSat-1"),
 
     // ── Additions ─────────────────────────────────────────────────────────
 
@@ -119,13 +119,13 @@ export const techBusiness: CategoryBank = {
     q(3, "Where is Flutterwave headquartered?", ["San Francisco", "Lagos", "London", "Nairobi"], "Most of its staff are in Africa.", W + "Flutterwave"),
     q(3, "In which year was Nigeria's Startup Act signed into law?", ["2022", "2018", "2020", "2024"], "It offers incentives to tech startups.", W + "Economy_of_Nigeria"),
     q(3, "Nigerian fintech Carbon was originally called?", ["Paylater", "Paga", "Kwik", "Lidya"], "It rebranded in 2019.", W + "Carbon_(company)"),
-    u(3, "Street phone-call businesses in the early 2000s were known as?", ["Umbrella call centres", "Mobile kiosks", "Talk shops", "Sim stalls"], "Vendors sat under umbrellas selling calls by the minute.", W + "Telecommunications_in_Nigeria"),
+    q(3, "Street phone-call businesses in the early 2000s were known as?", ["Call centres", "Cyber cafés", "Talk shops", "Sim stalls"], "Vendors sat under umbrellas selling calls by the minute.", W + "Telecommunications_in_Nigeria"),
     q(4, "MTN Nigeria listed on the Nigerian Stock Exchange in which year?", ["2019", "2001", "2010", "2023"], "It listed by introduction, without an IPO.", W + "MTN_Nigeria"),
     q(4, "The main index of the Nigerian Exchange is called?", ["All-Share Index", "NGX 100", "Lagos Composite", "Naira Index"], "It tracks all listed equities.", W + "Nigerian_Exchange_Group"),
     q(4, "Which two telecoms got Payment Service Bank licences in 2022 for mobile money?", ["MTN and Airtel", "Glo and 9mobile", "MTN and Glo", "Airtel and 9mobile"], "MTN's service is MoMo PSB and Airtel's is SmartCash.", W + "Mobile_payment"),
-    u(4, "The Treasury Single Account (TSA) for federal revenues was fully enforced in which year?", ["2015", "2010", "2019", "2005"], "It moved government money from commercial banks into the CBN.", W + "Economy_of_Nigeria"),
-    u(4, "Kobo360 is a Nigerian startup in which industry?", ["Haulage and logistics", "Banking", "Education", "Health"], "It connects truck owners with cargo.", W + "Kobo360"),
-    u(5, "Airtel Africa listed on which two stock exchanges in 2019?", ["London and Lagos", "New York and Lagos", "Johannesburg and Nairobi", "London and Johannesburg"], "Its biggest market is Nigeria.", W + "Airtel_Africa"),
+    q(4, "The Treasury Single Account (TSA) for federal revenues was fully enforced in which year?", ["2015", "2010", "2019", "2005"], "It moved government money from commercial banks into the CBN.", W + "Economy_of_Nigeria"),
+    q(4, "Kobo360 is a Nigerian startup in which industry?", ["Haulage and logistics", "Banking", "Education", "Health"], "It connects truck owners with cargo.", W + "Kobo360"),
+    q(5, "Airtel Africa listed on which two stock exchanges in 2019?", ["London and Lagos", "New York and Lagos", "Johannesburg and Nairobi", "London and Johannesburg"], "Its biggest market is Nigeria.", W + "Airtel_Africa"),
     q(2, "Which Nigerian bank is known for its orange branding?", ["GTBank", "Zenith Bank", "First Bank", "Access Bank"], "GTBank's orange is one of Nigeria's most recognisable brand colours.", W + "Guaranty_Trust_Bank"),
     q(3, "Which network launched in 2003 and popularised per-second billing in Nigeria?", ["Glo", "MTN", "Airtel", "9mobile"], "Before Glo, calls were billed per minute.", W + "Globacom"),
     q(3, "Ecobank Transnational is headquartered in which city?", ["Lomé", "Lagos", "Accra", "Abidjan"], "Ecobank operates in over 30 African countries.", W + "Ecobank"),

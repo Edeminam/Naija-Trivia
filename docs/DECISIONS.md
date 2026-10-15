@@ -138,3 +138,34 @@ Decisions made where the brief left room, or where a constraint forced a choice.
     while Premium is active. Freezes are now counted per Lagos week (`streaks.freezes_used`) and bridge
     one missed day each, so a Premium player can miss two days in a week without losing the streak.
 
+42. **Coins buy streak freezes.** 150 coins each, hold at most 2 (`streaks.freezes_owned`). A missed day uses
+    the week's free freeze(s) first and bought ones only after; if the gap is longer than all freezes
+    available, nothing is spent and the streak resets.
+43. **Coin stakes on direct friend challenges** (0/25/50/100). The creator's stake is taken at creation and the
+    friend's when they accept; anyone else using the link plays for free. When both have played, the winner
+    takes both stakes (a dead heat refunds both). At expiry (48 h): a player who finished beats one who
+    accepted but didn't; otherwise stakes are refunded. Settlement is idempotent (`challenges.stake_outcome`)
+    and runs on finish, on viewing the challenge, and on Home.
+44. **Weekly shop drops.** Nine rotating cosmetics (`rotating: true`), three on sale each Lagos week; every
+    item comes back every three weeks. Owned rotating items stay equippable forever.
+45. **New-player protection.** A player's first 10 ranked games can't lose rating (wins still count), shown
+    on the result screen. In the queue, new players are paired with each other first when one is in range.
+    The bot fallback after 5 s already existed and is unchanged. The result screen now shows the player's
+    wrong pick and the fact for each missed question.
+46. **Live national events** are scheduled in `LIVE_EVENTS` (shared): a 10-question, one-attempt quiz in a
+    60–90 minute window, server-timed like Daily Naija. Finishing pays 40 coins; when the event ends, the top
+    10 get 500/300/200/100… (settled once via `events_settled`, then pushed). Home shows the event from a week
+    before. Moving events (AFCON, BBNaija finale, Eid) need a dated entry; there's no admin UI for events yet.
+47. **Pidgin questions.** `question_translations` holds per-question versions (locale `pcm` now; `yo`/`ig`/`ha`
+    allowed) with options in the English order, so answers and stats are shared. Players pick "Show
+    questions in: English / Pidgin" in Settings; untranslated questions stay in English. 120 easy/medium
+    questions (12 per category) are translated. Yoruba, Igbo and Hausa packs were not written: they need
+    native-speaker editors to be trustworthy.
+48. **Daily Naija share card** (`/share/daily/:userId/:date.png`, 1080×1920 for WhatsApp Status) plus a
+    spoiler-free 🟩🟥 text grid. Match and challenge cards were already Status-sized.
+49. **Weekly content pipeline.** `questions.release_at`: a live question with a future release time isn't
+    served yet. Reviewers approve into the next Monday drop (or publish now); the admin "Content pipeline"
+    page tracks releases vs the 50/week target, scheduled drops, the review queue, per-category repeat rate
+    (answers in the last 7 days to a question the player had answered before) and the most-played questions.
+    The bank ships 150 pre-written questions in three drops (19 Oct, 26 Oct, 2 Nov 2026), and the 89
+    `in_review` questions were fact-checked and promoted (3 rewritten after checking sources).

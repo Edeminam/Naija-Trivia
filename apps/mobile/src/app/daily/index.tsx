@@ -1,10 +1,11 @@
 import { useState } from "react";
 import { View } from "react-native";
 import { router, useLocalSearchParams } from "expo-router";
-import { Flame, Snowflake, Play, Trophy, Users2, Download, WifiOff, CloudUpload, ChevronRight } from "lucide-react-native";
+import { Flame, Snowflake, Play, Trophy, Users2, Download, WifiOff, CloudUpload, ChevronRight, Share2 } from "lucide-react-native";
 import { stateByCode, addDays, lagosDate, nextStreakMilestone, STREAK_MILESTONES } from "@ntc/shared";
 import { Screen, SectionTitle, Txt, Button, Card, Icon, Segmented, SkeletonCard, SkeletonRow, ErrorState, EmptyState, Confetti, Chip, Modal, toast } from "../../ui";
 import { useOfflineDaily, downloadOfflineDaily } from "../../features/daily/offline";
+import { shareDaily } from "../../features/share/share";
 import { useDaily, useDailyBoard } from "../../features/daily/api";
 import { useMe } from "../../features/me";
 import { LeaderRow } from "../../features/LeaderRow";
@@ -75,6 +76,7 @@ export default function Daily() {
   const savedToday = !!offline.pack && offline.pack.date === lagosDate();
   const [confirmOffline, setConfirmOffline] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [sharing, setSharing] = useState(false);
 
   return (
     <View className="flex-1 bg-bg">
@@ -98,7 +100,13 @@ export default function Daily() {
               </View>
               <View className="flex-1">
                 <Txt variant="display" tabular>{d.streak.current}<Txt variant="h3" tone="muted"> day streak</Txt></Txt>
-                <Txt variant="caption" tone="muted">Best {d.streak.best} · {d.streak.freezeAvailable ? `${d.streak.freezesLeft ?? 1} of ${d.streak.freezesPerWeek ?? 1} freeze${(d.streak.freezesPerWeek ?? 1) > 1 ? "s" : ""} left this week` : "No freezes left this week"}</Txt>
+                <Txt variant="caption" tone="muted">
+                  Best {d.streak.best} · {d.streak.freezesLeft ? `${d.streak.freezesLeft} of ${d.streak.freezesPerWeek ?? 1} free freeze${(d.streak.freezesPerWeek ?? 1) > 1 ? "s" : ""} left this week` : "Free freezes used this week"}
+                  {d.streak.freezesOwned ? ` · ${d.streak.freezesOwned} bought` : ""}
+                </Txt>
+                {!d.streak.freezesOwned ? (
+                  <Txt variant="caption" tone="primary" onPress={() => router.push("/shop")} accessibilityRole="link">Buy a freeze in the shop</Txt>
+                ) : null}
               </View>
               <Icon as={Snowflake} tone={d.streak.freezeAvailable ? "primary" : "faint"} />
             </View>
@@ -141,6 +149,25 @@ export default function Daily() {
                     </View>
                   ))}
                 </View>
+                {d.results && me.data ? (
+                  <Button
+                    label="Share my score"
+                    icon={Share2}
+                    variant="secondary"
+                    full
+                    loading={sharing}
+                    onPress={async () => {
+                      setSharing(true);
+                      try {
+                        await shareDaily(me.data!.profile.id, d.date, { score: d.score ?? 0, correct: d.correct ?? 0, results: d.results!, streak: d.streak.current });
+                      } catch (e: any) {
+                        toast.error("Couldn't share", e.message);
+                      } finally {
+                        setSharing(false);
+                      }
+                    }}
+                  />
+                ) : null}
                 <Txt variant="caption" tone="muted" className="text-center">Next Daily Naija in <Txt variant="caption" tabular>{text}</Txt></Txt>
               </View>
             ) : d.mode === "offline" || savedToday ? (

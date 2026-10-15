@@ -3,7 +3,8 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Check, X, ExternalLink, Pencil, PartyPopper } from "lucide-react";
+import { Check, X, ExternalLink, Pencil, PartyPopper, CalendarPlus } from "lucide-react";
+import { nextContentDrop } from "@ntc/shared";
 import { toast } from "sonner";
 import { api } from "@/lib/api";
 import type { QuestionList, AdminQuestion } from "@/lib/types";
@@ -13,12 +14,15 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 
+const dropLabel = new Date(nextContentDrop()).toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short" });
+
 function ReviewItem({ q, onDone }: { q: AdminQuestion; onDone: () => void }) {
   const [notes, setNotes] = useState("");
   const decide = useMutation({
-    mutationFn: (decision: "approve" | "reject") => api(`/admin/review/${q.id}`, { body: { decision, notes: notes || undefined } }),
+    mutationFn: (decision: "approve" | "schedule" | "reject") =>
+      api(`/admin/review/${q.id}`, { body: { decision: decision === "schedule" ? "approve" : decision, schedule: decision === "schedule", notes: notes || undefined } }),
     onSuccess: (_r, decision) => {
-      toast.success(decision === "approve" ? "Approved — now live" : "Sent back to draft");
+      toast.success(decision === "approve" ? "Approved — now live" : decision === "schedule" ? `Scheduled for the ${dropLabel} drop` : "Sent back to draft");
       onDone();
     },
     onError: (e: any) => toast.error(e.message),
@@ -42,7 +46,8 @@ function ReviewItem({ q, onDone }: { q: AdminQuestion; onDone: () => void }) {
           {q.sourceUrl ? <a href={q.sourceUrl} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-sm text-green-text hover:underline">Check source <ExternalLink className="size-3.5" /></a> : <p className="text-sm text-destructive">No source URL</p>}
           <Textarea rows={2} placeholder="Reviewer notes (optional, shown to the author)" value={notes} onChange={(e) => setNotes(e.target.value)} aria-label="Reviewer notes" />
           <div className="flex flex-wrap gap-2">
-            <Button onClick={() => decide.mutate("approve")} disabled={decide.isPending}><Check /> Approve & publish</Button>
+            <Button onClick={() => decide.mutate("schedule")} disabled={decide.isPending}><CalendarPlus /> Approve for {dropLabel} drop</Button>
+            <Button variant="outline" onClick={() => decide.mutate("approve")} disabled={decide.isPending}><Check /> Publish now</Button>
             <Button variant="destructive" onClick={() => decide.mutate("reject")} disabled={decide.isPending}><X /> Reject</Button>
             <Button variant="ghost" nativeButton={false} render={<Link href={`/questions/${q.id}`} />}><Pencil /> Edit</Button>
           </div>
@@ -62,7 +67,7 @@ export default function Review() {
   };
   return (
     <>
-      <PageHeader title="Review queue" description="Verify the answer against the source before approving. Approved questions go live immediately." />
+      <PageHeader title="Review queue" description="Verify the answer against the source before approving. Approve into the next Monday drop to keep a steady weekly flow, or publish now." />
       {list.isError ? (
         <Card><ErrorBox error={list.error} onRetry={() => list.refetch()} /></Card>
       ) : !list.data ? (

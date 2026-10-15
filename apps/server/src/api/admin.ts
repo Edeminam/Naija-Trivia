@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { z } from "zod";
-import { questionInputSchema, questionStatusSchema, CATEGORIES, AUTO_PAUSE_REPORT_COUNT, REPORT_REASONS } from "@ntc/shared";
+import { questionInputSchema, questionStatusSchema, CATEGORIES, AUTO_PAUSE_REPORT_COUNT, REPORT_REASONS, CONTENT_WEEKLY_TARGET, nextContentDrop, lagosWeekStart, addDays } from "@ntc/shared";
 import { admin, parse, HttpError } from "./http";
 import type { Sql } from "../db";
 
@@ -43,6 +43,8 @@ function toQuestion(r: any) {
     reviewerNotes: r.reviewer_notes,
     authorName: r.author_name ?? null,
     reviewerName: r.reviewer_name ?? null,
+    releaseAt: r.release_at ? new Date(r.release_at).toISOString() : null,
+    scheduled: !!r.release_at && new Date(r.release_at).getTime() > Date.now(),
     createdAt: new Date(r.created_at).toISOString(),
     updatedAt: new Date(r.updated_at).toISOString(),
   };
@@ -139,11 +141,16 @@ adminApi.patch(
 adminApi.post(
   "/admin/review/:id",
   admin(async ({ req, sql, user }) => {
-    const body = parse(z.object({ decision: z.enum(["approve", "reject"]), notes: z.string().max(500).optional() }), req.body);
+    const body = parse(
+      z.object({ decision: z.enum(["approve", "reject"]), notes: z.string().max(500).optional(), schedule: z.boolean().default(false) }),
+      req.body,
+    );
+    // Approving records when it goes live: now, or the next weekly drop when scheduled.
+    const releaseAt = body.decision === "approve" ? (body.schedule ? nextContentDrop() : new Date().toISOString()) : null;
     const r = await sql.one(
-      `update questions set status = $2::question_status, reviewer_id = $3, reviewer_notes = $4, updated_at = now()
-        where id = $1 and status = 'in_review' returning id, status`,
-      [String(req.params.id), body.decision === "approve" ? "live" : "draft", user.userId, body.notes ?? null],
+      `update questions set status = $2::question_status, reviewer_id = $3, reviewer_notes = $4, release_at = $5::timestamptz, updated_at = now()
+        where id = $1 and status = 'in_review' returning id, status, release_at`,
+      [String(req.params.id), body.decision === "approve" ? "live" : "draft", user.userId, body.notes ?? null, releaseAt],
     );
     if (!r) throw new HttpError(409, "This question is no longer in review");
     return r;
@@ -254,7 +261,8 @@ adminApi.get(
               (select count(*)::int from matches where created_at > now() - interval '24 hours') as matches_24h,
               (select count(*)::int from question_reports where status = 'open') as open_reports,
               (select count(*)::int from questions where status = 'in_review') as in_review,
-              (select count(*)::int from questions where status = 'live') as live`,
+              (select count(*)::int from questions where status = 'live' and (release_at is null or release_at <= now())) as live,
+              (select count(*)::int from questions where status = 'live' and release_at > now()) as scheduled`,
     );
     const categories = CATEGORIES.map((c) => {
       const rows = byCat.filter((r) => r.slug === c.slug);
@@ -268,6 +276,98 @@ adminApi.get(
     });
     const buckets = Array.from({ length: 10 }, (_, i) => ({ from: i * 10, to: i * 10 + 10, count: dist.find((d) => d.bucket === i + 1)?.n ?? 0 }));
     return { totals, categories, accuracyBuckets: buckets, flags };
+  }),
+);
+
+/** Move a scheduled question to another drop, or publish it now (releaseAt: null). */
+adminApi.patch(
+  "/admin/questions/:id/release",
+  admin(async ({ req, sql }) => {
+    const body = parse(z.object({ releaseAt: z.iso.datetime({ offset: true }).nullable() }), req.body);
+    const r = await sql.one(
+      "update questions set release_at = coalesce($2::timestamptz, now()), updated_at = now() where id = $1 returning id, release_at",
+      [String(req.params.id), body.releaseAt],
+    );
+    if (!r) throw new HttpError(404, "Question not found");
+    return r;
+  }),
+);
+
+/**
+ * Content pipeline health: weekly releases against the target, what's scheduled, the review queue,
+ * and how often players meet a question they've already answered (repeats) per category.
+ */
+adminApi.get(
+  "/admin/content",
+  admin(async ({ sql }) => {
+    const thisWeek = lagosWeekStart();
+    const from = addDays(thisWeek, -28);
+    const to = addDays(thisWeek, 28);
+    const weekly = await sql.query<{ week: string; released: number; scheduled: number }>(
+      `select to_char(date_trunc('week', (release_at at time zone 'UTC') + interval '1 hour'), 'YYYY-MM-DD') as week,
+              count(*) filter (where release_at <= now())::int as released,
+              count(*) filter (where release_at > now())::int as scheduled
+         from questions
+        where status = 'live' and release_at >= ($1::date - interval '1 hour') and release_at < ($2::date - interval '1 hour')
+        group by 1`,
+      [from, to],
+    );
+    const weeks = Array.from({ length: 8 }, (_, i) => {
+      const week = addDays(from, 7 * i);
+      const w = weekly.find((r) => r.week === week);
+      return { weekStart: week, released: w?.released ?? 0, scheduled: w?.scheduled ?? 0, current: week === thisWeek };
+    });
+    const cats = await sql.query(
+      `select c.slug,
+              count(q.id) filter (where q.status = 'live' and (q.release_at is null or q.release_at <= now()))::int as live,
+              count(q.id) filter (where q.status = 'live' and q.release_at > now())::int as scheduled,
+              count(q.id) filter (where q.status = 'in_review')::int as in_review,
+              coalesce(avg(q.times_shown) filter (where q.status = 'live'), 0)::float as avg_shown
+         from categories c left join questions q on q.category_id = c.id group by c.slug`,
+    );
+    const repeats = await sql.query<{ slug: string; answers: number; repeats: number }>(
+      `select c.slug, count(*)::int as answers,
+              count(*) filter (where exists (
+                select 1 from match_answers p where p.user_id = a.user_id and p.question_id = a.question_id and p.created_at < a.created_at
+              ))::int as repeats
+         from match_answers a join categories c on c.id = a.category_id
+        where a.created_at > now() - interval '7 days'
+        group by c.slug`,
+    );
+    const mostSeen = await sql.query(
+      `select q.id, q.text, c.slug, q.times_shown, q.difficulty,
+              (select count(*)::int from seen_questions s where s.question_id = q.id and s.seen_at > now() - interval '30 days') as seen_by_30d
+         from questions q join categories c on c.id = q.category_id
+        where q.status = 'live' and q.times_shown > 0
+        order by q.times_shown desc limit 15`,
+    );
+    const active = await sql.one<{ n: number }>("select count(distinct user_id)::int as n from match_answers where created_at > now() - interval '30 days'");
+    const totalAnswers = repeats.reduce((a, r) => a + r.answers, 0);
+    const totalRepeats = repeats.reduce((a, r) => a + r.repeats, 0);
+    return {
+      target: CONTENT_WEEKLY_TARGET,
+      nextDrop: nextContentDrop(),
+      weeks,
+      reviewQueue: cats.reduce((a, c) => a + c.in_review, 0),
+      repeatRate7d: totalAnswers ? totalRepeats / totalAnswers : null,
+      activePlayers30d: active?.n ?? 0,
+      categories: CATEGORIES.map((c) => {
+        const row = cats.find((r) => r.slug === c.slug);
+        const rep = repeats.find((r) => r.slug === c.slug);
+        return {
+          slug: c.slug,
+          name: c.name,
+          tint: c.tint,
+          live: row?.live ?? 0,
+          scheduled: row?.scheduled ?? 0,
+          inReview: row?.in_review ?? 0,
+          avgShown: row?.avg_shown ?? 0,
+          answers7d: rep?.answers ?? 0,
+          repeatRate7d: rep?.answers ? rep.repeats / rep.answers : null,
+        };
+      }),
+      mostSeen: mostSeen.map((r) => ({ id: r.id, text: r.text, category: r.slug, timesShown: r.times_shown, difficulty: r.difficulty, seenBy30d: r.seen_by_30d })),
+    };
   }),
 );
 

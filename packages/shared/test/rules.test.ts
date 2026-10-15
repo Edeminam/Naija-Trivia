@@ -195,6 +195,23 @@ describe("matchmaking widening", () => {
     expect(pairs.map(([x, y]) => [x.userId, y.userId])).toEqual([["a", "c"]]);
     expect(timedOut.map((e) => e.userId)).toEqual(["d"]);
   });
+  it("pairs new players with each other when one is in range", () => {
+    const now = 20_000;
+    const { pairs } = pairQueue(
+      [
+        { userId: "new1", rating: 1000, joinedAt: now - 300, newPlayer: true },
+        { userId: "vet", rating: 1005, joinedAt: now - 200 },
+        { userId: "new2", rating: 1060, joinedAt: now - 100, newPlayer: true },
+      ],
+      now,
+    );
+    expect(pairs.map(([x, y]) => [x.userId, y.userId])).toEqual([["new1", "new2"]]);
+  });
+  it("protects new players from rating loss, not from gains", () => {
+    expect(ratingDelta({ rating: 1000, opponentRating: 1000, score: 0, rankedGames: 9, protectNew: true })).toBe(0);
+    expect(ratingDelta({ rating: 1000, opponentRating: 1000, score: 1, rankedGames: 9, protectNew: true })).toBe(16);
+    expect(ratingDelta({ rating: 1000, opponentRating: 1000, score: 0, rankedGames: 10, protectNew: true })).toBe(-16);
+  });
 });
 
 describe("question selection", () => {

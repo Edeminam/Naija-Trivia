@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { View } from "react-native";
 import { router, Redirect } from "expo-router";
 import Animated, { FadeInDown, ZoomIn } from "react-native-reanimated";
-import { RotateCcw, Share2, Home as HomeIcon, Check, X, Minus, Flag, Bot, TrendingUp, TrendingDown, MapPin, Sparkles, UserPlus, Gift } from "lucide-react-native";
+import { RotateCcw, Share2, Home as HomeIcon, Check, X, Minus, Flag, Bot, TrendingUp, TrendingDown, MapPin, Sparkles, UserPlus, Gift, ShieldCheck, Lightbulb } from "lucide-react-native";
 import { LEAGUES, leagueProgress, stateByCode, categoryBySlug } from "@ntc/shared";
 import { Screen, Txt, Button, Card, Avatar, AnimatedNumber, ProgressBar, LeagueBadge, CoinIcon, Icon, IconButton, Confetti, AdirePattern, Chip, toast } from "../../ui";
 import { useMatch, match } from "../../features/match/store";
@@ -127,6 +127,7 @@ export default function Result() {
           {!r.isBot && !isGuest && oppId ? <FriendButton id={oppId} name={opp?.username ?? "your opponent"} /> : null}
           {r.isBot ? <Chip label="Practice opponent · half rating & state points" icon={Bot} /> : null}
           {mine.shieldSaved ? <Chip label="Shield saved your rating" tone="primary" /> : null}
+          {mine.newPlayerSaved ? <Chip label="New player: no rating lost" icon={ShieldCheck} tone="primary" /> : null}
         </Card>
 
         <Animated.View entering={reduce ? undefined : FadeInDown.delay(150).duration(260)} className="flex-row gap-2.5 mt-4">
@@ -159,6 +160,9 @@ export default function Result() {
               </View>
               <ProgressBar value={leagueProgress(mine.ratingAfter)} delay={500} label="League progress" />
               {mine.levelAfter > mine.levelBefore ? <Txt variant="caption" tone="primary">Level up! You're now level {mine.levelAfter}.</Txt> : null}
+              {mine.protectedGamesLeft ? (
+                <Txt variant="caption" tone="muted">New player protection: {mine.protectedGamesLeft} more ranked {mine.protectedGamesLeft === 1 ? "game" : "games"} without losing rating.</Txt>
+              ) : null}
             </View>
           </Card>
         ) : (
@@ -171,14 +175,17 @@ export default function Result() {
           </Card>
         )}
 
-        <Txt variant="h3" className="mt-6 mb-3">Question by question</Txt>
+        <Txt variant="h3" className="mt-6 mb-1">Question by question</Txt>
+        <Txt variant="caption" tone="muted" className="mb-3">{mine.correct}/{r.rounds.length} right{mine.correct < r.rounds.length ? " · here's what you missed" : ""}</Txt>
         <Card className="px-4 overflow-hidden">
           <AdirePattern id="result-pattern" />
           {r.rounds.map((rd, i) => {
             const a = rd.answers[myId!];
             const b = rd.answers[oppId];
+            const picked = a?.optionId && !a.correct ? rd.options?.find((o) => o.id === a.optionId)?.text : null;
             return (
-              <View key={rd.round} className={cn("flex-row items-center gap-3 py-3", i > 0 && "border-t border-line")} accessibilityLabel={`Question ${rd.round}: ${rd.text}. Answer ${rd.correctText}. You ${a?.points ?? 0}, opponent ${b?.points ?? 0}`}>
+              <View key={rd.round} className={cn("py-3 gap-2", i > 0 && "border-t border-line")}>
+              <View className="flex-row items-center gap-3" accessibilityLabel={`Question ${rd.round}: ${rd.text}. Answer ${rd.correctText}.${picked ? ` You said ${picked}.` : ""} You ${a?.points ?? 0}, opponent ${b?.points ?? 0}`}>
                 <View className={cn("h-8 w-8 items-center justify-center rounded-full", a?.correct ? "bg-primary" : a?.optionId ? "bg-danger" : "bg-raised")}>
                   <Icon as={a?.correct ? Check : a?.optionId ? X : Minus} size={16} tone={a?.correct ? "ink" : a?.optionId ? "white" : "faint"} />
                 </View>
@@ -186,12 +193,20 @@ export default function Result() {
                   <Txt variant="caption" tone="faint">{rd.round === 7 ? "Q7 · Double Wahala" : `Q${rd.round}`} · {categoryBySlug(rd.category)?.short}</Txt>
                   <Txt variant="label" numberOfLines={2}>{rd.text}</Txt>
                   <Txt variant="caption" tone="primary" numberOfLines={1}>✓ {rd.correctText}</Txt>
+                  {picked ? <Txt variant="caption" tone="danger" numberOfLines={1}>✕ You: {picked}</Txt> : !a?.optionId ? <Txt variant="caption" tone="faint">No answer</Txt> : null}
                 </View>
                 <View className="items-end w-14">
                   <Txt variant="bodyStrong" tabular tone={a?.points ? "default" : "faint"}>{a?.points ?? 0}</Txt>
                   <Txt variant="caption" tone="faint" tabular>{b?.points ?? 0}</Txt>
                 </View>
                 <IconButton icon={Flag} label={`Report question ${rd.round}`} tone="muted" className="h-9 w-9" onPress={() => setReport({ id: rd.questionId, text: rd.text })} />
+              </View>
+              {rd.fact && !a?.correct ? (
+                <View className="flex-row items-start gap-2 rounded-xl bg-raised px-3 py-2 ml-11">
+                  <Icon as={Lightbulb} size={14} tone="accent" />
+                  <Txt variant="caption" tone="muted" className="flex-1">{rd.fact}</Txt>
+                </View>
+              ) : null}
               </View>
             );
           })}

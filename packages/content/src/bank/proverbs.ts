@@ -1,4 +1,4 @@
-import { q, u, W, type CategoryBank } from "./helpers";
+import { q, W, type CategoryBank } from "./helpers";
 
 const YO = W + "Yoruba_language";
 const IG = W + "Igbo_language";
@@ -99,8 +99,8 @@ export const proverbs: CategoryBank = {
     q(3, "The Hausa phrase 'Ba komai' means?", ["It's nothing / no problem", "There's no food", "Go away", "I don't know"], "It's a common reply to 'thank you'.", HA),
 
     // ── Difficulty 4 ──────────────────────────────────────────────────────
-    u(4, "In Things Fall Apart, the lizard that jumped from the iroko tree said it would praise itself if no one else did. Who uses this proverb?", ["Okonkwo", "Unoka", "Obierika", "Ezinma"], "Okonkwo says it when he praises himself in front of Nwakibie.", TFA),
-    u(4, "Complete Achebe's proverb: 'A chick that will grow into a cock can be spotted the very day it…'", ["Hatches", "Crows", "Eats", "Flies"], "It means greatness shows early.", TFA),
+    q(4, "In Things Fall Apart, the lizard that jumped from the iroko tree said it would praise itself if no one else did. Who uses this proverb?", ["Okonkwo", "Unoka", "Obierika", "Ezinma"], "Okonkwo says it when he praises himself in front of Nwakibie.", TFA),
+    q(4, "Complete Achebe's proverb: 'A chick that will grow into a cock can be spotted the very day it…'", ["Hatches", "Crows", "Eats", "Flies"], "It means greatness shows early.", TFA),
     q(4, "Hausa written in Arabic script is called?", ["Ajami", "Boko", "Tifinagh", "Nsibidi"], "Ajami was used for centuries before the Latin alphabet.", W + "Ajami_script"),
     q(4, "Hausa written in the Latin alphabet is called?", ["Boko", "Ajami", "Nsibidi", "Romaji"], "Boko was introduced during colonial rule.", HA),
     q(4, "Nsibidi is an ancient system of symbols from which region?", ["South-eastern Nigeria (Cross River area)", "Kano", "Ile-Ife", "Lake Chad"], "It was used by the Ekpe society among others.", W + "Nsibidi"),
@@ -113,19 +113,19 @@ export const proverbs: CategoryBank = {
     q(4, "The Berom people are mainly found in which state?", ["Plateau", "Kaduna", "Bauchi", "Benue"], "Jos is in Berom land.", W + "Berom_people"),
     q(4, "The Jukun people are mainly found in which state?", ["Taraba", "Adamawa", "Gombe", "Borno"], "Wukari is the seat of the Jukun kingdom.", W + "Jukun_people"),
     q(4, "Which Yoruba proverb is about an elder not standing by while a child's headload tilts?", ["Àgbà kì í wà lọ́jà kí orí ọmọ títún wọ́", "Ìwà l'ẹwà", "Ilé la ti ń kó ẹ̀ṣọ́ r'òde", "Ọ̀rọ̀ púpọ̀ ò kún agbọ̀n"], "It means elders must correct wrongs when they see them.", YO),
-    u(4, "The Hausa proverb 'Hannu da yawa maganin kazamar miya' is like which English saying?", ["Many hands make light work", "Too many cooks spoil the broth", "Clean as you go", "Hunger is the best sauce"], "Literally: 'Many hands are the cure for a messy soup'.", HA),
-    u(4, "The Yoruba proverb 'Ọ̀rọ̀ púpọ̀ ò kún agbọ̀n' means?", ["Many words don't fill a basket (talk is cheap)", "Baskets carry words", "Speak loudly", "Silence is foolish"], "It warns against empty promises.", YO),
-    u(4, "The Igbo proverb about bringing ant-infested firewood home warns that you should not complain when what visits?", ["Lizards", "Snakes", "Rats", "Visitors"], "It means accept the consequences of your choices.", PROV),
+    q(4, "The Hausa proverb 'Hannu da yawa maganin kazamar miya' is like which English saying?", ["Many hands make light work", "Too many cooks spoil the broth", "Clean as you go", "Hunger is the best sauce"], "Literally: 'Many hands are the cure for a messy soup'.", HA),
+    q(4, "The Yoruba proverb 'Ọ̀rọ̀ púpọ̀ ò kún agbọ̀n' means?", ["Many words don't fill a basket (talk is cheap)", "Baskets carry words", "Speak loudly", "Silence is foolish"], "It warns against empty promises.", YO),
+    q(4, "The Igbo proverb about bringing ant-infested firewood home warns that you should not complain when what visits?", ["Lizards", "Snakes", "Rats", "Visitors"], "It means accept the consequences of your choices.", PROV),
 
     // ── Difficulty 5 ──────────────────────────────────────────────────────
     q(5, "Which Achebe novel's title comes from a W. B. Yeats poem?", ["Things Fall Apart", "Arrow of God", "A Man of the People", "Anthills of the Savannah"], "The poem is 'The Second Coming'.", TFA),
     q(5, "What is 'asaa' in Igbo?", ["Seven", "Six", "Eight", "Nine"], "'Asatọ' is eight.", IG),
     q(5, "What is 'bakwai' in Hausa?", ["Seven", "Eight", "Nine", "Six"], "'Takwas' is eight and 'tara' is nine.", HA),
     q(5, "What is 'ẹ̀fà' in Yoruba?", ["Six", "Five", "Four", "Eight"], "'Àrún' is five.", YO),
-    u(5, "Which Igbo market day is often considered the first of the week?", ["Eke", "Orie", "Afọ", "Nkwọ"], "The order is Eke, Orie, Afọ, Nkwọ.", W + "Igbo_calendar"),
-    u(5, "In Yoruba naming, 'Ojo' (boy) and 'Aina' (girl) are names for a child born?", ["With the umbilical cord around the neck", "Feet first", "After twins", "On a Sunday"], "Such children are believed to be special.", YN),
-    u(5, "The Hausa proverb 'Komai nisan jifa, ƙasa za ta dawo' means?", ["However far a stone is thrown, it returns to the ground", "Throw stones at enemies", "The earth is wide", "Don't travel far"], "It means everything returns to its origin.", HA),
-    u(5, "Ubangiji is a Hausa word meaning?", ["Lord (God)", "King", "Teacher", "Elder"], "Allah is also widely used among Hausa Muslims.", HA),
+    q(5, "Which Igbo market day is often considered the first of the week?", ["Eke", "Orie", "Afọ", "Nkwọ"], "The order is Eke, Orie, Afọ, Nkwọ.", W + "Igbo_calendar"),
+    q(5, "In Yoruba naming, 'Ojo' (boy) and 'Aina' (girl) are names for a child born?", ["With the umbilical cord around the neck", "Feet first", "After twins", "On a Sunday"], "Such children are believed to be special.", YN),
+    q(5, "The Hausa proverb 'Komai nisan jifa, ƙasa za ta dawo' means?", ["However far a stone is thrown, it returns to the ground", "Throw stones at enemies", "The earth is wide", "Don't travel far"], "It means everything returns to its origin.", HA),
+    q(5, "Ubangiji is a Hausa word meaning?", ["Lord (God)", "King", "Teacher", "Elder"], "Allah is also widely used among Hausa Muslims.", HA),
 
     // ── Additions ─────────────────────────────────────────────────────────
 
@@ -140,6 +140,6 @@ export const proverbs: CategoryBank = {
     q(3, "What is the Hausa word for school?", ["Makaranta", "Kasuwa", "Masallaci", "Gida"], "'Gida' means house.", HA),
     q(3, "The Igbo saying 'Onye kwe, chi ya ekwe' means?", ["If a person agrees, their chi agrees", "Agree with your elders", "God gives to everyone", "The chief decides"], "Achebe drew on this idea in Things Fall Apart.", W + "Odinani"),
     q(3, "What is the Hausa word for girl?", ["Yarinya", "Yaro", "Mace", "Uwa"], "'Yaro' means boy.", HA),
-    u(5, "The Yoruba proverb says that when a child falls it looks forward, but when an elder falls it looks where?", ["Back (to see what caused it)", "Up to God", "At the crowd", "At the ground"], "It means elders learn from the past.", YO),
+    q(5, "The Yoruba proverb says that when a child falls it looks forward, but when an elder falls it looks where?", ["Back (to see what caused it)", "Up to God", "At the crowd", "At the ground"], "It means elders learn from the past.", YO),
   ],
 };

@@ -2,8 +2,8 @@ import { useState } from "react";
 import { View } from "react-native";
 import { router } from "expo-router";
 import { Search, Swords, Users, X, Check, UserMinus } from "lucide-react-native";
-import { LEAGUES, type FriendItem, type HeadToHead, type PublicProfile } from "@ntc/shared";
-import { Screen, SectionTitle, Txt, Card, Avatar, Button, IconButton, Input, Segmented, EmptyState, ErrorState, SkeletonRow, Icon, Modal, toast } from "../ui";
+import { LEAGUES, CHALLENGE_STAKES, type FriendItem, type HeadToHead, type PublicProfile } from "@ntc/shared";
+import { Screen, SectionTitle, Txt, Card, Avatar, Button, IconButton, Input, Segmented, EmptyState, ErrorState, SkeletonRow, Icon, Modal, BottomSheet, CoinIcon, toast } from "../ui";
 import { useMe } from "../features/me";
 import { useFriends, usePlayerSearch, useFriendAction, useChallengeFriend } from "../features/friends/api";
 import { FriendButton } from "../features/friends/FriendButton";
@@ -22,22 +22,44 @@ export function recordLine(r: HeadToHead) {
 
 function ChallengeButton({ friend }: { friend: PublicProfile }) {
   const challenge = useChallengeFriend();
+  const me = useMe();
+  const [open, setOpen] = useState(false);
+  const [stake, setStake] = useState("0");
+  const coins = me.data?.profile.coins ?? 0;
+  const amount = Number(stake);
+  const send = () =>
+    challenge.mutate(
+      { id: friend.id, stake: amount },
+      {
+        onSuccess: (c) => {
+          haptic.select();
+          setOpen(false);
+          toast.success(`Challenge for ${friend.username}`, amount ? `${amount} coins on the line. Play your round first.` : "Play your round first. They'll be notified when you finish.");
+          router.push({ pathname: "/c/[code]/play", params: { code: c.code } });
+        },
+        onError: (e: any) => toast.error("Couldn't create challenge", e.message),
+      },
+    );
   return (
-    <IconButton
-      icon={Swords}
-      label={`Challenge ${friend.username}`}
-      tone="primary"
-      onPress={() =>
-        challenge.mutate(friend.id, {
-          onSuccess: (c) => {
-            haptic.select();
-            toast.success(`Challenge for ${friend.username}`, "Play your round first. They'll be notified when you finish.");
-            router.push({ pathname: "/c/[code]/play", params: { code: c.code } });
-          },
-          onError: (e: any) => toast.error("Couldn't create challenge", e.message),
-        })
-      }
-    />
+    <>
+      <IconButton icon={Swords} label={`Challenge ${friend.username}`} tone="primary" onPress={() => setOpen(true)} />
+      <BottomSheet open={open} onClose={() => setOpen(false)} title={`Challenge ${friend.username}`} subtitle="Same 7 questions for both of you. Higher score wins.">
+        <View className="gap-3">
+          <Txt variant="label">Put coins on it?</Txt>
+          <Segmented label="Coin stake" value={stake} onChange={setStake} options={CHALLENGE_STAKES.map((n) => ({ value: String(n), label: n ? `${n}` : "None" }))} />
+          <View className="flex-row items-start gap-2">
+            <CoinIcon size={16} />
+            <Txt variant="caption" tone="muted" className="flex-1">
+              {amount
+                ? `You both put in ${amount}. The winner takes ${amount * 2}. If ${friend.username} doesn't accept within 48 hours, you get yours back.`
+                : "Just for bragging rights."}
+            </Txt>
+          </View>
+          {amount > coins ? <Txt variant="caption" tone="danger">You have {coins.toLocaleString("en-NG")} coins.</Txt> : null}
+          <Button label={amount ? `Stake ${amount} & play` : "Send challenge"} icon={Swords} size="lg" full disabled={amount > coins} loading={challenge.isPending} onPress={send} />
+        </View>
+      </BottomSheet>
+    </>
   );
 }
 
@@ -135,7 +157,7 @@ export default function Friends() {
                 <BoardRow key={b.profile.id} rank={i + 1} item={b} me={b.me} first={i === 0} onRemove={b.me ? undefined : () => setRemoving(b as FriendItem)} />
               ))}
             </Card>
-            <Txt variant="caption" tone="faint" className="text-center mt-3">Tap ⚔️ to send a friend 7 questions. Records count ranked clashes and challenges.</Txt>
+            <Txt variant="caption" tone="faint" className="text-center mt-3">Tap ⚔️ to send a friend 7 questions, with coins on it if you like. Records count ranked clashes and challenges.</Txt>
           </>
         )
       ) : (

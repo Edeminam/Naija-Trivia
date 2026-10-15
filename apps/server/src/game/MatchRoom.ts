@@ -29,10 +29,11 @@ import {
   type PowerUpKind,
   type PowerUpMsg,
   type CategorySlug,
+  type QuestionLocale,
 } from "@ntc/shared";
 import { getDb } from "../db";
 import { getProfileRow, toPublic } from "../repo/profiles";
-import { activeCategories, questionPool, recentlySeen, markSeen, getQuestions, shuffleRandom, crowdDistribution, type FullQuestion, type ShuffledOptions } from "../repo/questions";
+import { activeCategories, questionPool, recentlySeen, markSeen, getQuestions, localize, shuffleRandom, crowdDistribution, type FullQuestion, type ShuffledOptions } from "../repo/questions";
 import { persistMatchResult, type AnswerRecord } from "../repo/matches";
 import { makeBot, planBotAnswer, type BotProfile } from "./bot";
 import { analytics } from "../services/analytics";
@@ -100,6 +101,8 @@ interface Seat {
   hiddenOptions: string[];
   rematch: boolean;
   left: boolean;
+  /** Language this player sees questions in */
+  locale: QuestionLocale;
 }
 
 interface Pending {
@@ -124,6 +127,10 @@ export class MatchRoom extends Room<{ state: MatchState }> {
   private current: { q: FullQuestion; s: ShuffledOptions; startedAt: number } | null = null;
   private pending = new Map<string, Pending>();
   private rounds: RoundSummary[] = [];
+  /** Option id → original index for each round, so round summaries can be translated per player */
+  private roundIndex = new Map<number, Map<string, number>>();
+  /** Translated copies of this match's questions, by locale then question id */
+  private localized = new Map<QuestionLocale, Map<string, FullQuestion>>();
   private timers: { clear(): void }[] = [];
   private roundTimer: { clear(): void } | null = null;
   private finished = false;
@@ -141,7 +148,9 @@ export class MatchRoom extends Room<{ state: MatchState }> {
       const row = await getProfileRow(sql, userId);
       if (!row) throw new Error(`profile ${userId} not found`);
       const p = toPublic(row);
-      this.seats.set(userId, this.newSeat(userId, false, !!row.is_guest, row.rating ?? STARTING_RATING));
+      const seat = this.newSeat(userId, false, !!row.is_guest, row.rating ?? STARTING_RATING);
+      seat.locale = row.settings?.questionLanguage === "pcm" ? "pcm" : "en";
+      this.seats.set(userId, seat);
       this.state.players.set(
         userId,
         new PlayerState({
@@ -187,7 +196,7 @@ export class MatchRoom extends Room<{ state: MatchState }> {
   }
 
   private newSeat(userId: string, isBot: boolean, isGuest: boolean, rating: number, bot?: BotProfile): Seat {
-    return { userId, isBot, isGuest, rating, bot, answers: [], totalMs: 0, deadlineAt: 0, shieldArmed: false, shieldConsumed: false, hiddenOptions: [], rematch: false, left: false };
+    return { userId, isBot, isGuest, rating, bot, answers: [], totalMs: 0, deadlineAt: 0, shieldArmed: false, shieldConsumed: false, hiddenOptions: [], rematch: false, left: false, locale: "en" };
   }
 
   private addBot() {
@@ -361,6 +370,9 @@ export class MatchRoom extends Room<{ state: MatchState }> {
     const seen = await recentlySeen(sql, humans.map((h) => h.userId));
     const picks = selectQuestions(pool, { categories: remaining.map((o) => o.categoryId), avgRating: avg, recentlySeen: seen });
     this.questions = await getQuestions(sql, picks.map((p) => p.id));
+    for (const locale of new Set(humans.map((h) => h.locale).filter((l) => l !== "en"))) {
+      this.localized.set(locale, new Map((await localize(sql, this.questions, locale)).map((q) => [q.id, q])));
+    }
     for (const h of humans) await markSeen(sql, h.userId, this.questions.map((q) => q.id));
     this.state.total = this.questions.length;
     this.broadcast("phase", { phase: "ready", categories: remaining.map((o) => o.slug), serverNow: Date.now() });
@@ -384,15 +396,26 @@ export class MatchRoom extends Room<{ state: MatchState }> {
     }
   }
 
+  /** The question as this player should see it (translated when they asked for another language). */
+  private questionFor(seat: Seat | undefined, q: FullQuestion): FullQuestion {
+    return (seat && this.localized.get(seat.locale)?.get(q.id)) ?? q;
+  }
+
+  private seatOf(client: Client) {
+    const userId = this.sessionToUser.get(client.sessionId);
+    return userId ? this.seats.get(userId) : undefined;
+  }
+
   private questionMsg(seat: Seat): QuestionMsg & { hidden?: string[] } {
     const { q, s, startedAt } = this.current!;
+    const lq = this.questionFor(seat, q);
     return {
       round: this.state.round,
       total: this.state.total,
       questionId: q.id,
-      text: q.text,
+      text: lq.text,
       category: q.category as CategorySlug,
-      options: s.options,
+      options: lq === q ? s.options : s.options.map((o) => ({ id: o.id, text: lq.options[s.indexById.get(o.id)!]! })),
       deadlineAt: seat.deadlineAt,
       serverNow: Date.now(),
       durationMs: seat.deadlineAt - startedAt,
@@ -487,11 +510,12 @@ export class MatchRoom extends Room<{ state: MatchState }> {
     }
 
     const scores = Object.fromEntries([...this.state.players.entries()].map(([id, p]) => [id, p.score]));
-    this.rounds.push({ round, questionId: q.id, text: q.text, category: q.category as CategorySlug, correctText: q.options[q.correctIndex]!, answers });
+    this.rounds.push({ round, questionId: q.id, text: q.text, category: q.category as CategorySlug, correctText: q.options[q.correctIndex]!, fact: q.fact, options: s.options, answers });
+    this.roundIndex.set(round, s.indexById);
     this.state.phase = "reveal";
     const nextAt = Date.now() + REVEAL_MS;
     const msg: RevealMsg = { round, questionId: q.id, correctOptionId: s.correctOptionId, answers, scores, fact: q.fact, nextAt };
-    this.broadcast("reveal", msg);
+    for (const client of this.clients) client.send("reveal", { ...msg, fact: this.questionFor(this.seatOf(client), q).fact });
     this.current = null;
     this.later(REVEAL_MS, () => (round >= this.state.total ? this.finish() : this.startRound(round + 1)));
   }
@@ -593,11 +617,23 @@ export class MatchRoom extends Room<{ state: MatchState }> {
       players: persisted.players,
       rounds: this.rounds,
     };
-    this.broadcast("result", result);
+    for (const client of this.clients) client.send("result", { ...result, rounds: this.roundsFor(this.seatOf(client)) });
     for (const s of this.seats.values()) {
       if (!s.isBot) analytics.track(s.userId, "match_completed", { mode: this.mode, isBot: this.state.isBot, result: persisted.players[s.userId]?.result });
     }
     this.later(POST_RESULT_TTL_MS, () => this.disconnect());
+  }
+
+  /** Round summaries in this player's language. */
+  private roundsFor(seat: Seat | undefined): RoundSummary[] {
+    if (!seat || !this.localized.has(seat.locale)) return this.rounds;
+    return this.rounds.map((r) => {
+      const base = this.questions.find((q) => q.id === r.questionId);
+      const lq = base ? this.questionFor(seat, base) : undefined;
+      const idx = this.roundIndex.get(r.round);
+      if (!lq || lq === base || !idx) return r;
+      return { ...r, text: lq.text, correctText: lq.options[lq.correctIndex]!, fact: lq.fact, options: r.options.map((o) => ({ id: o.id, text: lq.options[idx.get(o.id)!]! })) };
+    });
   }
 
   // ── Rematch ─────────────────────────────────────────────────────────────

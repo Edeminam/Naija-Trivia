@@ -62,6 +62,8 @@ export interface StreakInfo {
   /** Freezes left this week (each one bridges one missed day) */
   freezesLeft: number;
   freezesPerWeek: number;
+  /** Freezes bought with coins; used after this week's free ones run out */
+  freezesOwned: number;
   playedToday: boolean;
 }
 
@@ -77,10 +79,12 @@ export interface HomeResponse {
   /** The friend you've played most recently and often, with the head-to-head record */
   rival: { friend: PublicProfile; record: HeadToHead } | null;
   /** Open challenges a friend sent directly to you */
-  incomingChallenges: { code: string; from: PublicProfile; expiresAt: string; scoreToBeat: number }[];
+  incomingChallenges: { code: string; from: PublicProfile; expiresAt: string; scoreToBeat: number; stake: number }[];
   achievementsToClaim: number;
   /** Premium perks granted on this visit (monthly coins, this season's pass), if any */
   premiumPerks: PremiumPerksGranted | null;
+  /** A live event happening now, or the next one within a week */
+  liveEvent: { id: string; name: string; tagline: string; live: boolean; startsAt: number; endsAt: number; played: boolean } | null;
 }
 
 export interface PremiumPerksGranted {
@@ -135,6 +139,10 @@ export interface RoundSummary {
   text: string;
   category: CategorySlug;
   correctText: string;
+  /** "Did you know?" fact shown after the match */
+  fact: string;
+  /** Options as shown in the match, so a wrong pick can be named */
+  options: WireOption[];
   answers: Record<string, RevealAnswer>;
 }
 
@@ -154,6 +162,10 @@ export interface PlayerMatchResult {
   leagueBefore: LeagueId;
   leagueAfter: LeagueId;
   shieldSaved: boolean;
+  /** New-player protection cancelled a rating loss */
+  newPlayerSaved: boolean;
+  /** Ranked games of protection left after this one (0 once it has run out) */
+  protectedGamesLeft: number;
   /** Extra coins on top of the base reward (already included in `coins`) */
   bonuses: MatchBonus[];
   /** Achievement slugs unlocked by this match */
@@ -275,6 +287,23 @@ export interface DailyStatus {
   players: number;
   /** "offline" once today's set was downloaded for offline play (then it can't be played online) */
   mode: "online" | "offline" | null;
+  /** Right/wrong per question once played, for the share grid */
+  results: boolean[] | null;
+}
+
+// ── Live events ────────────────────────────────────────────────────────────
+export interface LiveEventStatus {
+  id: string;
+  name: string;
+  tagline: string;
+  category: CategorySlug | null;
+  startsAt: number;
+  endsAt: number;
+  /** upcoming → live → ended */
+  phase: "upcoming" | "live" | "ended";
+  players: number;
+  me: { played: boolean; inProgress: boolean; nextIndex: number; score: number | null; rank: number | null; prize: number | null } | null;
+  board: LeaderboardPlayer[];
 }
 
 // ── Offline Daily Naija ────────────────────────────────────────────────────
@@ -299,7 +328,7 @@ export interface OfflineDailyResult {
   score: number;
   correct: number;
   results: { index: number; questionId: string; text: string; correct: boolean; correctOptionId: string; correctText: string; points: number; fact: string }[];
-  rewards: { coins: number; xp: number; streak: { current: number; usedFreeze: boolean; freezesUsed: number; advanced: boolean }; milestone: { days: number; coins: number } | null; achievements: string[] };
+  rewards: { coins: number; xp: number; streak: { current: number; usedFreeze: boolean; freezesUsed: number; boughtUsed: number; advanced: boolean }; milestone: { days: number; coins: number } | null; achievements: string[] };
 }
 
 export interface ChallengeSummary {
@@ -313,6 +342,19 @@ export interface ChallengeSummary {
   myEntry: { nextIndex: number; finished: boolean; score: number } | null;
   shareUrl: string;
   whatsappUrl: string;
+  /** Coin stake on a direct challenge (both sides put in `amount`, the winner takes both) */
+  stake: ChallengeStakeInfo | null;
+}
+
+export interface ChallengeStakeInfo {
+  amount: number;
+  /** The friend the challenge was sent to: the only other player who stakes */
+  targetId: string;
+  /** open until both have played (or it expires); then won, draw (both refunded) or refunded (nobody to play) */
+  status: "open" | "won" | "draw" | "refunded";
+  winnerId: string | null;
+  /** The viewer has already put in their coins */
+  staked: boolean;
 }
 
 // ── Profile stats ──────────────────────────────────────────────────────────

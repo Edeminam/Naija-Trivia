@@ -29,7 +29,11 @@ const STATUS_STYLE: Record<QuestionStatus, string> = {
 export const STATUS_LABEL: Record<QuestionStatus, string> = { live: "Live", in_review: "In review", draft: "Draft", paused: "Paused", retired: "Retired" };
 export const STATUSES = Object.keys(STATUS_LABEL) as QuestionStatus[];
 
-export function StatusBadge({ status }: { status: QuestionStatus }) {
+export function StatusBadge({ status, releaseAt, scheduled }: { status: QuestionStatus; releaseAt?: string | null; scheduled?: boolean }) {
+  if (status === "live" && releaseAt && scheduled) {
+    const day = new Date(releaseAt).toLocaleDateString("en-GB", { day: "numeric", month: "short" });
+    return <span className="inline-flex h-6 items-center rounded-full bg-primary/12 px-2.5 text-xs font-medium text-green-text">Scheduled · {day}</span>;
+  }
   return <span className={cn("inline-flex h-6 items-center rounded-full px-2.5 text-xs font-medium", STATUS_STYLE[status])}>{STATUS_LABEL[status]}</span>;
 }
 

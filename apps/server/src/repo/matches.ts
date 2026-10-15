@@ -12,6 +12,8 @@ import {
   SUSPICIOUS_ANSWER_MS,
   SUSPICIOUS_DAILY_THRESHOLD,
   FIRST_WIN_BONUS,
+  NEW_PLAYER_PROTECTED_GAMES,
+  isNewPlayer,
   themeFor,
   themedWinCoins,
   type PlayerMatchResult,
@@ -97,16 +99,11 @@ export async function persistMatchResult(sql: Sql, input: PersistInput): Promise
       const row = fresh.get(me.id);
       const ranked = input.mode === "ranked" && !row?.is_guest;
       const before = ratingOf(me);
-      const delta = ranked
-        ? ratingDelta({
-            rating: before,
-            opponentRating: ratingOf(opp),
-            score: scoreValue(result),
-            rankedGames: row?.ranked_games ?? 0,
-            vsBot,
-            shieldConsumed: me.shieldConsumed,
-          })
-        : 0;
+      const rankedGames: number = row?.ranked_games ?? 0;
+      const rate = (protectNew: boolean) =>
+        ratingDelta({ rating: before, opponentRating: ratingOf(opp), score: scoreValue(result), rankedGames, vsBot, shieldConsumed: me.shieldConsumed, protectNew });
+      const delta = ranked ? rate(true) : 0;
+      const newPlayerSaved = ranked && delta === 0 && rate(false) < 0 && !me.shieldConsumed && isNewPlayer(rankedGames);
       const after = Math.max(0, before + delta);
       deltas[me.id] = delta;
       const correct = me.answers.filter((a) => a.correct).length;
@@ -140,6 +137,8 @@ export async function persistMatchResult(sql: Sql, input: PersistInput): Promise
         leagueBefore: leagueForRating(before).id,
         leagueAfter: leagueForRating(after).id,
         shieldSaved: ranked && result === "loss" && me.shieldConsumed,
+        newPlayerSaved,
+        protectedGamesLeft: ranked ? Math.max(0, NEW_PLAYER_PROTECTED_GAMES - rankedGames - 1) : 0,
       };
     }
 

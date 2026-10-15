@@ -2,8 +2,8 @@ import { useState } from "react";
 import { View } from "react-native";
 import { router, useLocalSearchParams } from "expo-router";
 import { Swords, Clock, Trophy, Play, Hourglass, Home, RotateCcw, UserPlus } from "lucide-react-native";
-import { categoryBySlug, stateByCode } from "@ntc/shared";
-import { Screen, Txt, Button, Card, Chip, Avatar, Icon, ErrorState, SkeletonCard, EmptyState, Confetti, toast } from "../../../ui";
+import { categoryBySlug, stateByCode, type ChallengeSummary } from "@ntc/shared";
+import { Screen, Txt, Button, Card, Chip, Avatar, Icon, ErrorState, SkeletonCard, EmptyState, Confetti, CoinIcon, toast } from "../../../ui";
 import { useChallenge } from "../../../features/challenge/api";
 import { ShareActions } from "../../../features/challenge/ShareActions";
 import { useSession } from "../../../stores/session";
@@ -13,6 +13,29 @@ import { useCountdown } from "../../../lib/useCountdown";
 import { FriendButton } from "../../../features/friends/FriendButton";
 import { cn } from "../../../lib/cn";
 import type { ApiError } from "../../../lib/api";
+
+function StakeCard({ stake, myId, names }: { stake: NonNullable<ChallengeSummary["stake"]>; myId?: string; names: Record<string, string> }) {
+  const pot = stake.amount * 2;
+  const line =
+    stake.status === "open"
+      ? `Winner takes ${pot} coins`
+      : stake.status === "won"
+        ? stake.winnerId === myId
+          ? `You won ${pot} coins`
+          : `${names[stake.winnerId ?? ""] ?? "The winner"} took the ${pot} coins`
+        : stake.status === "draw"
+          ? "Dead heat: both stakes returned"
+          : "Stake returned: the challenge wasn't played";
+  return (
+    <Card className={cn("p-4 flex-row items-center gap-3", stake.status === "won" && stake.winnerId === myId && "border-accent")}>
+      <View className="h-11 w-11 items-center justify-center rounded-xl bg-accent-soft"><CoinIcon size={24} /></View>
+      <View className="flex-1">
+        <Txt variant="bodyStrong">{line}</Txt>
+        <Txt variant="caption" tone="muted">{stake.amount} coins each{stake.status === "open" ? " · paid out when you've both played" : ""}</Txt>
+      </View>
+    </Card>
+  );
+}
 
 export default function ChallengeLanding() {
   const { code, done } = useLocalSearchParams<{ code: string; done?: string }>();
@@ -28,6 +51,9 @@ export default function ChallengeLanding() {
   const mine = c?.myEntry;
   const finishedEntries = c?.entries.filter((e) => e.finished).sort((a, b) => (b.score ?? 0) - (a.score ?? 0) || a.totalMs - b.totalMs) ?? [];
   const iWon = !!mine?.finished && finishedEntries[0]?.player.id === myId && finishedEntries.length > 1;
+  const stake = c?.stake ?? null;
+  // Only the friend it was sent to stakes; anyone else with the link plays for fun.
+  const mustStake = !!stake && stake.targetId === myId && !stake.staked && stake.status === "open";
 
   const play = async () => {
     setBusy(true);
@@ -92,6 +118,8 @@ export default function ChallengeLanding() {
               </View>
             </Card>
 
+            {stake ? <StakeCard stake={stake} myId={myId} names={Object.fromEntries((c.entries.map((e) => [e.player.id, e.player.username]) as [string, string][]).concat([[c.createdBy.id, c.createdBy.username]]))} /> : null}
+
             {mine?.finished ? (
               <Card className={cn("p-4 items-center gap-1", iWon ? "border-primary" : "")}>
                 <Txt variant="h2">{iWon ? "You're on top! 🏆" : finishedEntries.length > 1 ? "Played!" : "Score locked in"}</Txt>
@@ -99,7 +127,7 @@ export default function ChallengeLanding() {
               </Card>
             ) : !c.expired || mine ? (
               <View className="gap-2">
-                <Button label={mine ? `Resume · question ${mine.nextIndex + 1}` : token ? "Accept challenge" : "Accept & play as guest"} icon={Play} size="lg" full loading={busy} onPress={play} testID="accept-challenge" />
+                <Button label={mine ? `Resume · question ${mine.nextIndex + 1}` : mustStake ? `Accept · stake ${stake!.amount} coins` : token ? "Accept challenge" : "Accept & play as guest"} icon={Play} size="lg" full loading={busy} onPress={play} testID="accept-challenge" />
                 {!token ? <Button label="I have an account" icon={UserPlus} variant="ghost" full onPress={() => router.push("/onboarding/sign-in")} /> : null}
               </View>
             ) : null}

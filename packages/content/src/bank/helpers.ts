@@ -8,6 +8,8 @@ export interface Seed {
   fact: string;
   sourceUrl: string;
   status: "live" | "in_review";
+  /** Weekly drop this question is scheduled into (Monday, YYYY-MM-DD, Lagos); unset = live now */
+  release?: string;
 }
 
 export interface CategoryBank {

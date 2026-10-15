@@ -15,6 +15,8 @@ export interface QueueEntry {
   userId: string;
   rating: number;
   joinedAt: number;
+  /** Still in the first few ranked games: paired with other new players when one is in range */
+  newPlayer?: boolean;
 }
 
 /** Two players can be paired when their gap fits the wider of their two windows. */
@@ -25,7 +27,8 @@ export function canPair(a: QueueEntry, b: QueueEntry, now: number): boolean {
 }
 
 /**
- * Greedy pairing pass: longest waiting first, each takes the closest-rated eligible partner.
+ * Greedy pairing pass: longest waiting first, each takes the closest-rated eligible partner, preferring
+ * someone at the same stage (new players with new players) when one is in range.
  * Returns pairs plus entries that have timed out (→ bot).
  */
 export function pairQueue(entries: QueueEntry[], now: number): { pairs: [QueueEntry, QueueEntry][]; timedOut: QueueEntry[] } {
@@ -37,7 +40,15 @@ export function pairQueue(entries: QueueEntry[], now: number): { pairs: [QueueEn
     let best: QueueEntry | null = null;
     for (const b of pool) {
       if (b === a || used.has(b.userId) || !canPair(a, b, now)) continue;
-      if (!best || Math.abs(b.rating - a.rating) < Math.abs(best.rating - a.rating)) best = b;
+      if (!best) {
+        best = b;
+        continue;
+      }
+      const sameStage = !!b.newPlayer === !!a.newPlayer;
+      const bestSameStage = !!best.newPlayer === !!a.newPlayer;
+      if (sameStage !== bestSameStage) {
+        if (sameStage) best = b;
+      } else if (Math.abs(b.rating - a.rating) < Math.abs(best.rating - a.rating)) best = b;
     }
     if (best) {
       used.add(a.userId);

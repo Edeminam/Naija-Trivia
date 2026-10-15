@@ -1,6 +1,6 @@
 import { QUESTION_MS, ANSWER_GRACE_MS, pointsForAnswer, isAnswerAccepted, type SoloQuestion, type SoloAnswerResult, type CategorySlug } from "@ntc/shared";
 import type { Sql } from "../db";
-import { getQuestions, shuffleSeeded, recordQuestionStats, type FullQuestion } from "./questions";
+import { getQuestions, playerLocale, shuffleSeeded, recordQuestionStats, type FullQuestion } from "./questions";
 import { HttpError } from "../api/http";
 
 /**
@@ -9,12 +9,12 @@ import { HttpError } from "../api/http";
  * so the client never controls the clock.
  */
 export interface SoloTable {
-  table: "daily_entries" | "challenge_entries";
-  keyCol: "daily_date" | "challenge_id";
+  table: "daily_entries" | "challenge_entries" | "event_entries";
+  keyCol: "daily_date" | "challenge_id" | "event_id";
   key: string;
   userId: string;
   questionIds: string[];
-  mode: "daily" | "challenge";
+  mode: "daily" | "challenge" | "event";
   /** apply Double Wahala on the last question (challenge mirrors a ranked match) */
   doubleLast: boolean;
 }
@@ -82,18 +82,19 @@ export async function serveNext(sql: Sql, t: SoloTable): Promise<{ question: Sol
     const e = await lock(tx, t);
     if (!e) throw new HttpError(404, "Start the session first");
     if (e.finished_at) return { question: null, timedOut: null, finished: true };
+    const locale = await playerLocale(tx, t.userId);
     let timedOut: SoloAnswerResult | null = null;
     const now = Date.now();
     if (e.served_at) {
       const servedAt = new Date(e.served_at).getTime();
-      const q = (await getQuestions(tx, [t.questionIds[e.current_index]!]))[0]!;
+      const q = (await getQuestions(tx, [t.questionIds[e.current_index]!], locale))[0]!;
       if (now <= servedAt + QUESTION_MS + ANSWER_GRACE_MS) return { question: toWire(t, q, e.current_index, servedAt), timedOut: null, finished: false };
       const r = await recordAnswer(tx, t, e, q, null, now);
       timedOut = r.result;
       if (r.done) return { question: null, timedOut, finished: true };
       e.current_index += 1;
     }
-    const q = (await getQuestions(tx, [t.questionIds[e.current_index]!]))[0];
+    const q = (await getQuestions(tx, [t.questionIds[e.current_index]!], locale))[0];
     if (!q) throw new HttpError(500, "Question missing from set");
     await tx.query(`update ${t.table} set served_at = to_timestamp($3 / 1000.0) where ${t.keyCol} = $1 and user_id = $2`, [t.key, t.userId, now]);
     return { question: toWire(t, q, e.current_index, now), timedOut, finished: false };
@@ -107,7 +108,7 @@ export async function submitAnswer(sql: Sql, t: SoloTable, index: number, option
     if (!e) throw new HttpError(404, "Start the session first");
     if (e.finished_at) throw new HttpError(409, "Already finished");
     if (e.current_index !== index || !e.served_at) throw new HttpError(409, "That question is no longer active");
-    const q = (await getQuestions(tx, [t.questionIds[index]!]))[0]!;
+    const q = (await getQuestions(tx, [t.questionIds[index]!], await playerLocale(tx, t.userId)))[0]!;
     return recordAnswer(tx, t, e, q, optionId, receivedAt);
   });
 }

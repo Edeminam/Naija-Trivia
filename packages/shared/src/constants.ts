@@ -220,6 +220,8 @@ export interface CosmeticDef {
   leagueReward?: LeagueId;
   /** Drawn with a crown on top of the avatar */
   crown?: boolean;
+  /** Only for sale in the weeks it's featured in the shop (see `featuredCosmetics`) */
+  rotating?: boolean;
 }
 
 export const COSMETICS: readonly CosmeticDef[] = [
@@ -234,6 +236,16 @@ export const COSMETICS: readonly CosmeticDef[] = [
   { id: "btn_midnight", kind: "button_theme", name: "Midnight", cost: 300, colors: ["#1C2420", "#2A3530"] },
   { id: "btn_jollof", kind: "button_theme", name: "Jollof", cost: 450, colors: ["#3A1D12", "#5A2A16"] },
   { id: "btn_indigo", kind: "button_theme", name: "Adire Indigo", cost: 450, colors: ["#141B3A", "#1E2A5A"] },
+  // Weekly drops: three of these are on sale each week, and each comes back every three weeks.
+  { id: "frame_owambe", kind: "frame", name: "Owambe", cost: 550, colors: ["#F368E0", "#FFD166"], rotating: true },
+  { id: "frame_asooke", kind: "frame", name: "Aso-Oke", cost: 650, colors: ["#7C2D12", "#F59E0B"], rotating: true },
+  { id: "frame_danfo", kind: "frame", name: "Danfo", cost: 450, colors: ["#FACC15", "#1F2937"], rotating: true },
+  { id: "frame_zuma", kind: "frame", name: "Zuma Rock", cost: 600, colors: ["#78716C", "#E7E5E4"], rotating: true },
+  { id: "frame_lagoon", kind: "frame", name: "Lagoon", cost: 550, colors: ["#0EA5E9", "#34D399"], rotating: true },
+  { id: "frame_harmattan", kind: "frame", name: "Harmattan", cost: 500, colors: ["#D6A35C", "#FDE7C4"], rotating: true },
+  { id: "btn_palmwine", kind: "button_theme", name: "Palm Wine", cost: 400, colors: ["#2B2A1A", "#8F8A5C"], rotating: true },
+  { id: "btn_suya", kind: "button_theme", name: "Suya", cost: 400, colors: ["#3B1A0E", "#9A3412"], rotating: true },
+  { id: "btn_ofada", kind: "button_theme", name: "Ofada", cost: 450, colors: ["#1A2B14", "#3F6212"], rotating: true },
 ] as const;
 
 // ── Missions ───────────────────────────────────────────────────────────────

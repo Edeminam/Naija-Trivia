@@ -1,4 +1,4 @@
-import { CATEGORIES, COINS, type CategorySlug } from "../constants";
+import { CATEGORIES, COINS, COSMETICS, type CategorySlug, type CosmeticDef } from "../constants";
 import { addDays, lagosWeekStart } from "./time";
 
 // ── First win of the day ───────────────────────────────────────────────────
@@ -28,6 +28,94 @@ export const PREMIUM_STIPEND_DAYS = 30;
 
 /** Daily Naija streak freezes per Lagos week (Monday–Sunday). */
 export const STREAK_FREEZES_PER_WEEK = { free: 1, premium: 2 } as const;
+
+// ── Coin sinks ─────────────────────────────────────────────────────────────
+/** A streak freeze bought with coins. Bought freezes are used only after the week's free ones run out. */
+export const STREAK_FREEZE_COST = 150;
+/** Most bought freezes a player can hold at once. */
+export const STREAK_FREEZE_MAX_OWNED = 2;
+
+/** Coins each side can put on a direct friend challenge; the winner takes both. */
+export const CHALLENGE_STAKES = [0, 25, 50, 100] as const;
+export type ChallengeStake = (typeof CHALLENGE_STAKES)[number];
+
+/** How many rotating cosmetics are on sale each week. */
+export const FEATURED_COSMETICS_PER_WEEK = 3;
+
+/**
+ * The rotating cosmetics on sale in the Lagos week starting `weekStart` (a Monday, YYYY-MM-DD).
+ * The pool is walked in order, three a week, so every item comes back every pool/3 weeks.
+ */
+export function featuredCosmetics(weekStart: string): CosmeticDef[] {
+  const pool = COSMETICS.filter((c) => c.rotating);
+  if (!pool.length) return [];
+  const week = Math.floor(Date.parse(`${weekStart}T00:00:00Z`) / (7 * 86_400_000));
+  const offset = (week * FEATURED_COSMETICS_PER_WEEK) % pool.length;
+  return Array.from({ length: Math.min(FEATURED_COSMETICS_PER_WEEK, pool.length) }, (_, i) => pool[(offset + i) % pool.length]!);
+}
+
+// ── Live national events ───────────────────────────────────────────────────
+export interface LiveEventDef {
+  id: string;
+  name: string;
+  tagline: string;
+  /** Lagos time, e.g. "2026-12-31T21:00:00+01:00" */
+  startsAt: string;
+  durationMin: number;
+  /** Category the 10 questions come from; omitted = a mix of everything */
+  category?: CategorySlug;
+}
+
+/** Questions in a live event (server-timed like Daily Naija, one attempt each). */
+export const LIVE_EVENT_QUESTIONS = 10;
+/** Coins for finishing a live event. */
+export const LIVE_EVENT_FINISH_COINS = 40;
+/** Coins by final place when the event closes: 1st, 2nd, 3rd, then 4th–10th. */
+export const LIVE_EVENT_PRIZES: readonly number[] = [500, 300, 200, 100, 100, 100, 100, 100, 100, 100];
+/** How long before the start an event shows as "coming up" on Home. */
+export const LIVE_EVENT_TEASE_MS = 7 * 86_400_000;
+
+/**
+ * Scheduled live quizzes for big national moments. Moving events (AFCON matches, BBNaija finale,
+ * Eid) get an entry here once their dates are announced.
+ */
+export const LIVE_EVENTS: readonly LiveEventDef[] = [
+  { id: "launch-night-2026", name: "Launch Night Live", tagline: "The first live quiz. Bragging rights forever.", startsAt: "2026-10-23T20:00:00+01:00", durationMin: 60 },
+  { id: "detty-december-2026", name: "Detty December Live", tagline: "Owambe, Afrobeats and Lagos traffic. You ready?", startsAt: "2026-12-19T20:00:00+01:00", durationMin: 60, category: "afrobeats" },
+  { id: "christmas-eve-2026", name: "Christmas Eve Quiz", tagline: "Before the jollof runs out.", startsAt: "2026-12-24T19:00:00+01:00", durationMin: 60, category: "food" },
+  { id: "new-year-2026", name: "New Year's Eve Countdown", tagline: "Last quiz of 2026. Finish the year on top.", startsAt: "2026-12-31T21:00:00+01:00", durationMin: 90 },
+  { id: "valentine-2027", name: "Val's Night Live", tagline: "Nollywood love stories and Afro love songs.", startsAt: "2027-02-14T20:00:00+01:00", durationMin: 60, category: "nollywood" },
+  { id: "childrens-day-2027", name: "Children's Day Live", tagline: "Throwback edition: school days and cartoons.", startsAt: "2027-05-27T16:00:00+01:00", durationMin: 60, category: "naija-life" },
+  { id: "democracy-day-2027", name: "Democracy Day Live", tagline: "June 12: know your history.", startsAt: "2027-06-12T20:00:00+01:00", durationMin: 60, category: "history" },
+  { id: "independence-2027", name: "Independence Day Live", tagline: "67 years of Naija. Prove you know her.", startsAt: "2027-10-01T20:00:00+01:00", durationMin: 90 },
+];
+
+export const liveEventById = (id: string) => LIVE_EVENTS.find((e) => e.id === id);
+export const liveEventWindow = (e: LiveEventDef) => {
+  const start = Date.parse(e.startsAt);
+  return { start, end: start + e.durationMin * 60_000 };
+};
+
+/** The event that is live now, else the next one starting within the tease window. */
+export function featuredLiveEvent(now: number = Date.now()): { event: LiveEventDef; live: boolean; start: number; end: number } | null {
+  for (const e of LIVE_EVENTS) {
+    const w = liveEventWindow(e);
+    if (now >= w.start && now < w.end) return { event: e, live: true, ...w };
+  }
+  const next = LIVE_EVENTS.map((e) => ({ event: e, ...liveEventWindow(e) }))
+    .filter((x) => x.start > now && x.start - now <= LIVE_EVENT_TEASE_MS)
+    .sort((a, b) => a.start - b.start)[0];
+  return next ? { ...next, live: false } : null;
+}
+
+// ── Content pipeline ───────────────────────────────────────────────────────
+/** New live questions the team aims to release each week. */
+export const CONTENT_WEEKLY_TARGET = 50;
+
+/** When the next weekly content drop goes live: the coming Monday, 00:00 Lagos time (ISO). */
+export function nextContentDrop(now: number = Date.now()): string {
+  return `${addDays(lagosWeekStart(now), 7)}T00:00:00+01:00`;
+}
 
 // ── Offline Daily Naija ────────────────────────────────────────────────────
 /** An offline run can be submitted up to this many days after its date (it still counts for that day). */

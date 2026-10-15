@@ -106,7 +106,11 @@ describe("ranked match end to end", () => {
 
     const expectedDelta = ratingDelta({ rating: 1000, opponentRating: 1000, score: 1, rankedGames: 0 });
     expect(pa.ratingDelta).toBe(expectedDelta);
-    expect(pb.ratingDelta).toBe(-expectedDelta);
+    // b is a new player (first ranked game), so the loss costs no rating.
+    expect(pb.ratingDelta).toBe(0);
+    expect(pb).toMatchObject({ newPlayerSaved: true, protectedGamesLeft: 9 });
+    expect(pa).toMatchObject({ newPlayerSaved: false, protectedGamesLeft: 9 });
+    expect(resA.rounds[0]).toMatchObject({ fact: expect.any(String), options: expect.arrayContaining([expect.objectContaining({ text: resA.rounds[0]!.correctText })]) });
     expect(pa.statePoints).toBe(statePointsForWin(1000));
     expect(pb.statePoints).toBe(0);
     // Win coins (more during a special themed week) + first win of the day.
@@ -119,7 +123,7 @@ describe("ranked match end to end", () => {
     const dbA = await sql.one("select rating, coins, wins, ranked_games from profiles where id = $1", [a.userId]);
     const dbB = await sql.one("select rating, coins, losses from profiles where id = $1", [b.userId]);
     expect(dbA).toMatchObject({ rating: 1000 + expectedDelta, coins: 200 + winCoins, wins: 1, ranked_games: 1 });
-    expect(dbB).toMatchObject({ rating: 1000 - expectedDelta, coins: 205, losses: 1 });
+    expect(dbB).toMatchObject({ rating: 1000, coins: 205, losses: 1 });
     const answers = await sql.one<{ n: number }>("select count(*)::int as n from match_answers where match_id = $1", [resA.matchId]);
     expect(answers!.n).toBe(14);
     const sp = await sql.one("select points from state_weekly_points where user_id = $1 and week_start = $2", [a.userId, lagosWeekStart()]);

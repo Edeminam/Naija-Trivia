@@ -1,4 +1,4 @@
-import { q, u, W, type Seed } from "../helpers";
+import { q, W, type Seed } from "../helpers";
 
 const NICK = W + "List_of_Nigerian_state_nicknames";
 const ZONES = W + "Geopolitical_zones_of_Nigeria";
@@ -123,10 +123,10 @@ export const geographyMore: Seed[] = [
   q(5, "Bida, famous for brass and glass work, is in which state?", ["Niger", "Kwara", "Kogi", "Kebbi"], "It is the seat of the Nupe kingdom.", W + "Bida"),
   q(5, "Ilesa is a city in which state?", ["Osun", "Ondo", "Ekiti", "Oyo"], "It is the capital of the Ijesa people.", W + "Ilesa"),
   q(5, "Sapele, once famous for its timber industry, is in which state?", ["Delta", "Edo", "Ondo", "Bayelsa"], "Sapele wood is named after the town.", W + "Sapele,_Nigeria"),
-  u(5, "The Hadejia-Nguru wetlands are mainly in which two states?", ["Jigawa and Yobe", "Kano and Katsina", "Borno and Adamawa", "Sokoto and Kebbi"], "The wetlands are an important stop for migratory birds.", W + "Hadejia-Nguru_wetlands"),
-  u(5, "Kamuku National Park is in which state?", ["Kaduna", "Niger", "Kano", "Kebbi"], "It became a national park in 1999.", W + "Kamuku_National_Park"),
-  u(5, "Farin Ruwa Falls is in which state?", ["Nasarawa", "Plateau", "Taraba", "Kaduna"], "Its name means 'white water' in Hausa.", W + "Farin_Ruwa_Falls"),
-  u(5, "The Pategi Regatta, a boat festival, is held in which state?", ["Kwara", "Niger", "Kogi", "Kebbi"], "It takes place on the River Niger.", W + "Pategi"),
-  u(5, "Nigeria's coastline is roughly how long?", ["About 850 km", "About 250 km", "About 2,000 km", "About 4,000 km"], "It stretches from Badagry to the Cameroon border.", W + "Geography_of_Nigeria"),
-  u(5, "Shiroro Dam is built on which river?", ["Kaduna", "Niger", "Benue", "Gongola"], "It is in Niger State.", W + "Shiroro_Dam"),
+  q(5, "The Hadejia-Nguru wetlands are mainly in which two states?", ["Jigawa and Yobe", "Kano and Katsina", "Borno and Adamawa", "Sokoto and Kebbi"], "The wetlands are an important stop for migratory birds.", W + "Hadejia-Nguru_wetlands"),
+  q(5, "Kamuku National Park is in which state?", ["Kaduna", "Niger", "Kano", "Kebbi"], "It became a national park in 1999.", W + "Kamuku_National_Park"),
+  q(5, "Farin Ruwa Falls is in which state?", ["Nasarawa", "Plateau", "Taraba", "Kaduna"], "Its name means 'white water' in Hausa.", W + "Farin_Ruwa_Falls"),
+  q(5, "The Pategi Regatta, a boat festival, is held in which state?", ["Kwara", "Niger", "Kogi", "Kebbi"], "It takes place on the River Niger.", W + "Pategi"),
+  q(5, "Nigeria's coastline is roughly how long?", ["About 850 km", "About 250 km", "About 2,000 km", "About 4,000 km"], "It stretches from Badagry to the Cameroon border.", W + "Geography_of_Nigeria"),
+  q(5, "Shiroro Dam is built on which river?", ["Kaduna", "Niger", "Benue", "Gongola"], "It is in Niger State.", W + "Shiroro_Dam"),
 ];

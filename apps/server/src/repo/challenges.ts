@@ -24,8 +24,9 @@ export function challengeLinks(code: string, creatorName: string) {
   return { shareUrl, whatsappUrl: `https://wa.me/?text=${encodeURIComponent(text)}`, text, creatorName };
 }
 
-export async function createChallenge(sql: Sql, userId: string, targetId: string | null = null) {
-  const prof = await sql.one("select rating, premium_until, username from profiles where id = $1", [userId]);
+export async function createChallenge(sql: Sql, userId: string, targetId: string | null = null, stake = 0) {
+  if (stake > 0 && !targetId) throw new HttpError(400, "Stakes are only for challenges sent to a friend.");
+  const prof = await sql.one("select rating, premium_until, username, coins from profiles where id = $1", [userId]);
   if (!prof) throw new HttpError(404, "Profile not found");
   if (!isPremium(prof)) {
     const n = await sql.one<{ n: number }>("select count(*)::int as n from challenges where created_by = $1 and created_at > now() - interval '24 hours'", [userId]);
@@ -33,6 +34,7 @@ export async function createChallenge(sql: Sql, userId: string, targetId: string
       throw new HttpError(402, `Free players can send ${FREE_CHALLENGES_PER_DAY} challenges a day. Go Premium for unlimited.`, "challenge_limit");
     }
   }
+  if (stake > 0 && prof.coins < stake) throw new HttpError(402, `You need ${stake} coins to stake this challenge.`, "insufficient_coins");
   const cats = await activeCategories(sql);
   const chosen = [...cats].sort(() => Math.random() - 0.5).slice(0, 3);
   const pool = await questionPool(sql, chosen.map((c) => c.id));
@@ -44,15 +46,26 @@ export async function createChallenge(sql: Sql, userId: string, targetId: string
     if (!clash) break;
     code = makeCode();
   }
-  await sql.query(
-    "insert into challenges (code, created_by, question_ids, categories, expires_at, target_id) values ($1, $2, $3::uuid[], $4::text[], now() + ($5 || ' milliseconds')::interval, $6)",
-    [code, userId, pgArray(picks.map((p) => p.id)), pgArray(chosen.map((c) => c.slug)), String(CHALLENGE_TTL_MS), targetId],
-  );
+  await sql.tx(async (tx) => {
+    const c = await tx.one<{ id: string }>(
+      "insert into challenges (code, created_by, question_ids, categories, expires_at, target_id, stake) values ($1, $2, $3::uuid[], $4::text[], now() + ($5 || ' milliseconds')::interval, $6, $7) returning id",
+      [code, userId, pgArray(picks.map((p) => p.id)), pgArray(chosen.map((c) => c.slug)), String(CHALLENGE_TTL_MS), targetId, stake],
+    );
+    if (stake > 0) {
+      // The creator's coins are held now; they come back as winnings or a refund when the stake settles.
+      const paid = await tx.one("update profiles set coins = coins - $2 where id = $1 and coins >= $2 returning coins", [userId, stake]);
+      if (!paid) throw new HttpError(402, `You need ${stake} coins to stake this challenge.`, "insufficient_coins");
+      await tx.query("insert into challenge_entries (challenge_id, user_id, staked) values ($1, $2, true)", [c!.id, userId]);
+    }
+  });
   return code;
 }
 
 export async function getChallengeRow(sql: Sql, code: string) {
-  const c: any = await sql.one("select id, code, created_by, target_id, question_ids, categories, expires_at, created_at from challenges where code = $1", [code.toUpperCase()]);
+  const c: any = await sql.one(
+    "select id, code, created_by, target_id, question_ids, categories, expires_at, created_at, stake, stake_outcome, stake_winner from challenges where code = $1",
+    [code.toUpperCase()],
+  );
   if (!c) throw new HttpError(404, "This challenge link doesn't exist.", "not_found");
   return c;
 }
@@ -62,9 +75,10 @@ export function challengeTable(userId: string, c: { id: string; question_ids: st
 }
 
 export async function challengeSummary(sql: Sql, code: string, viewerId: string | null): Promise<ChallengeSummary> {
-  const c = await getChallengeRow(sql, code);
+  let c = await getChallengeRow(sql, code);
+  if (c.stake > 0 && !c.stake_outcome && (await settleStake(sql, c.id))) c = await getChallengeRow(sql, code);
   const entries = await sql.query(
-    "select user_id, score, correct, total_ms, current_index, finished_at from challenge_entries where challenge_id = $1 order by finished_at nulls last, score desc",
+    "select user_id, score, correct, total_ms, current_index, finished_at, staked from challenge_entries where challenge_id = $1 order by finished_at nulls last, score desc",
     [c.id],
   );
   const profiles = await getPublicProfiles(sql, [c.created_by, ...entries.map((e) => e.user_id)]);
@@ -90,20 +104,35 @@ export async function challengeSummary(sql: Sql, code: string, viewerId: string 
     myEntry: mine ? { nextIndex: mine.current_index, finished: !!mine.finished_at, score: mine.score } : null,
     shareUrl: links.shareUrl,
     whatsappUrl: links.whatsappUrl,
+    stake:
+      c.stake > 0 && c.target_id
+        ? { amount: c.stake, targetId: c.target_id, status: c.stake_outcome ?? "open", winnerId: c.stake_winner ?? null, staked: !!mine?.staked }
+        : null,
   };
 }
 
 export async function startChallenge(sql: Sql, code: string, userId: string) {
   const c = await getChallengeRow(sql, code);
   const existing = await sql.one("select 1 from challenge_entries where challenge_id = $1 and user_id = $2", [c.id, userId]);
-  if (!existing && new Date(c.expires_at).getTime() < Date.now()) throw new HttpError(410, "This challenge has expired (48 hours).", "expired");
+  if (existing) return c;
+  if (new Date(c.expires_at).getTime() < Date.now()) throw new HttpError(410, "This challenge has expired (48 hours).", "expired");
+  if (c.stake > 0 && userId === c.target_id) {
+    // Accepting a staked challenge takes the friend's coins too.
+    await sql.tx(async (tx) => {
+      const paid = await tx.one("update profiles set coins = coins - $2 where id = $1 and coins >= $2 returning coins", [userId, c.stake]);
+      if (!paid) throw new HttpError(402, `You need ${c.stake} coins to accept this challenge.`, "insufficient_coins");
+      await tx.query("insert into challenge_entries (challenge_id, user_id, staked) values ($1, $2, true)", [c.id, userId]);
+    });
+    return c;
+  }
   await sql.query("insert into challenge_entries (challenge_id, user_id) values ($1, $2) on conflict do nothing", [c.id, userId]);
   return c;
 }
 
 /** When someone finishes: give XP/coins and, if the creator has a score, record a friend match for history. */
-export async function completeChallenge(sql: Sql, c: { id: string; created_by: string; categories: string[] }, userId: string, totals: { score: number; correct: number; total_ms: number }) {
+export async function completeChallenge(sql: Sql, c: { id: string; created_by: string; categories: string[]; stake?: number }, userId: string, totals: { score: number; correct: number; total_ms: number }) {
   await sql.query("update profiles set xp = xp + $2, coins = coins + 10, updated_at = now() where id = $1", [userId, XP.perCorrect * totals.correct]);
+  if (c.stake) await settleStake(sql, c.id);
   if (userId === c.created_by) {
     // Anyone who played before the creator gets their result recorded now.
     const others = await sql.query("select user_id, score, total_ms from challenge_entries where challenge_id = $1 and user_id <> $2 and finished_at is not null", [c.id, userId]);
@@ -122,10 +151,13 @@ export async function completeChallenge(sql: Sql, c: { id: string; created_by: s
 
 type Side = { userId: string; score: number; total_ms: number };
 
-/** Record a finished challenge pairing as a 'friend' match (highest score wins, fastest breaks ties). */
+/** Highest score wins, fastest total time breaks ties; null for a dead heat. */
+const pickWinner = (a: Side, b: Side) =>
+  a.score === b.score ? (a.total_ms === b.total_ms ? null : a.total_ms < b.total_ms ? a.userId : b.userId) : a.score > b.score ? a.userId : b.userId;
+
+/** Record a finished challenge pairing as a 'friend' match. */
 async function recordFriendMatch(sql: Sql, c: { categories: string[] }, creator: Side, other: Side) {
-  const winner =
-    creator.score === other.score ? (creator.total_ms === other.total_ms ? null : creator.total_ms < other.total_ms ? creator.userId : other.userId) : creator.score > other.score ? creator.userId : other.userId;
+  const winner = pickWinner(creator, other);
   await sql.query("insert into matches (type, player_a, player_b, winner, score_a, score_b, categories) values ('friend', $1, $2, $3, $4, $5, $6::text[])", [
     creator.userId,
     other.userId,
@@ -141,8 +173,8 @@ async function recordFriendMatch(sql: Sql, c: { categories: string[] }, creator:
 
 /** Open challenges a friend sent straight to this player (once the sender has set a score) that they haven't played yet. */
 export async function incomingChallenges(sql: Sql, userId: string) {
-  const rows = await sql.query<{ code: string; created_by: string; expires_at: string; score: number }>(
-    `select c.code, c.created_by, c.expires_at, ce.score from challenges c
+  const rows = await sql.query<{ code: string; created_by: string; expires_at: string; score: number; stake: number }>(
+    `select c.code, c.created_by, c.expires_at, ce.score, c.stake from challenges c
        join challenge_entries ce on ce.challenge_id = c.id and ce.user_id = c.created_by and ce.finished_at is not null
       where c.target_id = $1 and c.expires_at > now()
         and not exists (select 1 from challenge_entries e where e.challenge_id = c.id and e.user_id = $1)
@@ -152,5 +184,53 @@ export async function incomingChallenges(sql: Sql, userId: string) {
   const profiles = await getPublicProfiles(sql, rows.map((r) => r.created_by));
   return rows
     .filter((r) => profiles.has(r.created_by))
-    .map((r) => ({ code: r.code, from: profiles.get(r.created_by)!, expiresAt: new Date(r.expires_at).toISOString(), scoreToBeat: r.score }));
+    .map((r) => ({ code: r.code, from: profiles.get(r.created_by)!, expiresAt: new Date(r.expires_at).toISOString(), scoreToBeat: r.score, stake: r.stake }));
+}
+
+/**
+ * Pay out a staked challenge once both sides have played, or once it expires. Both played: the winner
+ * takes both stakes (a dead heat refunds both). Expired with one side unfinished: a player who finished
+ * beats one who staked but didn't; if nobody finished, or the friend never accepted, stakes are refunded.
+ * Idempotent: returns true only on the call that settled it.
+ */
+export async function settleStake(sql: Sql, challengeId: string): Promise<boolean> {
+  return sql.tx(async (tx) => {
+    const c = await tx.one<{ stake: number; created_by: string; target_id: string; expired: boolean }>(
+      "select stake, created_by, target_id, expires_at < now() as expired from challenges where id = $1 and stake > 0 and stake_outcome is null for update",
+      [challengeId],
+    );
+    if (!c) return false;
+    const rows = await tx.query<{ user_id: string; score: number; total_ms: number; finished: boolean }>(
+      "select user_id, score, total_ms, finished_at is not null as finished from challenge_entries where challenge_id = $1 and staked and user_id in ($2, $3)",
+      [challengeId, c.created_by, c.target_id],
+    );
+    const finished = rows.filter((r) => r.finished);
+    const bothDone = rows.length === 2 && finished.length === 2;
+    if (!bothDone && !c.expired) return false;
+    let outcome: "won" | "draw" | "refunded";
+    let winner: string | null = null;
+    if (bothDone) {
+      const [a, b] = finished.map((r) => ({ userId: r.user_id, score: r.score, total_ms: r.total_ms }));
+      winner = pickWinner(a!, b!);
+      outcome = winner ? "won" : "draw";
+    } else if (rows.length === 2 && finished.length === 1) {
+      winner = finished[0]!.user_id;
+      outcome = "won";
+    } else {
+      outcome = "refunded";
+    }
+    if (winner) await tx.query("update profiles set coins = coins + $2 where id = $1", [winner, c.stake * rows.length]);
+    else for (const r of rows) await tx.query("update profiles set coins = coins + $2 where id = $1", [r.user_id, c.stake]);
+    await tx.query("update challenges set stake_outcome = $2, stake_winner = $3, stake_settled_at = now() where id = $1", [challengeId, outcome, winner]);
+    return true;
+  });
+}
+
+/** Settle any of this player's staked challenges that have expired (called on Home). */
+export async function settleDueStakes(sql: Sql, userId: string) {
+  const due = await sql.query<{ id: string }>(
+    "select id from challenges where stake > 0 and stake_outcome is null and expires_at < now() and (created_by = $1 or target_id = $1)",
+    [userId],
+  );
+  for (const d of due) await settleStake(sql, d.id);
 }

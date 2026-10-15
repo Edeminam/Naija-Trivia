@@ -1,4 +1,4 @@
-import { q, u, W, type Seed } from "../helpers";
+import { q, W, type Seed } from "../helpers";
 
 const NT = W + "Nigeria_national_football_team";
 
@@ -73,7 +73,7 @@ export const footballMore: Seed[] = [
   q(3, "Rangers International FC is nicknamed?", ["The Flying Antelopes", "The People's Elephant", "Sai Masu Gida", "The Oluyole Warriors"], "Rangers are one of the most popular clubs in eastern Nigeria.", W + "Rangers_International_F.C."),
   q(3, "Kano Pillars play home matches at which stadium?", ["Sani Abacha Stadium", "Ahmadu Bello Stadium", "Teslim Balogun Stadium", "Liberation Stadium"], "The stadium is in Kano's Kofar Mata area.", W + "Kano_Pillars_F.C."),
   q(3, "Which Lagos stadium, opened in 1972, hosted the 1973 All-Africa Games?", ["National Stadium, Surulere", "Teslim Balogun Stadium", "Onikan Stadium", "Agege Stadium"], "It hosted Nigeria's 1980 AFCON triumph too.", W + "National_Stadium,_Lagos"),
-  u(3, "The Liberation Stadium is in which city?", ["Port Harcourt", "Calabar", "Warri", "Uyo"], "It was formerly known as the Yakubu Gowon Stadium.", W + "Liberation_Stadium"),
+  q(3, "The Liberation Stadium is in which city?", ["Port Harcourt", "Calabar", "Warri", "Uyo"], "It was formerly known as the Yakubu Gowon Stadium.", W + "Liberation_Stadium"),
   q(3, "Super Falcons' best-ever Women's World Cup finish was reaching which round in 1999?", ["Quarter-finals", "Semi-finals", "Final", "Round of 16"], "They lost 4–3 to Brazil after extra time.", W + "Nigeria_women%27s_national_football_team"),
   q(3, "The Flying Eagles lost the 2005 FIFA U-20 World Cup final to which team?", ["Argentina", "Brazil", "Spain", "Netherlands"], "Lionel Messi scored both of Argentina's goals from the penalty spot.", W + "2005_FIFA_World_Youth_Championship"),
   q(3, "Anthony Joshua won Olympic gold in 2012 in which weight class?", ["Super heavyweight", "Heavyweight", "Cruiserweight", "Light heavyweight"], "He won the final in London on a countback.", W + "Anthony_Joshua"),
@@ -83,8 +83,8 @@ export const footballMore: Seed[] = [
   q(3, "In which Paralympic sport has Nigeria won the most medals?", ["Powerlifting", "Wheelchair basketball", "Swimming", "Archery"], "Nigerian powerlifters have set several world records.", W + "Nigeria_at_the_Paralympics"),
   q(3, "Francis Obikwelu won Olympic 100m silver in 2004 representing which country?", ["Portugal", "Nigeria", "Spain", "Great Britain"], "Born in Onitsha, he earlier won a world bronze for Nigeria.", W + "Francis_Obikwelu"),
   q(3, "Ese Brume won World Championship silver in 2022 in which event?", ["Long jump", "Triple jump", "100m", "Discus"], "She had earlier won world bronze in 2019.", W + "Ese_Brume"),
-  u(3, "Which club has won the most Nigerian league titles?", ["Enyimba", "Rangers International", "Shooting Stars", "Kano Pillars"], "Enyimba also won back-to-back CAF Champions League titles.", W + "Enyimba_F.C."),
-  u(3, "Who is the most-capped player in Super Eagles history?", ["Ahmed Musa", "Vincent Enyeama", "Joseph Yobo", "Mikel John Obi"], "Musa passed Enyeama's record of 101 caps.", W + "Ahmed_Musa"),
+  q(3, "Which club has won the most Nigerian league titles?", ["Enyimba", "Rangers International", "Shooting Stars", "Kano Pillars"], "Enyimba also won back-to-back CAF Champions League titles.", W + "Enyimba_F.C."),
+  q(3, "Who is the most-capped player in Super Eagles history?", ["Ahmed Musa", "Vincent Enyeama", "Joseph Yobo", "Mikel John Obi"], "Musa passed Enyeama's record of 101 caps.", W + "Ahmed_Musa"),
 
   // ── Difficulty 4 ──────────────────────────────────────────────────────
   q(4, "Who coached Nigeria at the 2002 World Cup?", ["Festus Onigbinde", "Shaibu Amodu", "Bora Milutinović", "Christian Chukwu"], "Onigbinde also coached Nigeria to the 1984 AFCON final.", W + "Festus_Onigbinde"),
@@ -111,11 +111,11 @@ export const footballMore: Seed[] = [
   q(4, "Nigeria's men's basketball team made its Olympic debut at which Games?", ["London 2012", "Beijing 2008", "Athens 2004", "Tokyo 2020"], "They qualified through a last-chance tournament in Venezuela.", W + "Nigeria_men%27s_national_basketball_team"),
   q(4, "Hakeem Olajuwon played college basketball for which university?", ["Houston", "Georgetown", "Kentucky", "Duke"], "His college team was nicknamed 'Phi Slama Jama'.", W + "Hakeem_Olajuwon"),
   q(4, "Which Kansas City Chiefs running back was nicknamed 'The Nigerian Nightmare'?", ["Christian Okoye", "Ezekiel Ansah", "Amobi Okoye", "Osi Umenyiora"], "Okoye led the NFL in rushing yards in 1989.", W + "Christian_Okoye"),
-  u(4, "Gidigbo is a traditional Yoruba form of which sport?", ["Wrestling", "Boxing", "Archery", "Canoe racing"], "Gidigbo bouts test strength and balance.", W + "Gidigbo"),
-  u(4, "Who coached D'Tigress at the Paris 2024 Olympics?", ["Rena Wakama", "Otis Hughley", "Mike Brown", "Alex Nwora"], "She became the first African woman to coach at the Olympic basketball tournament.", W + "Rena_Wakama"),
-  u(4, "Which Nigerian won long jump gold at the 2022 Commonwealth Games?", ["Ese Brume", "Blessing Okagbare", "Chioma Ajunwa", "Prestina Ochonogor"], "The Games were held in Birmingham, England.", W + "Ese_Brume"),
-  u(4, "Shooting Stars SC of Ibadan are popularly called?", ["Oluyole Warriors", "Flying Antelopes", "People's Elephant", "Sai Masu Gida"], "3SC were the first Nigerian club to win a continental trophy.", W + "Shooting_Stars_S.C."),
-  u(4, "Favour Ofili was left off the Paris 2024 100m start list because of what?", ["Officials failed to register her", "A doping ban", "An injury", "She chose to skip it"], "She still raced the 200m at the Games.", W + "Favour_Ofili"),
+  q(4, "Gidigbo is a traditional Yoruba form of which sport?", ["Wrestling", "Boxing", "Archery", "Canoe racing"], "Gidigbo bouts test strength and balance.", W + "Gidigbo"),
+  q(4, "Who coached D'Tigress at the Paris 2024 Olympics?", ["Rena Wakama", "Otis Hughley", "Mike Brown", "Alex Nwora"], "Under her, D'Tigress became the first African team to reach an Olympic basketball quarter-final.", W + "Rena_Wakama"),
+  q(4, "Which Nigerian won long jump gold at the 2022 Commonwealth Games?", ["Ese Brume", "Blessing Okagbare", "Chioma Ajunwa", "Prestina Ochonogor"], "The Games were held in Birmingham, England.", W + "Ese_Brume"),
+  q(4, "Shooting Stars SC of Ibadan are popularly called?", ["Oluyole Warriors", "Flying Antelopes", "People's Elephant", "Sai Masu Gida"], "3SC were the first Nigerian club to win a continental trophy.", W + "Shooting_Stars_S.C."),
+  q(4, "Favour Ofili was left off the Paris 2024 100m start list because of what?", ["Officials failed to register her", "A doping ban", "An injury", "She chose to skip it"], "She still raced the 200m at the Games.", W + "Favour_Ofili"),
 
   // ── Difficulty 5 ──────────────────────────────────────────────────────
   q(5, "Which team beat Nigeria in the 1990 AFCON final?", ["Algeria", "Cameroon", "Egypt", "Zambia"], "Algeria were also the hosts that year.", W + "1990_African_Cup_of_Nations"),
@@ -126,9 +126,9 @@ export const footballMore: Seed[] = [
   q(5, "Who captained the Golden Eaglets to the first U-16 world title in 1985?", ["Nduka Ugbade", "Victor Igbinoba", "Jonathan Akpoborie", "Fatai Atere"], "It was the first FIFA tournament won by an African nation.", W + "Nduka_Ugbade"),
   q(5, "Who scored Nigeria's winner against Bosnia and Herzegovina at the 2014 World Cup?", ["Peter Odemwingie", "Emmanuel Emenike", "Ahmed Musa", "Victor Moses"], "It was Nigeria's first World Cup win since 1998.", W + "Peter_Odemwingie"),
   q(5, "Peter Odemwingie famously drove to which club's stadium on transfer deadline day in 2013?", ["Queens Park Rangers", "Stoke City", "Cardiff City", "Aston Villa"], "The move did not go through, and he stayed at West Brom.", W + "Peter_Odemwingie"),
-  u(5, "Perpetua Nkwocha won the African Women's Footballer of the Year award how many times?", ["4", "2", "3", "6"], "She scored four goals in the 2004 African Women's Championship final.", W + "Perpetua_Nkwocha"),
-  u(5, "Dick Tiger, the world boxing champion, was born in which present-day state?", ["Imo", "Anambra", "Abia", "Enugu"], "He was born Richard Ihetu in Amaigbo.", W + "Dick_Tiger"),
-  u(5, "Daniel Amokachi scored a famous solo goal at the 1994 World Cup against which team?", ["Greece", "Bulgaria", "Argentina", "Italy"], "Nigeria beat Greece 2–0 to top their group.", W + "Daniel_Amokachi"),
-  u(5, "Nigeria made its debut at which ICC tournament in 2020?", ["U-19 Cricket World Cup", "T20 World Cup", "Women's World Cup", "Champions Trophy"], "Nigeria became the first West African side to play at the event.", W + "2020_Under-19_Cricket_World_Cup"),
-  u(5, "The NFF's headquarters in Abuja is popularly called?", ["The Glass House", "The Green House", "Eagles' Nest", "The Pavilion"], "It sits beside the Moshood Abiola National Stadium.", W + "Nigeria_Football_Federation"),
+  q(5, "Perpetua Nkwocha won the African Women's Footballer of the Year award how many times?", ["4", "2", "3", "6"], "She scored four goals in the 2004 African Women's Championship final.", W + "Perpetua_Nkwocha"),
+  q(5, "Dick Tiger, the world boxing champion, was born in which present-day state?", ["Imo", "Anambra", "Abia", "Enugu"], "He was born Richard Ihetu in Amaigbo.", W + "Dick_Tiger"),
+  q(5, "Daniel Amokachi scored a famous solo goal at the 1994 World Cup against which team?", ["Greece", "Bulgaria", "Argentina", "Italy"], "Nigeria beat Greece 2–0 to top their group.", W + "Daniel_Amokachi"),
+  q(5, "Nigeria made its debut at which ICC tournament in 2020?", ["U-19 Cricket World Cup", "T20 World Cup", "Women's World Cup", "Champions Trophy"], "Nigeria became the first West African side to play at the event.", W + "2020_Under-19_Cricket_World_Cup"),
+  q(5, "The NFF's headquarters in Abuja is popularly called?", ["The Glass House", "The Green House", "Eagles' Nest", "The Pavilion"], "The NFF runs Nigerian football from Abuja.", W + "Nigeria_Football_Federation"),
 ];

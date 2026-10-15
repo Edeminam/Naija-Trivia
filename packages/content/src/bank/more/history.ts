@@ -1,4 +1,4 @@
-import { q, u, W, type Seed } from "../helpers";
+import { q, W, type Seed } from "../helpers";
 
 export const historyMore: Seed[] = [
   // ── Difficulty 1 ──────────────────────────────────────────────────────
@@ -123,9 +123,9 @@ export const historyMore: Seed[] = [
   q(5, "Who was the Biafran leader who surrendered to the federal government in January 1970?", ["Philip Effiong", "Odumegwu Ojukwu", "Alexander Madiebo", "Louis Mbanefo"], "Ojukwu had flown into exile days before.", W + "Philip_Effiong"),
   q(5, "In which city was Aguiyi-Ironsi killed in July 1966?", ["Ibadan", "Lagos", "Kaduna", "Enugu"], "He was killed along with his host, Adekunle Fajuyi.", W + "Johnson_Aguiyi-Ironsi"),
   q(5, "Which military governor of the Western Region died with Aguiyi-Ironsi in 1966?", ["Adekunle Fajuyi", "Robert Adebayo", "David Ejoor", "Hassan Katsina"], "Fajuyi is remembered for refusing to abandon his guest.", W + "Adekunle_Fajuyi"),
-  u(5, "Who became Nigeria's first female federal minister, in 1979?", ["Adenike Ebun Oyagbola", "Margaret Ekpo", "Funmilayo Ransome-Kuti", "Dora Akunyili"], "She served as Minister of National Planning.", W + "Adenike_Oyagbola"),
-  u(5, "Who was the first Nigerian to qualify as a lawyer?", ["Christopher Sapara Williams", "Herbert Macaulay", "Obafemi Awolowo", "Adeyemo Alakija"], "He was called to the English bar in 1879.", W + "Christopher_Sapara_Williams"),
-  u(5, "Which flower is Nigeria's national flower?", ["Costus spectabilis", "Hibiscus", "Bougainvillea", "Pride of Barbados"], "It has bright yellow trumpet-shaped blooms.", W + "Costus_spectabilis"),
-  u(5, "Who was President of the UN General Assembly in 2019–20?", ["Tijjani Muhammad-Bande", "Joseph Garba", "Amina Mohammed", "Ibrahim Gambari"], "He was Nigeria's ambassador to the UN.", W + "Tijjani_Muhammad-Bande"),
-  u(5, "Kudirat Kekere-Ekun, sworn in as Chief Justice in 2024, is Nigeria's how-manyth female CJN?", ["Second", "First", "Third", "Fourth"], "Aloma Mukhtar was the first.", W + "Kudirat_Kekere-Ekun"),
+  q(5, "Who became Nigeria's first female federal minister, in 1979?", ["Adenike Ebun Oyagbola", "Margaret Ekpo", "Funmilayo Ransome-Kuti", "Dora Akunyili"], "She served as Minister of National Planning.", W + "Adenike_Oyagbola"),
+  q(5, "Who was the first Nigerian to qualify as a lawyer?", ["Christopher Sapara Williams", "Herbert Macaulay", "Obafemi Awolowo", "Adeyemo Alakija"], "He was called to the English bar in 1879.", W + "Christopher_Sapara_Williams"),
+  q(5, "Which flower is Nigeria's national flower?", ["Costus spectabilis", "Hibiscus", "Bougainvillea", "Pride of Barbados"], "It has bright yellow trumpet-shaped blooms.", W + "Costus_spectabilis"),
+  q(5, "Who was President of the UN General Assembly in 2019–20?", ["Tijjani Muhammad-Bande", "Joseph Garba", "Amina Mohammed", "Ibrahim Gambari"], "He was Nigeria's ambassador to the UN.", W + "Tijjani_Muhammad-Bande"),
+  q(5, "Kudirat Kekere-Ekun, sworn in as Chief Justice in 2024, is Nigeria's how-manyth female CJN?", ["Second", "First", "Third", "Fourth"], "Aloma Mukhtar was the first.", W + "Kudirat_Kekere-Ekun"),
 ];

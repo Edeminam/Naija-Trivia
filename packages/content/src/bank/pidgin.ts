@@ -1,4 +1,4 @@
-import { q, u, W, type CategoryBank } from "./helpers";
+import { q, W, type CategoryBank } from "./helpers";
 
 const P = W + "Nigerian_Pidgin";
 
@@ -114,17 +114,17 @@ export const pidgin: CategoryBank = {
     q(4, "Some linguists call Nigerian Pidgin by which name?", ["Naijá", "Wazobia", "Krio", "Broken Hausa"], "Krio is the related creole of Sierra Leone.", P),
     q(4, "'Shey' at the start of a Pidgin question means roughly?", ["Is it that…?", "Never", "Because", "Tomorrow"], "'Shey you go come?' means 'Will you come?'.", P),
     q(4, "Who is a 'waka-pass'?", ["A passer-by", "A bus pass", "A tour guide", "A traffic warden"], "Also used for someone who isn't really involved.", P),
-    u(4, "In Nigerian slang, 'gragra' means?", ["Aggressive bluster or showing force", "Grace", "Laughter", "Gravel"], "'Na only gragra, no action.'", P),
-    u(4, "In Nigerian slang, 'kampe' means?", ["Strong, solid or fine", "Camp", "Broken", "Quiet"], "'I dey kampe' means 'I'm doing great'.", P),
-    u(4, "In Nigerian slang, 'ogbonge' means?", ["Genuine or top-quality", "Fake", "Lazy", "Huge"], "'Na ogbonge material be this.'", P),
-    u(4, "What does 'wotowoto' mean?", ["Plenty or in abundance", "Very hot", "Small amount", "Rotten"], "'Food dey wotowoto for the party.'", P),
-    u(4, "An 'Ajala traveller' is someone who?", ["Travels around a lot", "Never leaves home", "Sells travel tickets", "Drives a bus"], "It refers to a famous Nigerian globetrotter, Olabisi Ajala.", W + "Olabisi_Ajala"),
+    q(4, "In Nigerian slang, 'gragra' means?", ["Aggressive bluster or showing force", "Grace", "Laughter", "Gravel"], "'Na only gragra, no action.'", P),
+    q(4, "In Nigerian slang, 'kampe' means?", ["Strong, solid or fine", "Camp", "Broken", "Quiet"], "'I dey kampe' means 'I'm doing great'.", P),
+    q(4, "In Nigerian slang, 'ogbonge' means?", ["Genuine or top-quality", "Fake", "Lazy", "Huge"], "'Na ogbonge material be this.'", P),
+    q(4, "What does 'wotowoto' mean?", ["Plenty or in abundance", "Very hot", "Small amount", "Rotten"], "'Food dey wotowoto for the party.'", P),
+    q(4, "An 'Ajala traveller' is someone who?", ["Travels around a lot", "Never leaves home", "Sells travel tickets", "Drives a bus"], "It refers to a famous Nigerian globetrotter, Olabisi Ajala.", W + "Olabisi_Ajala"),
 
     // ── Difficulty 5 ──────────────────────────────────────────────────────
     q(5, "The Pidgin word 'pikin' likely comes from which Portuguese word?", ["Pequeno", "Pessoa", "Piquete", "Pai"], "Pequeno means 'small'.", P),
     q(5, "Roughly how many people use Nigerian Pidgin as a first or second language?", ["Over 100 million", "About 5 million", "About 20 million", "About 1 million"], "It is one of the most widely spoken languages in Africa.", P),
     q(5, "Nigerian Pidgin is most closely related to which Sierra Leonean creole?", ["Krio", "Sango", "Tok Pisin", "Papiamento"], "Both grew out of West African English-based contact languages.", W + "Krio_language"),
-    u(5, "'Shege' in northern Nigerian slang refers to?", ["Hardship or suffering", "A wedding", "A type of food", "Good luck"], "'I don see shege!' means 'I've suffered!'.", P),
-    u(5, "'Yanga' in Nigerian slang means?", ["Showing off or pride", "Shyness", "Hunger", "Anger"], "'Na yanga she dey form.'", P),
+    q(5, "'Shege' in northern Nigerian slang refers to?", ["Hardship or suffering", "A wedding", "A type of food", "Good luck"], "'I don see shege!' means 'I've suffered!'.", P),
+    q(5, "'Yanga' in Nigerian slang means?", ["Showing off or pride", "Shyness", "Hunger", "Anger"], "'Na yanga she dey form.'", P),
   ],
 };

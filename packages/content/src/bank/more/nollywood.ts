@@ -1,4 +1,4 @@
-import { q, u, W, type Seed } from "../helpers";
+import { q, W, type Seed } from "../helpers";
 
 export const nollywoodMore: Seed[] = [
   // ── Difficulty 1 ──────────────────────────────────────────────────────
@@ -75,11 +75,11 @@ export const nollywoodMore: Seed[] = [
   q(4, "What does the name 'Aníkúlápó' mean in Yoruba?", ["One who has death in his pouch", "The king's son", "The traveller", "Born on a market day"], "It was also Fela Kuti's adopted middle name.", W + "An%C3%ADk%C3%BAl%C3%A1p%C3%B3"),
   q(4, "Which actor stars in Professor Johnbull as the title character?", ["Kanayo O. Kanayo", "Pete Edochie", "Nkem Owoh", "Zack Orji"], "The sitcom mixes comedy with social commentary.", W + "Kanayo_O._Kanayo"),
   q(4, "Which 1980s NTA sitcom popularised the line 'To be a millionaire, think like a millionaire'?", ["Basi and Company", "The New Masquerade", "Village Headmaster", "Cock Crow at Dawn"], "Its hero, Basi, is always chasing get-rich-quick schemes.", W + "Basi_and_Company"),
-  u(4, "Which BBNaija star won the 2024 season 'No Loose Guard'?", ["Kellyrae", "Wanni", "Shaun", "Ozee"], "The 2024 season began with housemates in pairs.", W + "Big_Brother_Naija_(season_9)"),
-  u(4, "Which comedian is famous for the catchphrase 'Chop Knuckle'?", ["Brain Jotter", "Sabinus", "Mr Macaroni", "Lasisi Elenu"], "Brain Jotter is known for his expressive faces.", W + "Brain_Jotter"),
-  u(4, "Which NdaniTV web series follows Tiwa's attempts to lose weight?", ["Skinny Girl in Transit", "Rumour Has It", "Our Best Friend's Wedding", "Phases"], "The series started in 2015.", W + "Skinny_Girl_in_Transit"),
-  u(4, "The Ikorodu Bois were invited to the premiere of which Netflix film after recreating its trailer?", ["Extraction 2", "The Gray Man", "Red Notice", "The Old Guard"], "The Russo brothers praised their homemade remakes.", W + "Ikorodu_Bois"),
-  u(4, "EbonyLife TV's 2016 drama Sons of the Caliphate is set where?", ["Northern Nigeria", "Lagos", "Calabar", "Abuja's Maitama"], "It follows wealthy young men in a northern city.", W + "Sons_of_the_Caliphate"),
+  q(4, "Which BBNaija star won the 2024 season 'No Loose Guard'?", ["Kellyrae", "Wanni", "Shaun", "Ozee"], "The 2024 season began with housemates in pairs.", W + "Big_Brother_Naija_(season_9)"),
+  q(4, "Which comedian started the 'Gwo Gwo Gwo Ngwo' dance challenge?", ["Brain Jotter", "Sabinus", "Mr Macaroni", "Lasisi Elenu"], "Brain Jotter is known for his expressive faces.", W + "Brain_Jotter"),
+  q(4, "Which NdaniTV web series follows Tiwa's attempts to lose weight?", ["Skinny Girl in Transit", "Rumour Has It", "Our Best Friend's Wedding", "Phases"], "The series started in 2015.", W + "Skinny_Girl_in_Transit"),
+  q(4, "The Ikorodu Bois were invited to the premiere of which Netflix film after recreating its trailer?", ["Extraction 2", "The Gray Man", "Red Notice", "The Old Guard"], "The Russo brothers praised their homemade remakes.", W + "Ikorodu_Bois"),
+  q(4, "EbonyLife TV's 2016 drama Sons of the Caliphate is set where?", ["Northern Nigeria", "Lagos", "Calabar", "Abuja's Maitama"], "It follows wealthy young men in a northern city.", W + "Sons_of_the_Caliphate"),
 
   // ── Difficulty 5 ──────────────────────────────────────────────────────
   q(5, "Which Nigerian-American actor played Chris Partlow in The Wire?", ["Gbenga Akinnagbe", "Hakeem Kae-Kazim", "Nonso Anozie", "Chukwudi Iwuji"], "He grew up in Maryland.", W + "Gbenga_Akinnagbe"),
@@ -88,10 +88,10 @@ export const nollywoodMore: Seed[] = [
   q(5, "Which 1990s Zeb Ejiro film became famous for its title character, a Lagos sex worker?", ["Domitilla", "Glamour Girls", "Rattlesnake", "Violated"], "Domitilla was released in 1996.", W + "Domitilla"),
   q(5, "Before Netflix, Nollywood films were mostly sold on what format in the 1990s?", ["VHS tapes", "DVDs", "Film reels in cinemas", "Online downloads"], "Markets like Idumota and Alaba became distribution hubs.", W + "Nollywood"),
   q(5, "Which Lagos market became a major hub for Nollywood film distribution?", ["Idumota", "Balogun", "Mile 12", "Oshodi"], "Onitsha's Upper Iweka was another key hub.", W + "Nollywood"),
-  u(5, "Who were the hosts of Big Brother Nigeria in 2006?", ["Olisa Adibua and Michelle Dede", "Ebuka Obi-Uchendu and Toke Makinwa", "IK Osakioduwa and Eku Edewor", "Frank Edoho and Kate Henshaw"], "The 2006 season was won by Katung Aduwak.", W + "Big_Brother_Nigeria_(season_1)"),
-  u(5, "Lady Buckit and the Motley Mopsters (2018) is billed as Nigeria's first what?", ["Animated feature film", "3D horror film", "Silent film", "IMAX documentary"], "It was directed by Adebisi Adetayo.", W + "Lady_Buckit_and_the_Motley_Mopsters"),
-  u(5, "Lateef Adedimeji is married to which actress?", ["Mo Bimpe", "Bimbo Ademoye", "Toyin Abraham", "Bisola Aiyeola"], "The couple married in 2021.", W + "Lateef_Adedimeji"),
-  u(5, "Who played Arolake in Anikulapo (2022)?", ["Bimbo Ademoye", "Sola Sobowale", "Mercy Johnson", "Toyin Abraham"], "The film later got a Netflix series, 'Rise of the Spectre'.", W + "An%C3%ADk%C3%BAl%C3%A1p%C3%B3"),
+  q(5, "Who were the hosts of Big Brother Nigeria in 2006?", ["Olisa Adibua and Michelle Dede", "Ebuka Obi-Uchendu and Toke Makinwa", "IK Osakioduwa and Eku Edewor", "Frank Edoho and Kate Henshaw"], "The 2006 season was won by Katung Aduwak.", W + "Big_Brother_Nigeria_(season_1)"),
+  q(5, "Lady Buckit and the Motley Mopsters (2018) is billed as Nigeria's first what?", ["Animated feature film", "3D horror film", "Silent film", "IMAX documentary"], "It was directed by Adebisi Adetayo.", W + "Lady_Buckit_and_the_Motley_Mopsters"),
+  q(5, "Lateef Adedimeji is married to which actress?", ["Mo Bimpe", "Bimbo Ademoye", "Toyin Abraham", "Bisola Aiyeola"], "The couple married in 2021.", W + "Lateef_Adedimeji"),
+  q(5, "Who played Arolake in Anikulapo (2022)?", ["Bimbo Ademoye", "Sola Sobowale", "Mercy Johnson", "Toyin Abraham"], "The film later got a Netflix series, 'Rise of the Spectre'.", W + "An%C3%ADk%C3%BAl%C3%A1p%C3%B3"),
 
   // ── Additions ───────────────────────────────────────────────────────────
 
@@ -106,9 +106,9 @@ export const nollywoodMore: Seed[] = [
   q(4, "Who directed The CEO (2016), a thriller set at a corporate retreat?", ["Kunle Afolayan", "Niyi Akinmolayan", "Izu Ojukwu", "Obi Emelonye"], "It premiered on a flight, a first for Nollywood.", W + "The_CEO_(film)"),
   q(4, "Kunle Afolayan's Mokalik (2019) is set in a…", ["Mechanic village", "Hospital", "University", "Fishing village"], "The title is slang for 'mechanic'.", W + "Mokalik"),
   q(4, "The Africa Movie Academy Awards (AMAA) were first held in which year?", ["2005", "1995", "2013", "2010"], "AMAA was founded by Peace Anyiam-Osigwe.", W + "Africa_Movie_Academy_Awards"),
-  u(4, "Kunle Afolayan's Netflix film Swallow (2021) is set in which decade?", ["1980s", "1960s", "2000s", "1990s"], "It is adapted from Sefi Atta's novel.", W + "Swallow_(2021_film)"),
-  u(4, "Netflix's Glamour Girls (2022) is a remake of a 1994 film. Who directed the remake?", ["Bunmi Ajakaiye", "Kunle Afolayan", "Kemi Adetiba", "Jade Osiberu"], "The original was a Nollywood classic.", W + "Glamour_Girls_(2022_film)"),
-  u(5, "Genevieve Nnaji began acting as a child in which TV series?", ["Ripples", "Checkmate", "Mirror in the Sun", "Super Story"], "She later became one of Nollywood's biggest stars.", W + "Genevieve_Nnaji"),
-  u(5, "Izzar So, a hugely popular series on YouTube, is from which film industry?", ["Kannywood", "Nollywood (Lagos)", "Ghallywood", "Yoruba Nollywood"], "It is in Hausa.", W + "Kannywood"),
-  u(5, "Kunle Afolayan's Ìjọ̀gbọ̀n (2023) follows four teenagers who find what?", ["Rough diamonds", "A gun", "A dead body", "A treasure map"], "It was released on Netflix.", W + "Kunle_Afolayan"),
+  q(4, "Kunle Afolayan's Netflix film Swallow (2021) is set in which decade?", ["1980s", "1960s", "2000s", "1990s"], "It is adapted from Sefi Atta's novel.", W + "Swallow_(2021_film)"),
+  q(4, "Netflix's Glamour Girls (2022) is a remake of a 1994 film. Who directed the remake?", ["Bunmi Ajakaiye", "Kunle Afolayan", "Kemi Adetiba", "Jade Osiberu"], "The original was a Nollywood classic.", W + "Glamour_Girls_(2022_film)"),
+  q(5, "Genevieve Nnaji began acting as a child in which TV series?", ["Ripples", "Checkmate", "Mirror in the Sun", "Super Story"], "She later became one of Nollywood's biggest stars.", W + "Genevieve_Nnaji"),
+  q(5, "Izzar So, a hugely popular series on YouTube, is from which film industry?", ["Kannywood", "Nollywood (Lagos)", "Ghallywood", "Yoruba Nollywood"], "It is in Hausa.", W + "Kannywood"),
+  q(5, "Kunle Afolayan's Ìjọ̀gbọ̀n (2023) follows four teenagers who find what?", ["Rough diamonds", "A gun", "A dead body", "A treasure map"], "It was released on Netflix.", W + "Kunle_Afolayan"),
 ];

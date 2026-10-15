@@ -156,6 +156,44 @@ async function challengeCard(code: string): Promise<Buffer | null> {
   );
 }
 
+async function dailyCard(userId: string, date: string): Promise<Buffer | null> {
+  const sql = await getDb();
+  const e = await sql.one(
+    `select d.score, d.correct, d.answers, p.username, p.avatar_id, p.state_code, p.rating, s.current as streak
+       from daily_entries d join profiles p on p.id = d.user_id left join streaks s on s.user_id = d.user_id
+      where d.user_id = $1 and d.daily_date = $2 and d.finished_at is not null`,
+    [userId, date],
+  );
+  if (!e) return null;
+  const rank = await sql.one("select national_rank, players from daily_rank($1, $2)", [date, userId]);
+  const answers = ((typeof e.answers === "string" ? JSON.parse(e.answers) : e.answers) as { index: number; correct: boolean }[]).sort((a, b) => a.index - b.index);
+  const league = leagueForRating(e.rating ?? 1000);
+  const day = new Date(`${date}T12:00:00Z`).toLocaleDateString("en-NG", { day: "numeric", month: "long", year: "numeric" });
+  const square = (ok: boolean | undefined) => h("div", { width: 76, height: 76, borderRadius: 18, backgroundColor: ok ? C.green : ok === false ? "#E5484D" : C.raised });
+  return render(
+    frame(
+      h("div", { flexDirection: "column", alignItems: "center", marginTop: 130, gap: 22 },
+        h("div", { fontSize: 34, letterSpacing: 8, color: C.gold, fontWeight: 700 }, "DAILY NAIJA"),
+        h("div", { fontSize: 34, color: C.muted }, day),
+        img(dataUri(avatarSvg(e.avatar_id ?? "ada", league.color)), 220),
+        h("div", { fontFamily: "Satoshi", fontWeight: 700, fontSize: 52 }, e.username ?? "Player"),
+        h("div", { fontFamily: "Satoshi", fontWeight: 900, fontSize: 170, color: C.gold, lineHeight: 1 }, Number(e.score).toLocaleString("en-NG")),
+        h("div", { fontSize: 40, color: C.text, fontWeight: 700 }, `${e.correct}/10 right`),
+      ),
+      h("div", { justifyContent: "center", gap: 14, marginTop: 60 }, ...Array.from({ length: 10 }, (_, i) => square(answers.find((a) => a.index === i)?.correct))),
+      h("div", { justifyContent: "center", gap: 24, marginTop: 60 },
+        e.streak ? h("div", { padding: "18px 34px", borderRadius: 999, backgroundColor: "rgba(229,72,77,0.16)", color: "#FF8A8D", fontSize: 34, fontWeight: 700 }, `${e.streak}-day streak`) : null,
+        rank?.national_rank ? h("div", { padding: "18px 34px", borderRadius: 999, backgroundColor: "rgba(15,169,88,0.16)", color: "#2FCB78", fontSize: 34, fontWeight: 700 }, `#${rank.national_rank} of ${Number(rank.players).toLocaleString("en-NG")} in Naija`) : null,
+      ),
+      h("div", { flexDirection: "column", alignItems: "center", marginTop: "auto", gap: 18 },
+        h("div", { fontFamily: "Satoshi", fontWeight: 900, fontSize: 60, textAlign: "center", justifyContent: "center", maxWidth: 920 }, "Same 10 questions for everybody."),
+        h("div", { fontSize: 34, color: C.muted }, "Can you beat my score today?"),
+        h("div", { marginTop: 10, padding: "22px 48px", borderRadius: 28, backgroundColor: C.green, color: "#03140B", fontSize: 38, fontWeight: 700 }, env.appUrl.replace(/^https?:\/\//, "")),
+      ),
+    ),
+  );
+}
+
 const esc = (s: string) => s.replace(/[&<>"']/g, (ch) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[ch]!);
 
 /** Tiny OpenGraph page so WhatsApp/Twitter show the card, then hop into the app. */
@@ -193,6 +231,28 @@ share.get("/share/challenge/:code.png", async (req, res) => {
     errors.capture(e, { where: "share.challenge" });
     res.status(500).end();
   }
+});
+
+const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
+const UUID_RE = /^[0-9a-f-]{36}$/i;
+
+share.get("/share/daily/:userId/:date.png", async (req, res) => {
+  const { userId, date } = req.params as { userId: string; date: string };
+  if (!UUID_RE.test(userId) || !DATE_RE.test(date)) return void res.status(404).end();
+  try {
+    const png = await cached(`d:${userId}:${date}`, () => dailyCard(userId, date));
+    if (!png) return void res.status(404).end();
+    res.set({ "content-type": "image/png", "cache-control": "public, max-age=300" }).send(png);
+  } catch (e) {
+    errors.capture(e, { where: "share.daily" });
+    res.status(500).end();
+  }
+});
+
+share.get("/l/d/:userId/:date", (req, res) => {
+  const { userId, date } = req.params as { userId: string; date: string };
+  if (!UUID_RE.test(userId) || !DATE_RE.test(date)) return void res.redirect(`${env.appUrl}/daily`);
+  res.type("html").send(linkPage("Daily Naija on Naija Trivia Clash", "Same 10 questions for everybody. Can you beat my score today?", `${env.publicUrl}/share/daily/${userId}/${date}.png`, `${env.appUrl}/daily`));
 });
 
 share.get("/l/c/:code", (req, res) => {

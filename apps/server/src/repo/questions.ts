@@ -1,5 +1,5 @@
 import { createHash, randomBytes } from "node:crypto";
-import { SEEN_QUESTION_WINDOW_DAYS, type CategorySlug, type WireOption } from "@ntc/shared";
+import { SEEN_QUESTION_WINDOW_DAYS, type CategorySlug, type QuestionLocale, type WireOption } from "@ntc/shared";
 import { pgArray, type Sql } from "../db";
 
 export interface FullQuestion {
@@ -27,7 +27,7 @@ export interface ActiveCategory {
 export async function activeCategories(sql: Sql, minLive = 20): Promise<ActiveCategory[]> {
   return sql.query<ActiveCategory>(
     `select c.id, c.slug, c.name, count(q.id)::int as live
-       from categories c join questions q on q.category_id = c.id and q.status = 'live'
+       from categories c join questions q on q.category_id = c.id and q.status = 'live' and (q.release_at is null or q.release_at <= now())
       where c.active
       group by c.id, c.slug, c.name, c.sort
      having count(q.id) >= $1
@@ -38,7 +38,7 @@ export async function activeCategories(sql: Sql, minLive = 20): Promise<ActiveCa
 
 export async function questionPool(sql: Sql, categoryIds: string[]) {
   return sql.query<{ id: string; categoryId: string; difficulty: number }>(
-    `select id, category_id as "categoryId", difficulty from questions where status = 'live' and category_id = any($1::uuid[])`,
+    `select q.id, q.category_id as "categoryId", q.difficulty from questions q where q.status = 'live' and (q.release_at is null or q.release_at <= now()) and q.category_id = any($1::uuid[])`,
     [pgArray(categoryIds)],
   );
 }
@@ -62,7 +62,32 @@ export async function markSeen(sql: Sql, userId: string, questionIds: string[]) 
   );
 }
 
-export async function getQuestions(sql: Sql, ids: string[]): Promise<FullQuestion[]> {
+/** The language a player wants questions in (from their synced settings). */
+export async function playerLocale(sql: Sql, userId: string): Promise<QuestionLocale> {
+  const r = await sql.one<{ l: string | null }>("select settings->>'questionLanguage' as l from profiles where id = $1", [userId]);
+  return r?.l === "pcm" ? "pcm" : "en";
+}
+
+/**
+ * Swap in translated text, options and fact where a live translation exists; otherwise keep English.
+ * Translated options are stored in the same order, so correctIndex and option ids still line up.
+ */
+export async function localize(sql: Sql, qs: FullQuestion[], locale: QuestionLocale): Promise<FullQuestion[]> {
+  if (locale === "en" || !qs.length) return qs;
+  const rows = await sql.query<{ question_id: string; text: string; options: unknown; fact: string }>(
+    "select question_id, text, options, fact from question_translations where locale = $1 and status = 'live' and question_id = any($2::uuid[])",
+    [locale, pgArray(qs.map((q) => q.id))],
+  );
+  const byId = new Map(rows.map((r) => [r.question_id, r]));
+  return qs.map((q) => {
+    const t = byId.get(q.id);
+    if (!t) return q;
+    const options = (typeof t.options === "string" ? JSON.parse(t.options) : t.options) as string[];
+    return { ...q, text: t.text, options, fact: t.fact };
+  });
+}
+
+export async function getQuestions(sql: Sql, ids: string[], locale: QuestionLocale = "en"): Promise<FullQuestion[]> {
   if (!ids.length) return [];
   const rows = await sql.query(
     `select q.id, q.category_id, c.slug, q.text, q.options, q.correct_index, q.difficulty, q.fact, q.image_url, q.option_picks, q.times_shown
@@ -87,7 +112,7 @@ export async function getQuestions(sql: Sql, ids: string[]): Promise<FullQuestio
       } satisfies FullQuestion,
     ]),
   );
-  return ids.map((id) => map.get(id)).filter(Boolean) as FullQuestion[];
+  return localize(sql, ids.map((id) => map.get(id)).filter(Boolean) as FullQuestion[], locale);
 }
 
 /** Record one answer against question stats (option picks feed Ask the Crowd). */

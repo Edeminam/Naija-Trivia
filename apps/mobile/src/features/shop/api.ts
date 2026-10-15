@@ -12,6 +12,9 @@ export interface ShopData {
   powerUps: (PowerUpDef & { owned: number })[];
   cosmetics: (CosmeticDef & { owned: boolean })[];
   products: ProductDef[];
+  /** This week's rotating cosmetics (ids) and when the next drop lands */
+  featured: { ids: string[]; endsAt: number };
+  streakFreeze: { cost: number; owned: number; max: number };
 }
 
 export function useShop() {
@@ -30,9 +33,16 @@ export function useShopRefresh() {
 
 export function useBuyItem() {
   const refresh = useShopRefresh();
+  const qc = useQueryClient();
   return useMutation({
-    mutationFn: (v: { kind: "power_up" | "cosmetic"; itemId: string }) => api.post<{ coins: number; itemId: string }>("/shop/buy-item", v),
-    onSuccess: (r) => refresh(r.coins),
+    mutationFn: (v: { kind: "power_up" | "cosmetic" | "streak_freeze"; itemId: string }) => api.post<{ coins: number; itemId: string }>("/shop/buy-item", v),
+    onSuccess: (r, v) => {
+      refresh(r.coins);
+      if (v.kind === "streak_freeze") {
+        void qc.invalidateQueries({ queryKey: ["daily"] });
+        void qc.invalidateQueries({ queryKey: ["home"] });
+      }
+    },
   });
 }
 

@@ -1,4 +1,4 @@
-import { q, u, W, type Seed } from "../helpers";
+import { q, W, type Seed } from "../helpers";
 
 const NC = W + "Nigerian_cuisine";
 
@@ -74,12 +74,12 @@ export const foodMore: Seed[] = [
   q(4, "'Iyan' and 'amala' are both swallows. What is amala made from that iyan is not?", ["Dried yam flour", "Fresh boiled yam", "Cassava", "Rice"], "Iyan is pounded from fresh boiled yam.", W + "Amala_(food)"),
   q(4, "Which leafy vegetable is called 'efo shoko' in Yoruba?", ["Lagos spinach (Celosia)", "Waterleaf", "Fluted pumpkin", "Bitter leaf"], "It is often used in efo riro.", W + "Celosia_argentea"),
   q(4, "Which leafy vegetable is called 'efo tete' in Yoruba?", ["Amaranth", "Moringa", "Jute leaf", "Uziza"], "It is cooked like spinach.", W + "Amaranth"),
-  u(4, "Ofada stew is also popularly called?", ["Designer stew", "Party stew", "Village stew", "Red stew"], "It uses green peppers and locust beans.", NC),
-  u(4, "World Jollof Day is celebrated on which date?", ["22 August", "1 October", "14 February", "12 June"], "Cooks across West Africa share their best jollof online.", W + "Jollof_rice"),
-  u(4, "Alkubus is a northern Nigerian…", ["Steamed bread", "Fried bean cake", "Fermented drink", "Grilled meat"], "It is often eaten with soup or sauce.", NC),
-  u(4, "Robo is a Yoruba snack made by frying balls of?", ["Egusi paste", "Plantain", "Rice", "Cassava"], "It is crunchy and often spiced with pepper.", NC),
-  u(4, "Gwate is a northern Nigerian…", ["Porridge", "Bread", "Kebab", "Soup thickener"], "It is often made with grains and vegetables.", NC),
-  u(4, "Ghanaian jollof is often made with which kind of rice, unlike Nigerian jollof?", ["Jasmine or basmati", "Parboiled long grain", "Ofada", "Brown rice"], "Nigerian cooks tend to use parboiled long-grain rice.", W + "Jollof_rice"),
+  q(4, "Ofada stew is also popularly called?", ["Designer stew", "Party stew", "Village stew", "Red stew"], "It uses green peppers and locust beans.", NC),
+  q(4, "World Jollof Day is celebrated on which date?", ["22 August", "1 October", "14 February", "12 June"], "Cooks across West Africa share their best jollof online.", W + "Jollof_rice"),
+  q(4, "Alkubus is a northern Nigerian…", ["Steamed bread", "Fried bean cake", "Fermented drink", "Grilled meat"], "It is often eaten with soup or sauce.", NC),
+  q(4, "Robo is a Yoruba snack made by frying balls of?", ["Egusi paste", "Plantain", "Rice", "Cassava"], "It is crunchy and often spiced with pepper.", NC),
+  q(4, "Gwate is a northern Nigerian…", ["Porridge", "Bread", "Kebab", "Soup thickener"], "It is often made with grains and vegetables.", NC),
+  q(4, "Ghanaian jollof is often made with which kind of rice, unlike Nigerian jollof?", ["Jasmine or basmati", "Parboiled long grain", "Ofada", "Brown rice"], "Nigerian cooks tend to use parboiled long-grain rice.", W + "Jollof_rice"),
 
   // ── Difficulty 5 ──────────────────────────────────────────────────────
   q(5, "The African star apple (agbalumo) has which scientific name?", ["Chrysophyllum albidum", "Dacryodes edulis", "Irvingia gabonensis", "Garcinia kola"], "It is in season during the dry months.", W + "Chrysophyllum_albidum"),
@@ -95,7 +95,7 @@ export const foodMore: Seed[] = [
   q(5, "Tiger nuts, used in kunu aya, have which scientific name?", ["Cyperus esculentus", "Arachis hypogaea", "Vigna subterranea", "Sesamum indicum"], "Despite the name, they are tubers, not nuts.", W + "Cyperus_esculentus"),
   q(5, "Bambara nut, used in okpa, has which scientific name?", ["Vigna subterranea", "Arachis hypogaea", "Vigna unguiculata", "Cajanus cajan"], "It is named after the Bambara people of Mali.", W + "Vigna_subterranea"),
   q(5, "Cowpea, the bean used for akara and moi moi, has which scientific name?", ["Vigna unguiculata", "Phaseolus vulgaris", "Vigna subterranea", "Glycine max"], "Nigeria is the world's largest cowpea producer.", W + "Cowpea"),
-  u(5, "Aidan fruit, used in pepper soup, is called what in Yoruba?", ["Aridan", "Uda", "Ehuru", "Iru"], "Its scientific name is Tetrapleura tetraptera.", W + "Tetrapleura_tetraptera"),
+  q(5, "Aidan fruit, used in pepper soup, is called what in Yoruba?", ["Aridan", "Uda", "Ehuru", "Iru"], "Its scientific name is Tetrapleura tetraptera.", W + "Tetrapleura_tetraptera"),
 
   // ── Additions ───────────────────────────────────────────────────────────
 
@@ -114,6 +114,6 @@ export const foodMore: Seed[] = [
   q(3, "'Anụ' means what in Igbo?", ["Meat", "Fish", "Pepper", "Oil"], "Anụ ọkụkọ means chicken meat.", NC),
   q(3, "Okazi (ukazi) is the Igbo name for which leaf?", ["Afang leaf", "Bitter leaf", "Scent leaf", "Waterleaf"], "It is used in afang and okazi soups.", W + "Gnetum_africanum"),
   q(3, "'Ìrẹsì' means what in Yoruba?", ["Rice", "Beans", "Yam", "Plantain"], "Ìrẹsì ọ̀fada is local Ofada rice.", NC),
-  u(4, "'Moi moi elemi meje' is moi moi with how many 'lives' (fillings)?", ["Seven", "Three", "Five", "Ten"], "Fillings can include egg, fish, corned beef and liver.", W + "Moi_moi"),
-  u(4, "Palm kernel oil is called what in Yoruba?", ["Àdín", "Epo pupa", "Òróró", "Ọ̀rí"], "It is dark and strong-smelling.", W + "Palm_kernel_oil"),
+  q(4, "'Moi moi elemi meje' is moi moi with how many 'lives' (fillings)?", ["Seven", "Three", "Five", "Ten"], "Fillings can include egg, fish, corned beef and liver.", W + "Moi_moi"),
+  q(4, "Palm kernel oil is called what in Yoruba?", ["Àdín", "Epo pupa", "Òróró", "Ọ̀rí"], "It is dark and strong-smelling.", W + "Palm_kernel_oil"),
 ];

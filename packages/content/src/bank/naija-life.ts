@@ -1,4 +1,4 @@
-import { q, u, W, type CategoryBank } from "./helpers";
+import { q, W, type CategoryBank } from "./helpers";
 
 const CN = W + "Culture_of_Nigeria";
 const LAGOS = W + "Transport_in_Lagos";
@@ -89,18 +89,18 @@ export const naijaLife: CategoryBank = {
     q(4, "Spraying or stepping on naira notes is an offence under which law?", ["The Central Bank of Nigeria Act", "The Criminal Code's Section 419", "The Land Use Act", "The Electoral Act"], "The CBN has warned against 'abuse of the naira'.", W + "Central_Bank_of_Nigeria"),
     q(4, "Okada motorcycle taxis took their name from which defunct airline?", ["Okada Air", "Nigeria Airways", "Kabo Air", "Bellview Airlines"], "Okada Air was based in Benin City.", W + "Okada_Air"),
     q(4, "Covenant University, linked to Winners Chapel, is in which state?", ["Ogun", "Lagos", "Oyo", "Kwara"], "It sits inside Canaanland in Ota.", W + "Covenant_University"),
-    u(4, "The Yoruba engagement ceremony is called?", ["Idana", "Igba nkwu", "Kamu", "Ofala"], "Families exchange gifts and the bride price.", W + "Yoruba_people"),
-    u(4, "Abuja's registered taxis are traditionally painted which colours?", ["Green and white", "Yellow and black", "Red and white", "Blue and white"], "The colours echo the national flag.", W + "Abuja"),
-    u(4, "In northern Nigeria, motorcycle taxis are commonly called?", ["Achaba", "Danfo", "Molue", "Kabu kabu"], "Several northern states have restricted them.", W + "Okada_(motorcycle_taxi)"),
-    u(4, "What is Nigeria's national emergency phone number?", ["112", "911", "999", "199"], "Some states also run their own lines, like Lagos's 767.", W + "Emergency_telephone_number"),
-    u(4, "'Babban riga' is a flowing robe worn by men of which people?", ["Hausa and Fulani", "Igbo", "Ijaw", "Tiv"], "Its name means 'big gown' in Hausa.", W + "Boubou_(clothing)"),
+    q(4, "The Yoruba engagement ceremony is called?", ["Idana", "Igba nkwu", "Kamu", "Ofala"], "Families exchange gifts and the bride price.", W + "Yoruba_people"),
+    q(4, "Abuja's registered taxis are traditionally painted which colours?", ["Green and white", "Yellow and black", "Red and white", "Blue and white"], "The colours echo the national flag.", W + "Abuja"),
+    q(4, "In northern Nigeria, motorcycle taxis are commonly called?", ["Achaba", "Danfo", "Molue", "Kabu kabu"], "Several northern states have restricted them.", W + "Okada_(motorcycle_taxi)"),
+    q(4, "What is Nigeria's national emergency phone number?", ["112", "911", "999", "199"], "Some states also run their own lines, like Lagos's 767.", W + "Emergency_telephone_number"),
+    q(4, "'Babban riga' is a flowing robe worn by men of which people?", ["Hausa and Fulani", "Igbo", "Ijaw", "Tiv"], "Its name means 'big gown' in Hausa.", W + "Boubou_(clothing)"),
 
     // ── Difficulty 5 ──────────────────────────────────────────────────────
     q(5, "Which Lagos military administrator introduced the 'Keke' tricycles?", ["Buba Marwa", "Raji Rasaki", "Olagunsoye Oyinlola", "Ahmed Mohammed"], "He governed Lagos from 1996 to 1999.", W + "Mohammed_Buba_Marwa"),
     q(5, "The 1983 order expelling West African migrants, which gave the 'Ghana Must Go' bag its name, was issued under which president?", ["Shehu Shagari", "Muhammadu Buhari", "Olusegun Obasanjo", "Ibrahim Babangida"], "Over a million people, many of them Ghanaian, had to leave.", W + "Ghana_Must_Go"),
     q(5, "Which Lagos expressway hosts the Redemption Camp and the Mountain of Fire prayer city?", ["Lagos–Ibadan Expressway", "Third Mainland Bridge", "Badagry Expressway", "Ikorodu Road"], "The stretch is often called the world's busiest 'church road'.", W + "Lagos%E2%80%93Ibadan_Expressway"),
     q(5, "Which Lagos BRT corridor was the first, opened in 2008?", ["Mile 12 to CMS", "Ikorodu to TBS", "Oshodi to Abule Egba", "Lekki to Ajah"], "It was the first BRT system in sub-Saharan Africa.", W + "Lagos_Bus_Rapid_Transit_System"),
-    u(5, "Which Lagos emergency number did the state set up for its own emergencies?", ["767", "112", "911", "199"], "Lagos also runs 112 alongside it.", W + "Lagos_State"),
+    q(5, "Which Lagos emergency number did the state set up for its own emergencies?", ["767", "112", "911", "199"], "Lagos also runs 112 alongside it.", W + "Lagos_State"),
 
     // ── Additions ─────────────────────────────────────────────────────────
 
@@ -128,8 +128,8 @@ export const naijaLife: CategoryBank = {
     q(3, "Lagos's CMS bus stop is named after which organisation?", ["Church Missionary Society", "Central Market Society", "City Motor Service", "Commercial Marine Station"], "The CMS founded Nigeria's oldest secondary school.", W + "Church_Mission_Society"),
     q(3, "Nairaland, a huge Nigerian online forum, was founded by?", ["Seun Osewa", "Linda Ikeji", "Jason Njoku", "Sim Shagaya"], "It launched in 2005.", W + "Nairaland"),
     q(3, "Gelede masks of the Yoruba honour whom?", ["Women and mothers", "Hunters", "Kings", "Farmers"], "Gelede performances are UNESCO-listed heritage.", W + "Gelede"),
-    u(4, "What is the standard mains voltage in Nigeria?", ["230 V", "110 V", "120 V", "400 V"], "The frequency is 50 Hz.", W + "Mains_electricity_by_country"),
-    u(4, "In Igbo society, 'umunna' refers to?", ["The patrilineal kindred", "The market women", "The age grade", "The village shrine"], "Umunna meetings settle family matters.", W + "Igbo_people"),
-    u(4, "The Ekpe society, known for its masquerades and Nsibidi symbols, belongs to which people?", ["Efik and Ejagham", "Hausa", "Kanuri", "Tiv"], "Ekpe was also a powerful trading guild in old Calabar.", W + "Ekpe"),
+    q(4, "What is the standard mains voltage in Nigeria?", ["230 V", "110 V", "120 V", "400 V"], "The frequency is 50 Hz.", W + "Mains_electricity_by_country"),
+    q(4, "In Igbo society, 'umunna' refers to?", ["The patrilineal kindred", "The market women", "The age grade", "The village shrine"], "Umunna meetings settle family matters.", W + "Igbo_people"),
+    q(4, "The Ekpe society, known for its masquerades and Nsibidi symbols, belongs to which people?", ["Efik and Ejagham", "Hausa", "Kanuri", "Tiv"], "Ekpe was also a powerful trading guild in old Calabar.", W + "Ekpe"),
   ],
 };

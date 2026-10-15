@@ -1,6 +1,6 @@
 import { View } from "react-native";
 import { router } from "expo-router";
-import { Flame, Gift, CheckCircle2, Snowflake, Play, Trophy, Sparkles, Swords, ChevronRight, Medal } from "lucide-react-native";
+import { Flame, Gift, CheckCircle2, Snowflake, Play, Trophy, Sparkles, Swords, ChevronRight, Medal, Radio, CalendarClock } from "lucide-react-native";
 import { nextLagosMidnight, nextStreakMilestone, categoryBySlug, LAGOS_OFFSET_MS, type MissionProgress, type StreakInfo, type ActiveTheme } from "@ntc/shared";
 import { Card, Txt, Icon, Button, ProgressBar, Chip, CoinIcon, Avatar, PressableScale, toast } from "../../ui";
 import { CATEGORY_ICONS } from "../icons";
@@ -35,7 +35,7 @@ export function DailyNaijaCard({ played, score, resetsAt, streak }: { played: bo
             <View className="flex-row items-center gap-1.5 flex-1">
               <Icon as={next ? Flame : Snowflake} size={14} tone={next ? "danger" : streak.freezeAvailable ? "primary" : "faint"} />
               <Txt variant="caption" tone="faint" numberOfLines={1}>
-                {next ? `${next.days - streak.current} more day${next.days - streak.current === 1 ? "" : "s"} to +${next.coins} bonus` : streak.freezeAvailable ? (streak.freezesLeft > 1 ? `${streak.freezesLeft} streak freezes ready` : "Streak freeze ready") : "Freezes used this week"}
+                {next ? `${next.days - streak.current} more day${next.days - streak.current === 1 ? "" : "s"} to +${next.coins} bonus` : streak.freezeAvailable ? (streak.freezesLeft + (streak.freezesOwned ?? 0) > 1 ? `${streak.freezesLeft + (streak.freezesOwned ?? 0)} streak freezes ready` : "Streak freeze ready") : "Freezes used this week"}
               </Txt>
             </View>
           );
@@ -152,12 +152,12 @@ export function IncomingChallenges({ items }: { items: HomeData["incomingChallen
   return (
     <Card className="overflow-hidden">
       {items.map((c, i) => (
-        <PressableScale key={c.code} scaleTo={0.99} onPress={() => router.push({ pathname: "/c/[code]", params: { code: c.code } })} accessibilityRole="button" accessibilityLabel={`${c.from.username} challenged you. Score to beat ${c.scoreToBeat}`} className={cn("flex-row items-center gap-3 p-4", i > 0 && "border-t border-line")}>
+        <PressableScale key={c.code} scaleTo={0.99} onPress={() => router.push({ pathname: "/c/[code]", params: { code: c.code } })} accessibilityRole="button" accessibilityLabel={`${c.from.username} challenged you. Score to beat ${c.scoreToBeat}${c.stake ? `, winner takes ${c.stake * 2} coins` : ""}`} className={cn("flex-row items-center gap-3 p-4", i > 0 && "border-t border-line")}>
           <Avatar id={c.from.avatarId} size={44} league={c.from.league} frameId={c.from.frameId} />
           <View className="flex-1">
             <Txt variant="overline" tone="danger">Challenge for you</Txt>
             <Txt variant="bodyStrong" numberOfLines={2}>{c.from.username} challenged you</Txt>
-            <Txt variant="caption" tone="muted">Score to beat: <Txt variant="caption" tabular>{c.scoreToBeat.toLocaleString("en-NG")}</Txt></Txt>
+            <Txt variant="caption" tone="muted">Score to beat: <Txt variant="caption" tabular>{c.scoreToBeat.toLocaleString("en-NG")}</Txt>{c.stake ? <Txt variant="caption" tone="accent"> · {c.stake * 2} coins on it</Txt> : null}</Txt>
           </View>
           <Chip label="Play" icon={Swords} tone="primary" />
         </PressableScale>
@@ -191,6 +191,31 @@ export function AchievementsNudge({ count }: { count: number }) {
       <View className="flex-1">
         <Txt variant="bodyStrong">{count === 1 ? "1 achievement unlocked" : `${count} achievements unlocked`}</Txt>
         <Txt variant="caption" tone="muted">Claim your coins on your profile</Txt>
+      </View>
+      <Icon as={ChevronRight} tone="faint" />
+    </Card>
+  );
+}
+
+export function LiveEventCard({ event }: { event: NonNullable<HomeData["liveEvent"]> }) {
+  const { text } = useCountdown(event.live ? event.endsAt : event.startsAt);
+  return (
+    <Card
+      variant={event.live ? "hero" : "default"}
+      tint={event.live ? "accent" : undefined}
+      className="p-4 flex-row items-center gap-3"
+      onPress={() => router.push({ pathname: "/event/[id]", params: { id: event.id } })}
+      accessibilityLabel={`${event.name}. ${event.live ? `Live now, ends in ${text}` : `Starts in ${text}`}`}
+    >
+      <View className={cn("h-12 w-12 items-center justify-center rounded-2xl", event.live ? "bg-danger-soft" : "bg-primary-soft")}>
+        <Icon as={event.live ? Radio : CalendarClock} size={24} tone={event.live ? "danger" : "primary"} />
+      </View>
+      <View className="flex-1 gap-0.5">
+        <Txt variant="overline" tone={event.live ? "danger" : "primary"}>
+          {event.live ? "● Live now · ends in " : "Live event · starts in "}<Txt variant="overline" tone={event.live ? "danger" : "primary"} tabular>{text}</Txt>
+        </Txt>
+        <Txt variant="bodyStrong">{event.name}</Txt>
+        <Txt variant="caption" tone="muted" numberOfLines={2}>{event.played ? "You're on the board. Check your place." : event.tagline}</Txt>
       </View>
       <Icon as={ChevronRight} tone="faint" />
     </Card>

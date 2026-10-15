@@ -1,16 +1,19 @@
 import { randomUUID } from "node:crypto";
-import { COSMETICS, POWER_UPS, PRODUCTS, purchaseSchema, buyItemSchema, type PurchaseResponse } from "@ntc/shared";
+import { COSMETICS, POWER_UPS, PRODUCTS, STREAK_FREEZE_COST, STREAK_FREEZE_MAX_OWNED, featuredCosmetics, lagosWeekStart, addDays, purchaseSchema, buyItemSchema, type PurchaseResponse } from "@ntc/shared";
 import type { Sql } from "../db";
 import { HttpError, parse } from "../api/http";
 import { isPremium } from "./profiles";
 import { analytics } from "../services/analytics";
 import { applyPremiumPerks, grantSeasonPass } from "./premium";
+import { buyStreakFreeze } from "./daily";
 
 
 export async function shopCatalog(sql: Sql, userId: string) {
   const p = await sql.one("select coins, premium_until, frame_id, button_theme_id from profiles where id = $1", [userId]);
   const inv = await sql.query<{ item_id: string; quantity: number }>("select item_id, quantity from inventory where user_id = $1 and quantity > 0", [userId]);
   const owned = Object.fromEntries(inv.map((i) => [i.item_id, i.quantity]));
+  const freezes = await sql.one<{ freezes_owned: number }>("select freezes_owned from streaks where user_id = $1", [userId]);
+  const week = lagosWeekStart();
   return {
     coins: p?.coins ?? 0,
     premium: { active: !!p && isPremium(p), until: p?.premium_until ? new Date(p.premium_until).toISOString() : null },
@@ -19,6 +22,8 @@ export async function shopCatalog(sql: Sql, userId: string) {
     powerUps: POWER_UPS.map((pu) => ({ ...pu, owned: owned[`pu_${pu.kind}`] ?? 0 })),
     cosmetics: COSMETICS.map((c) => ({ ...c, owned: !!owned[c.id] || (c.premiumOnly && !!p && isPremium(p)) })),
     products: PRODUCTS,
+    featured: { ids: featuredCosmetics(week).map((c) => c.id), endsAt: Date.parse(`${addDays(week, 7)}T00:00:00+01:00`) },
+    streakFreeze: { cost: STREAK_FREEZE_COST, owned: freezes?.freezes_owned ?? 0, max: STREAK_FREEZE_MAX_OWNED },
   };
 }
 
@@ -60,6 +65,7 @@ export async function purchaseProduct(sql: Sql, userId: string, raw: unknown): P
 
 export async function buyItem(sql: Sql, userId: string, raw: unknown) {
   const body = parse(buyItemSchema, raw);
+  if (body.kind === "streak_freeze") return buyStreakFreeze(sql, userId);
   return sql.tx(async (tx) => {
     if (body.kind === "power_up") {
       const pu = POWER_UPS.find((p) => `pu_${p.kind}` === body.itemId || p.kind === body.itemId);
@@ -77,6 +83,9 @@ export async function buyItem(sql: Sql, userId: string, raw: unknown) {
     if (!c) throw new HttpError(404, "Unknown item");
     if (c.premiumOnly) throw new HttpError(403, "This frame is included with Premium.", "premium_only");
     if (c.leagueReward) throw new HttpError(403, "This frame is earned by finishing a season in its league.", "league_reward");
+    if (c.rotating && !featuredCosmetics(lagosWeekStart()).some((f) => f.id === c.id)) {
+      throw new HttpError(409, `${c.name} isn't in this week's drops. It comes back soon.`, "not_featured");
+    }
     const has = await tx.one("select 1 from inventory where user_id = $1 and item_id = $2 and quantity > 0", [userId, c.id]);
     if (has) throw new HttpError(409, "You already own this.");
     const paid = await tx.one("update profiles set coins = coins - $2 where id = $1 and coins >= $2 returning coins", [userId, c.cost]);
