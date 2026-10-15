@@ -97,6 +97,7 @@ cp apps/admin/.env.example  apps/admin/.env.local
 | `PUBLIC_APP_URL` | Public URL of the web app (challenge links) |
 | `DATABASE_URL` | Supabase Postgres connection string (transaction pooler). Empty → embedded PGlite |
 | `SUPABASE_URL`, `SUPABASE_JWT_SECRET` | Verify Supabase access tokens (HS256 secret or the project's JWKS). Setting the secret disables dev auth |
+| `ADMIN_EMAILS` | Comma-separated emails that become admins the first time they sign in to the admin dashboard (the email must be confirmed in Supabase Auth) |
 | `DEV_JWT_SECRET` | Signing secret for dev/guest tokens issued by the server |
 | `REDIS_URL` | Matchmaking queue in Redis (needed for more than one server instance) |
 | `POSTHOG_KEY`, `POSTHOG_HOST`, `SENTRY_DSN` | Optional analytics / error reporting (no-op when empty) |
@@ -114,8 +115,9 @@ cp apps/admin/.env.example  apps/admin/.env.local
 2. Apply the schema: `supabase link --project-ref <ref> && supabase db push`, or paste the files in
    `supabase/migrations/` into the SQL editor in order.
 3. Load content: run `supabase/seed.sql` (regenerate it with `pnpm seed:generate` after editing the bank).
-4. Make yourself an admin: `update profiles set is_admin = true where id = '<your auth user id>';`
-   (create an email/password user in **Auth → Users** for the admin dashboard).
+4. Make yourself an admin: set `ADMIN_EMAILS=you@example.com` on the server, create an email/password
+   user for that address (**Auth → Users → Add user**, tick *Auto Confirm User*), and sign in to the admin
+   dashboard. You're promoted on that first sign-in, so no SQL is needed.
 5. Set the server's `DATABASE_URL`, `SUPABASE_URL` and `SUPABASE_JWT_SECRET`, and the clients'
    `SUPABASE_URL` + anon key.
 
@@ -130,7 +132,7 @@ writes happen on the server.
 **Game server → Fly.io** (or Railway; any Docker host)
 ```bash
 fly launch --no-deploy --copy-config   # uses ./fly.toml and apps/server/Dockerfile
-fly secrets set DATABASE_URL=... SUPABASE_URL=... SUPABASE_JWT_SECRET=... REDIS_URL=... PUBLIC_SERVER_URL=https://... PUBLIC_APP_URL=https://...
+fly secrets set DATABASE_URL=... SUPABASE_URL=... SUPABASE_JWT_SECRET=... ADMIN_EMAILS=you@example.com REDIS_URL=... PUBLIC_SERVER_URL=https://... PUBLIC_APP_URL=https://...
 fly deploy
 ```
 Matches live in memory on a machine, so keep `min_machines_running = 1` and disable auto-stop. To run

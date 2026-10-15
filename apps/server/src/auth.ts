@@ -76,6 +76,22 @@ export async function createDevUser(sql: Sql, opts: { guest: boolean; username?:
   return u!.id;
 }
 
+/**
+ * Make a signed-in user an admin if their confirmed email is in ADMIN_EMAILS, so the first admin
+ * needs no SQL. Unconfirmed emails don't count: anyone can sign up with an address they don't own.
+ */
+export async function promoteListedAdmin(sql: Sql, userId: string, emails = env.adminEmails): Promise<boolean> {
+  if (!emails.length) return false;
+  const r = await sql.one(
+    `update profiles p set is_admin = true
+       from auth.users u
+      where p.id = $1 and u.id = p.id and u.email_confirmed_at is not null and lower(u.email) = any($2::text[])
+      returning p.id`,
+    [userId, `{${emails.join(",")}}`],
+  );
+  return !!r;
+}
+
 /** Profiles are created by trigger, but make sure one exists (e.g. trigger missing on a fresh project). */
 export async function ensureProfile(sql: Sql, user: AuthUser) {
   await sql.query("insert into profiles (id, is_guest) values ($1, $2) on conflict (id) do nothing", [user.userId, user.isAnonymous]);

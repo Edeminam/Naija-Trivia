@@ -169,3 +169,8 @@ Decisions made where the brief left room, or where a constraint forced a choice.
     (answers in the last 7 days to a question the player had answered before) and the most-played questions.
     The bank ships 150 pre-written questions in three drops (19 Oct, 26 Oct, 2 Nov 2026), and the 89
     `in_review` questions were fact-checked and promoted (3 rewritten after checking sources).
+50. **Admins by email allowlist.** `ADMIN_EMAILS` on the server lists who may run the CMS; a signed-in user
+    whose email is on it is set `is_admin` the first time they hit an admin route, so setting up the first
+    admin needs no SQL. Only emails confirmed in Supabase Auth (`auth.users.email_confirmed_at`) count,
+    otherwise anyone could sign up with the owner's address first. Removing an email doesn't demote; unset
+    `is_admin` for that.

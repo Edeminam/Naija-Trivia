@@ -15,6 +15,8 @@ export const env = {
   supabaseJwtSecret: process.env.SUPABASE_JWT_SECRET || null,
   /** HS256 secret for dev / guest tokens issued by this server. */
   devJwtSecret: process.env.DEV_JWT_SECRET ?? "naija-trivia-clash-local-dev-secret-change-me",
+  /** Emails that become admins on their first admin sign-in (must be confirmed in Supabase Auth). */
+  adminEmails: (process.env.ADMIN_EMAILS ?? "").split(",").map((e) => e.trim().toLowerCase()).filter(Boolean),
   allowDevAuth: process.env.ALLOW_DEV_AUTH ? process.env.ALLOW_DEV_AUTH === "true" : !process.env.SUPABASE_JWT_SECRET,
   pgliteDir: process.env.PGLITE_DIR ?? fileURLToPath(new URL("../.data/pglite", import.meta.url)),
   posthogKey: process.env.POSTHOG_KEY || null,

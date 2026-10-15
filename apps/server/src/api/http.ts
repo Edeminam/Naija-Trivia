@@ -1,6 +1,6 @@
 import type { Request, Response, NextFunction, RequestHandler } from "express";
 import type { ZodType } from "zod";
-import { verifyToken, ensureProfile, AuthError, type AuthUser } from "../auth";
+import { verifyToken, ensureProfile, promoteListedAdmin, AuthError, type AuthUser } from "../auth";
 import { getDb, type Sql } from "../db";
 import { errors } from "../services/errors";
 
@@ -34,11 +34,11 @@ export function authed(fn: (ctx: Ctx) => Promise<unknown>): RequestHandler {
   };
 }
 
-/** Admin-only handler (profiles.is_admin). */
+/** Admin-only handler (profiles.is_admin, or a confirmed email listed in ADMIN_EMAILS). */
 export function admin(fn: (ctx: Ctx) => Promise<unknown>): RequestHandler {
   return authed(async (ctx) => {
     const r = await ctx.sql.one("select is_admin from profiles where id = $1", [ctx.user.userId]);
-    if (!r?.is_admin) throw new HttpError(403, "Admins only");
+    if (!r?.is_admin && !(await promoteListedAdmin(ctx.sql, ctx.user.userId))) throw new HttpError(403, "Admins only");
     return fn(ctx);
   });
 }
