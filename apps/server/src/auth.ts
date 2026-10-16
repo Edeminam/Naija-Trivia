@@ -95,7 +95,13 @@ export async function promoteListedAdmin(sql: Sql, userId: string, emails = env.
 
 /** Profiles are created by trigger, but make sure one exists (e.g. trigger missing on a fresh project). */
 export async function ensureProfile(sql: Sql, user: AuthUser) {
-  await sql.query("insert into profiles (id, is_guest) values ($1, $2) on conflict (id) do nothing", [user.userId, user.isAnonymous]);
+  try {
+    await sql.query("insert into profiles (id, is_guest) values ($1, $2) on conflict (id) do nothing", [user.userId, user.isAnonymous]);
+  } catch (e: any) {
+    // Valid token for an account that no longer exists (deleted, or a local DB reset) — make the client sign in again.
+    if (e?.code === "23503") throw new AuthError("Account not found");
+    throw e;
+  }
   // A guest who linked a phone / Google / Apple identity keeps the same id — promote them.
   if (!user.isAnonymous) await sql.query("update profiles set is_guest = false where id = $1 and is_guest", [user.userId]);
 }
