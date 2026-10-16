@@ -48,9 +48,10 @@ describe("quick play on a public deploy", () => {
     expect((await res.json()).token).toBeTruthy();
   });
 
-  it("locally too, a taken username is refused", async () => {
-    expect((await post("/auth/dev", { username: "local_tester" })).status).toBe(200);
-    expect((await post("/auth/dev", { username: "local_tester" })).status).toBe(409);
+  it("locally, a username signs you back in to that account", async () => {
+    const a = await (await post("/auth/dev", { username: "local_tester" })).json();
+    const b = await (await post("/auth/dev", { username: "LOCAL_TESTER" })).json();
+    expect(b.userId).toBe(a.userId);
   });
 
   it("locally, the admin dashboard can sign back in as admin", async () => {
